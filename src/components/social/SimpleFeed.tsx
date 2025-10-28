@@ -8,6 +8,8 @@ import {
   Plus
 } from 'lucide-react';
 import Image from 'next/image';
+import PublicProfile from '@/components/profile/PublicProfile';
+import { PH1, PH2, PH3 } from '@/lib/placeholders';
 
 interface SocialFeedProps {
   communities: Array<{
@@ -44,6 +46,8 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [selectedCommunity, setSelectedCommunity] = useState<string>('');
+  const [publicProfileOpen, setPublicProfileOpen] = useState(false);
+  const [publicProfileData, setPublicProfileData] = useState<any>(null);
 
   const samplePosts = [
     {
@@ -51,11 +55,12 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
       author: {
         name: '田中花子',
         community: '写真部',
-        avatar: ''
+        avatar: '',
+        diagnosis: 'ENFP'
       },
       content: {
         text: '今日の撮影会、天気に恵まれて素晴らしい写真がたくさん撮れました！新しいメンバーの皆さんも上達が早くて驚きです 📸✨',
-        images: ['/placeholder-1.jpg', '/placeholder-2.jpg']
+        images: [PH1, PH2]
       },
       timestamp: '2時間前',
       likes: 24,
@@ -67,7 +72,8 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
       author: {
         name: '山田太郎',
         community: 'プログラミング部',
-        avatar: ''
+        avatar: '',
+        diagnosis: 'INTP'
       },
       content: {
         text: 'ハッカソン完了！React + TypeScriptで作ったアプリがついに形になりました 🎉 チーム開発の面白さを実感できた3日間でした。',
@@ -83,11 +89,12 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
       author: {
         name: '佐藤美咲',
         community: '料理部',
-        avatar: ''
+        avatar: '',
+        diagnosis: 'ISFP'
       },
       content: {
         text: '今日はパスタ作りに挑戦！手打ちは難しいけど、みんなでワイワイ作ると楽しいですね 🍝 来週はピザ作りの予定です！',
-        images: ['/placeholder-3.jpg']
+        images: [PH3]
       },
       timestamp: '6時間前',
       likes: 18,
@@ -249,20 +256,23 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
             {/* Post Header */}
             <div className="p-6 pb-4">
               <div className="flex items-center space-x-3">
-                <div className={`w-12 h-12 bg-gradient-to-br ${getCommunityGradient(post.author.community)} rounded-xl flex items-center justify-center`}>
-                  <span className="text-white font-medium">
-                    {post.author.name.charAt(0)}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="font-semibold text-gray-900">{post.author.name}</h3>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
-                      {post.author.community}
-                    </span>
+                <button onClick={() => { setPublicProfileData({ nickname: post.author.name, bio: '', goal: '', diagnosis: post.author.diagnosis }); setPublicProfileOpen(true); }} className={`flex-1 text-left flex items-center gap-3`}>
+                  <div className={`w-12 h-12 bg-gradient-to-br ${getCommunityGradient(post.author.community)} rounded-xl flex items-center justify-center`}>
+                    <span className="text-white font-medium">{post.author.name.charAt(0)}</span>
                   </div>
-                  <p className="text-sm text-gray-500">{post.timestamp}</p>
-                </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                        {post.author.name}
+                        {post.author.diagnosis && (
+                          <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full font-medium">{post.author.diagnosis}</span>
+                        )}
+                      </h3>
+                      <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">{post.author.community}</span>
+                    </div>
+                    <p className="text-sm text-gray-500">{post.timestamp}</p>
+                  </div>
+                </button>
               </div>
             </div>
 
@@ -395,6 +405,9 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
             </div>
           </div>
         </div>
+      )}
+      {publicProfileOpen && (
+        <PublicProfile onClose={() => { setPublicProfileOpen(false); setPublicProfileData(null); }} profileData={publicProfileData} />
       )}
     </div>
   );

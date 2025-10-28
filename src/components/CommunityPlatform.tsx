@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Clock, 
   Calendar, 
@@ -25,6 +25,7 @@ import EventPageBuilder from '@/components/events/EventPageBuilder';
 import MemberManagement from '@/components/management/MemberManagement';
 import Analytics from '@/components/analytics/Analytics';
 import AIAssistant from '@/components/ai/AIAssistant';
+import DailyTarot from '@/components/fortune/DailyTarot';
 
 type PageType = 'dashboard' | 'events' | 'survey' | 'event-builder' | 'manager-dashboard' | 'member-management' | 'analytics';
 type UserRole = 'member' | 'manager';
@@ -34,6 +35,40 @@ const CommunityPlatform: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>('member');
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
+  const [showDailyTarot, setShowDailyTarot] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState('PH1');
+
+  // ページ読み込み時に今日のタロット占いをチェック
+  useEffect(() => {
+    const checkDailyTarot = () => {
+      try {
+        // 現在のユーザーIDを取得
+        const userIdRaw = localStorage.getItem('cocoty_current_user_v1');
+        const userId = userIdRaw ? JSON.parse(userIdRaw).id : 'PH1';
+        setCurrentUserId(userId);
+
+        // 最後に引いた日付をチェック
+        const lastDrawRaw = localStorage.getItem(`cocoty_last_draw_date_v1_${userId}`);
+        const today = new Date().toDateString();
+
+        if (lastDrawRaw) {
+          const lastDraw = JSON.parse(lastDrawRaw);
+          // 今日まだ引いていない場合は自動表示
+          if (lastDraw.date !== today) {
+            setShowDailyTarot(true);
+          }
+        } else {
+          // 一度も引いていない場合は自動表示
+          setShowDailyTarot(true);
+        }
+      } catch (e) {
+        console.error('Failed to check daily tarot', e);
+        // エラーの場合は表示しない
+      }
+    };
+
+    checkDailyTarot();
+  }, []);
 
   // Sample data for demonstration
   const sampleData = {
@@ -494,6 +529,14 @@ const CommunityPlatform: React.FC = () => {
             { type: 'events', count: sampleData.upcomingEvents.length }
           ]
         }}
+      />
+
+      {/* Daily Tarot Auto-popup */}
+      <DailyTarot
+        isOpen={showDailyTarot}
+        onClose={() => setShowDailyTarot(false)}
+        userId={currentUserId}
+        userName="あなた"
       />
     </div>
   );

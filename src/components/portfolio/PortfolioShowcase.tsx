@@ -17,6 +17,7 @@ import {
   List
 } from 'lucide-react';
 import Image from 'next/image';
+import { PH1, PH2, PH3 } from '@/lib/placeholders';
 
 interface Achievement {
   id: string;
@@ -64,7 +65,7 @@ const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({
       community: '写真部',
       author: '田中花子',
       type: 'photo',
-      thumbnail: '/placeholder-1.jpg',
+  thumbnail: PH1,
       url: '#',
       likes: 156,
       views: 2340,
@@ -81,7 +82,7 @@ const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({
       community: 'プログラミング部',
       author: '山田太郎',
       type: 'code',
-      thumbnail: '/placeholder-2.jpg',
+  thumbnail: PH2,
       url: '#',
       likes: 89,
       views: 1567,
@@ -98,7 +99,7 @@ const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({
       community: '料理部',
       author: '佐藤美咲',
       type: 'video',
-      thumbnail: '/placeholder-3.jpg',
+  thumbnail: PH3,
       url: '#',
       likes: 234,
       views: 4521,
@@ -115,7 +116,7 @@ const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({
       community: '映像制作部',
       author: '高橋智子',
       type: 'video',
-      thumbnail: '/placeholder-4.jpg',
+  thumbnail: PH1,
       url: '#',
       likes: 178,
       views: 3200,
@@ -131,7 +132,7 @@ const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({
       community: 'デザイン部',
       author: '鈴木一郎',
       type: 'document',
-      thumbnail: '/placeholder-5.jpg',
+  thumbnail: PH2,
       url: '#',
       likes: 67,
       views: 1234,
@@ -147,7 +148,7 @@ const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({
       community: 'アート部',
       author: '伊藤美香',
       type: 'artwork',
-      thumbnail: '/placeholder-6.jpg',
+  thumbnail: PH3,
       url: '#',
       likes: 123,
       views: 1890,

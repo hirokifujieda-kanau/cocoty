@@ -3,6 +3,7 @@
 import React from 'react';
 import { Heart, MessageCircle, Share2, Plus, Search, Bell, Camera } from 'lucide-react';
 import Image from 'next/image';
+import { PH1, PH2, PH3 } from '@/lib/placeholders';
 
 interface SocialFeedProps {
   communities: Array<{
@@ -42,7 +43,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
       },
       content: {
         text: '今日の撮影会、本当に楽しかった！📸✨ みんなの笑顔をたくさん撮れて幸せです。次回はポートレート撮影に挑戦してみたいな〜',
-        images: ['/placeholder-1.jpg', '/placeholder-2.jpg'],
+  images: [PH1, PH2],
         location: '上野公園'
       },
       stats: {
@@ -63,7 +64,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
       },
       content: {
         text: 'React + TypeScriptでのハッカソン、無事完成🎉 チーム開発って本当に勉強になる。次は機械学習にも挑戦してみたい！',
-        images: ['/placeholder-3.jpg']
+  images: [PH3]
       },
       stats: {
         likes: 18,
@@ -83,7 +84,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
       },
       content: {
         text: '初めてのパン作りに挑戦！🍞 思ったより難しかったけど、みんなで食べると美味しさ倍増でした💕 次はケーキ作りに挑戦します',
-        images: ['/placeholder-4.jpg', '/placeholder-5.jpg', '/placeholder-6.jpg']
+  images: [PH1, PH2, PH3]
       },
       stats: {
         likes: 31,

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Share2, Plus, Camera, FileText, Calendar } from 'lucide-react';
 import Image from 'next/image';
+import { PH1, PH2, PH3 } from '@/lib/placeholders';
 
 interface TimelinePost {
   id: string;
@@ -56,7 +57,7 @@ const SimpleTimeline: React.FC<SimpleTimelineProps> = ({
       },
       content: {
         text: '桜の撮影会での一枚。光の使い方を意識して撮影しました。春の柔らかい光が桜の花びらを美しく照らしてくれました 🌸',
-        images: ['/placeholder-1.jpg']
+        images: [PH1]
       },
       timestamp: '1時間前',
       likes: 28,
@@ -90,7 +91,7 @@ const SimpleTimeline: React.FC<SimpleTimelineProps> = ({
       },
       content: {
         text: '今日は手作りピザに挑戦！生地から作るのは初めてでしたが、みんなで作ると楽しいですね。次回はパスタ作りに挑戦予定です 🍕',
-        images: ['/placeholder-2.jpg', '/placeholder-3.jpg']
+        images: [PH2, PH3]
       },
       timestamp: '5時間前',
       likes: 22,
@@ -107,7 +108,7 @@ const SimpleTimeline: React.FC<SimpleTimelineProps> = ({
       },
       content: {
         text: '短編映画の撮影が完了しました！編集作業に入ります。今回はドローンも使用してダイナミックな映像が撮れました 🎬',
-        images: ['/placeholder-4.jpg']
+        images: [PH1]
       },
       timestamp: '8時間前',
       likes: 35,
