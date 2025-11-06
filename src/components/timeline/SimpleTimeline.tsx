@@ -126,24 +126,24 @@ const SimpleTimeline: React.FC<SimpleTimelineProps> = ({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Filter Tabs */}
-      <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100">
-        <div className="flex space-x-2">
+      <div className="bg-white rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-sm border border-gray-100">
+        <div className="flex space-x-1 sm:space-x-2 overflow-x-auto pb-1 sm:pb-0">
           {filters.map((filter) => {
             const Icon = filter.icon;
             return (
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id as any)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-colors ${
+                className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl transition-colors whitespace-nowrap ${
                   activeFilter === filter.id
                     ? 'bg-blue-500 text-white'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                {Icon && <Icon className="h-4 w-4" />}
-                <span className="font-medium">{filter.label}</span>
+                {Icon && <Icon className="h-3 w-3 sm:h-4 sm:w-4" />}
+                <span className="font-medium text-xs sm:text-base">{filter.label}</span>
               </button>
             );
           })}
@@ -151,61 +151,61 @@ const SimpleTimeline: React.FC<SimpleTimelineProps> = ({
       </div>
 
       {/* Post Creation */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-            <span className="text-white font-medium">あ</span>
+      <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-medium text-sm sm:text-base">あ</span>
           </div>
-          <div className="flex-1">
-            <button className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-gray-500 transition-colors">
+          <div className="flex-1 min-w-0">
+            <button className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 hover:bg-gray-100 rounded-lg sm:rounded-xl text-gray-500 transition-colors text-xs sm:text-base">
               活動の記録を投稿しましょう...
             </button>
           </div>
-          <button className="p-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors">
-            <Plus className="h-5 w-5" />
+          <button className="p-2 sm:p-3 bg-blue-500 text-white rounded-lg sm:rounded-xl hover:bg-blue-600 transition-colors flex-shrink-0">
+            <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
       </div>
 
       {/* Timeline Posts */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {samplePosts.map((post) => (
-          <div key={post.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div key={post.id} className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Post Header */}
-            <div className="p-6 pb-4">
-              <div className="flex items-center space-x-4">
-                <div className={`w-14 h-14 bg-gradient-to-br ${getCommunityColor(post.author.community)} rounded-xl flex items-center justify-center`}>
-                  <span className="text-white font-medium text-lg">
+            <div className="p-4 sm:p-6 pb-3 sm:pb-4">
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <div className={`w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br ${getCommunityColor(post.author.community)} rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0`}>
+                  <span className="text-white font-medium text-sm sm:text-lg">
                     {post.author.name.charAt(0)}
                   </span>
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3">
-                    <h3 className="font-bold text-gray-900">{post.author.name}</h3>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full font-medium">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap">
+                    <h3 className="font-bold text-gray-900 text-sm sm:text-base">{post.author.name}</h3>
+                    <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-blue-100 text-blue-700 text-xs sm:text-sm rounded-full font-medium">
                       {post.author.community}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">{post.timestamp}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">{post.timestamp}</p>
                 </div>
               </div>
             </div>
 
             {/* Post Content */}
-            <div className="px-6 pb-6">
-              <p className="text-gray-800 leading-relaxed text-lg mb-6">{post.content.text}</p>
+            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+              <p className="text-gray-800 leading-relaxed text-sm sm:text-lg mb-4 sm:mb-6">{post.content.text}</p>
               
               {post.content.images.length > 0 && (
-                <div className="rounded-2xl overflow-hidden">
+                <div className="rounded-xl sm:rounded-2xl overflow-hidden">
                   {post.content.images.length === 1 ? (
-                    <div className="aspect-video bg-gray-200 rounded-2xl flex items-center justify-center">
-                      <span className="text-gray-400">画像プレビュー</span>
+                    <div className="aspect-video bg-gray-200 rounded-xl sm:rounded-2xl flex items-center justify-center">
+                      <span className="text-gray-400 text-sm">画像プレビュー</span>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-1 sm:gap-2">
                       {post.content.images.map((image, index) => (
-                        <div key={index} className="aspect-square bg-gray-200 rounded-xl flex items-center justify-center">
-                          <span className="text-gray-400 text-sm">画像 {index + 1}</span>
+                        <div key={index} className="aspect-square bg-gray-200 rounded-lg sm:rounded-xl flex items-center justify-center">
+                          <span className="text-gray-400 text-xs sm:text-sm">画像 {index + 1}</span>
                         </div>
                       ))}
                     </div>
@@ -215,42 +215,42 @@ const SimpleTimeline: React.FC<SimpleTimelineProps> = ({
             </div>
 
             {/* Post Stats */}
-            <div className="px-6 py-3 border-t border-gray-100">
-              <div className="flex items-center justify-between text-sm text-gray-600">
+            <div className="px-4 sm:px-6 py-2 sm:py-3 border-t border-gray-100">
+              <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
                 <span className="font-medium">{post.likes}いいね</span>
-                <div className="flex space-x-4">
+                <div className="flex space-x-2 sm:space-x-4">
                   <span>{post.comments}コメント</span>
                 </div>
               </div>
             </div>
 
             {/* Post Actions */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-gray-100 bg-gray-50">
               <div className="flex items-center justify-around">
                 <button
                   onClick={() => onLike(post.id)}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-xl transition-colors ${
+                  className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-colors ${
                     post.isLiked
                       ? 'text-red-600 bg-red-50'
                       : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
                   }`}
                 >
-                  <Heart className={`h-5 w-5 ${post.isLiked ? 'fill-current' : ''}`} />
-                  <span className="font-medium">いいね</span>
+                  <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${post.isLiked ? 'fill-current' : ''}`} />
+                  <span className="font-medium text-xs sm:text-base hidden sm:inline">いいね</span>
                 </button>
                 <button
                   onClick={() => onComment(post.id)}
-                  className="flex items-center space-x-2 px-6 py-3 rounded-xl text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                 >
-                  <MessageCircle className="h-5 w-5" />
-                  <span className="font-medium">コメント</span>
+                  <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="font-medium text-xs sm:text-base hidden sm:inline">コメント</span>
                 </button>
                 <button
                   onClick={() => onShare(post.id)}
-                  className="flex items-center space-x-2 px-6 py-3 rounded-xl text-gray-600 hover:text-green-600 hover:bg-green-50 transition-colors"
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl text-gray-600 hover:text-green-600 hover:bg-green-50 transition-colors"
                 >
-                  <Share2 className="h-5 w-5" />
-                  <span className="font-medium">シェア</span>
+                  <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="font-medium text-xs sm:text-base hidden sm:inline">シェア</span>
                 </button>
               </div>
             </div>

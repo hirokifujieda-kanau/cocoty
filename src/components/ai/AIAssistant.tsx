@@ -45,7 +45,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
     {
       id: '1',
       type: 'ai',
-      content: 'コミュニティマネージャーのAIアシスタントです！活動促進のためのアドバイスや分析をお手伝いします。何かお聞きしたいことはありますか？',
+      content: 'ココティマネージャーのAIアシスタントです！活動促進のためのアドバイスや分析をお手伝いします。何かお聞きしたいことはありますか？',
       timestamp: '今',
       suggestions: [
         'メンバーの参加率を上げるには？',
@@ -63,7 +63,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
       icon: TrendingUp,
       title: '活動分析',
       description: '今月の活動データを分析',
-      prompt: '今月のコミュニティ活動を分析して、改善点を教えてください'
+      prompt: '今月のココティ活動を分析して、改善点を教えてください'
     },
     {
       icon: Users,
@@ -81,7 +81,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
       icon: Target,
       title: '目標設定',
       description: '活動目標の設定支援',
-      prompt: 'コミュニティの成長のための短期・中期目標設定をサポートしてください'
+      prompt: 'ココティの成長のための短期・中期目標設定をサポートしてください'
     }
   ];
 
@@ -145,11 +145,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
 ・アクティブメンバー: 28人 (78%)
 ・イベント参加率: 85%
 
-**好調なコミュニティ:**
+**好調なココティ:**
 🏆 プログラミング部 (参加率92%)
 🏆 写真部 (投稿数+25%)
 
-**要注意コミュニティ:**
+**要注意ココティ:**
 ⚠️ 映像制作部 (参加率65%に低下)
 
 **推奨アクション:**
@@ -168,7 +168,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
 
 **🍂 秋の合同発表会**
 ・各部活の成果物展示
-・相互交流でコミュニティ活性化
+・相互交流でココティ活性化
 ・社内広報効果も期待
 
 **📷 紅葉撮影ツアー**
@@ -189,7 +189,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
     } else {
       response = `🤖 ご質問ありがとうございます！
 
-コミュニティマネージャーとして以下の分野でサポートできます：
+ココティマネージャーとして以下の分野でサポートできます：
 
 ・**活動分析**: データに基づく改善提案
 ・**メンバー促進**: 参加率向上の具体策  
@@ -245,7 +245,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({
           </div>
           <div>
             <h3 className="font-semibold">AIアシスタント</h3>
-            <p className="text-xs text-blue-100">コミュニティマネージャーサポート</p>
+            <p className="text-xs text-blue-100">ココティマネージャーサポート</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">

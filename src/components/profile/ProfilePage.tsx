@@ -218,7 +218,7 @@ const ProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<any | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [albums, setAlbums] = useState<any[]>([]);
-  const [designPattern, setDesignPattern] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [designPattern, setDesignPattern] = useState<1>(1);
 
   // Phase 1-3: 新しいステート管理
   const [currentUser, setCurrentUser] = useState<any | null>(null);
@@ -563,6 +563,8 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto">
       {/* デザインパターン切り替えボタン & 表示モード切り替え */}
+      {/* パターン1のみ使用するため切り替えUIを非表示 */}
+      {false && (
       <div className="fixed top-4 right-4 z-50 bg-white rounded-xl shadow-2xl p-3 border-2 border-gray-200">
         {/* デザインパターン */}
         <div className="mb-3 pb-3 border-b border-gray-200">
@@ -696,6 +698,7 @@ const ProfilePage: React.FC = () => {
           </div>
         )}
       </div>
+      )}
 
       {/* パターン1: Instagram風（現在のデザイン） */}
       {designPattern === 1 && (

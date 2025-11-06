@@ -38,7 +38,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            コミュニティ・ダッシュボード
+            ココティ・ダッシュボード
           </h1>
           <p className="text-gray-600">
             各部活の最新情報と次のイベント予定を確認しましょう

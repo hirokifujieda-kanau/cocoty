@@ -26,27 +26,28 @@ import MemberManagement from '@/components/management/MemberManagement';
 import Analytics from '@/components/analytics/Analytics';
 import AIAssistant from '@/components/ai/AIAssistant';
 import DailyTarot from '@/components/fortune/DailyTarot';
+import UserSwitcher from '@/components/auth/UserSwitcher';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
 type PageType = 'dashboard' | 'events' | 'survey' | 'event-builder' | 'manager-dashboard' | 'member-management' | 'analytics';
 type UserRole = 'member' | 'manager';
 
-const CommunityPlatform: React.FC = () => {
+const CommunityPlatformContent: React.FC = () => {
+  const { currentUser, isLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState<PageType>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>('member');
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [showDailyTarot, setShowDailyTarot] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState('PH1');
 
   // ページ読み込み時に今日のタロット占いをチェック
   useEffect(() => {
     const checkDailyTarot = () => {
+      if (!currentUser) return;
+      
       try {
-        // 現在のユーザーIDを取得
-        const userIdRaw = localStorage.getItem('cocoty_current_user_v1');
-        const userId = userIdRaw ? JSON.parse(userIdRaw).id : 'PH1';
-        setCurrentUserId(userId);
-
+        const userId = currentUser.id;
+        
         // 最後に引いた日付をチェック
         const lastDrawRaw = localStorage.getItem(`cocoty_last_draw_date_v1_${userId}`);
         const today = new Date().toDateString();
@@ -63,12 +64,32 @@ const CommunityPlatform: React.FC = () => {
         }
       } catch (e) {
         console.error('Failed to check daily tarot', e);
-        // エラーの場合は表示しない
       }
     };
 
     checkDailyTarot();
-  }, []);
+  }, [currentUser]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+        <div className="text-center">
+          <p className="text-gray-600">ユーザー情報を読み込めませんでした</p>
+        </div>
+      </div>
+    );
+  }
 
   // Sample data for demonstration
   const sampleData = {
@@ -382,21 +403,23 @@ const CommunityPlatform: React.FC = () => {
   // 部員の場合は専用のMemberAppを表示
   if (userRole === 'member') {
     return (
-      <MemberApp
-        communities={sampleData.communities}
-        upcomingEvents={sampleData.upcomingEvents}
-        recentPosts={sampleData.recentPosts}
-        onSwitchToManager={() => {
-          setUserRole('manager');
-          setCurrentPage('manager-dashboard');
-        }}
-      />
+      <div className="h-screen w-screen overflow-hidden">
+        <MemberApp
+          communities={sampleData.communities}
+          upcomingEvents={sampleData.upcomingEvents}
+          recentPosts={sampleData.recentPosts}
+          onSwitchToManager={() => {
+            setUserRole('manager');
+            setCurrentPage('manager-dashboard');
+          }}
+        />
+      </div>
     );
   }
 
   // マネージャーの場合は従来のサイドバー形式
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-gray-100">
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -498,7 +521,17 @@ const CommunityPlatform: React.FC = () => {
             <h1 className="text-lg font-semibold text-gray-900">
               {managerNavigation.find(item => item.id === currentPage)?.label}
             </h1>
-            <div className="w-10" />
+            <UserSwitcher />
+          </div>
+        </div>
+
+        {/* Desktop Header */}
+        <div className="hidden lg:block bg-white shadow-sm border-b border-gray-200 px-6 py-3">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-gray-900">
+              {managerNavigation.find(item => item.id === currentPage)?.label}
+            </h1>
+            <UserSwitcher />
           </div>
         </div>
 
@@ -535,10 +568,19 @@ const CommunityPlatform: React.FC = () => {
       <DailyTarot
         isOpen={showDailyTarot}
         onClose={() => setShowDailyTarot(false)}
-        userId={currentUserId}
-        userName="あなた"
+        userId={currentUser.id}
+        userName={currentUser.nickname}
       />
     </div>
+  );
+};
+
+// メインコンポーネント（AuthProviderでラップ）
+const CommunityPlatform: React.FC = () => {
+  return (
+    <AuthProvider>
+      <CommunityPlatformContent />
+    </AuthProvider>
   );
 };
 

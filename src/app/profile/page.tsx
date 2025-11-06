@@ -1,15 +1,14 @@
 'use client';
 
 import React from 'react';
-import BackButton from '@/components/ui/BackButton';
-import ProfilePage from '@/components/profile/ProfilePage';
+import InstagramProfilePage from '@/components/profile/InstagramProfilePage';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 const Page: React.FC = () => {
   return (
-    <div className="p-4">
-      <BackButton className="mb-4" />
-      <ProfilePage />
-    </div>
+    <AuthProvider>
+      <InstagramProfilePage />
+    </AuthProvider>
   );
 };
 

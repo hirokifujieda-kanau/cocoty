@@ -27,7 +27,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ communities }) => {
             マネージャーダッシュボード
           </h1>
           <p className="text-gray-600">
-            コミュニティ全体の活動状況を管理・監視できます
+            ココティ全体の活動状況を管理・監視できます
           </p>
         </div>
 
@@ -65,7 +65,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ communities }) => {
             <div className="flex items-center mb-6">
               <Users className="h-6 w-6 text-blue-500 mr-3" />
               <h2 className="text-xl font-semibold text-gray-900">
-                コミュニティ管理
+                ココティ管理
               </h2>
             </div>
             

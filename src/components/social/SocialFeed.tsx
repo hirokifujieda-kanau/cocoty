@@ -179,7 +179,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
 
             {/* Quick Stats */}
             <div className="bg-white rounded-xl shadow-sm p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">マイコミュニティ</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">マイココティ</h3>
               <div className="space-y-3">
                 {communities.map((community) => (
                   <div key={community.name} className="flex items-center justify-between">

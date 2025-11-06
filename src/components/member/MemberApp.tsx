@@ -13,6 +13,8 @@ import {
 import SimpleFeed from '@/components/social/SimpleFeed';
 import Profile from '@/components/profile/Profile';
 import Store from '@/components/store/Store';
+import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 
 interface MemberAppProps {
   communities: Array<{
@@ -48,6 +50,7 @@ const MemberApp: React.FC<MemberAppProps> = ({
   recentPosts,
   onSwitchToManager
 }) => {
+  const { currentUser } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'home' | 'events' | 'store'>('home');
   const [profile, setProfile] = useState<{
@@ -77,42 +80,46 @@ const MemberApp: React.FC<MemberAppProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-full w-full flex flex-col bg-gray-50 overflow-hidden">
       {/* Simple Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-slate-800">コミュニティ</h1>
+            <h1 className="text-2xl font-bold text-slate-800">ココティ</h1>
 
             <div className="flex items-center space-x-4">
               <button className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors">
                 <Search className="h-5 w-5" />
               </button>
 
-              <button onClick={() => { window.location.href = '/profile'; }} className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors flex items-center gap-2">
-                {profile && profile.nickname ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center text-sm font-medium">{getInitials(profile.nickname)}</div>
-                    <div className="text-sm text-slate-800">{profile.nickname}</div>
-                    {profile.diagnosis && (
-                      <div className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded-full">{profile.diagnosis}</div>
-                    )}
-                  </div>
-                ) : (
-                  <User className="h-5 w-5" />
-                )}
-              </button>
-
               <button className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors">
                 <Bell className="h-5 w-5" />
               </button>
+
+              {/* プロフィールリンク */}
+              <Link 
+                href="/profile"
+                className="flex items-center space-x-2 p-2.5 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-colors"
+              >
+                {currentUser && (
+                  <>
+                    <img 
+                      src={currentUser.avatar} 
+                      alt={currentUser.name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <span className="text-sm font-medium hidden md:inline">{currentUser.name}</span>
+                  </>
+                )}
+                {!currentUser && <User className="h-5 w-5" />}
+              </Link>
 
               <button 
                 onClick={onSwitchToManager}
                 className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-colors border border-gray-200"
               >
                 <UserCog className="h-4 w-4" />
-                <span className="text-sm font-medium">管理画面</span>
+                <span className="text-sm font-medium hidden md:inline">管理画面</span>
               </button>
             </div>
           </div>
@@ -163,14 +170,15 @@ const MemberApp: React.FC<MemberAppProps> = ({
       </nav>
 
       {/* Content */}
-      <main className="max-w-4xl mx-auto px-6 py-6">
-                {activeTab === 'home' ? (
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-6 py-6">
+          {activeTab === 'home' ? (
           <SimpleFeed 
             communities={communities}
             upcomingEvents={upcomingEvents}
             recentPosts={recentPosts}
           />
-                ) : activeTab === 'events' ? (
+        ) : activeTab === 'events' ? (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-900">イベント一覧</h2>
@@ -213,13 +221,13 @@ const MemberApp: React.FC<MemberAppProps> = ({
               </div>
             ))}
           </div>
-        ) : null}
-        {activeTab === 'store' && (
+        ) : activeTab === 'store' ? (
           <div className="py-6">
             <h2 className="text-xl font-bold mb-4">ストア / ショーケース</h2>
             <Store />
           </div>
-        )}
+        ) : null}
+        </div>
       </main>
 
       <Profile isOpen={profileOpen} onClose={() => setProfileOpen(false)} onSave={() => {}} />

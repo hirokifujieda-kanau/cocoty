@@ -32,7 +32,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
               活動分析
             </h1>
             <p className="text-gray-600">
-              コミュニティ活動のデータ分析とインサイト
+              ココティ活動のデータ分析とインサイト
             </p>
           </div>
           
@@ -120,7 +120,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
           {/* Community Growth Chart */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              コミュニティ成長トレンド
+              ココティ成長トレンド
             </h3>
             <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
               <div className="text-center">
@@ -134,7 +134,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
           {/* Top Communities */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              エンゲージメント上位コミュニティ
+              エンゲージメント上位ココティ
             </h3>
             <div className="space-y-4">
               {data.topCommunities.map((community, index) => (

@@ -69,7 +69,7 @@ const MemberManagement: React.FC<MemberManagementProps> = ({
               メンバー管理
             </h1>
             <p className="text-gray-600">
-              コミュニティメンバーの情報と活動状況を管理
+              ココティメンバーの情報と活動状況を管理
             </p>
           </div>
           <button
@@ -151,7 +151,7 @@ const MemberManagement: React.FC<MemberManagementProps> = ({
               onChange={(e) => setSelectedCommunity(e.target.value)}
               className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="all">すべてのコミュニティ</option>
+              <option value="all">すべてのココティ</option>
               {communities.map(community => (
                 <option key={community} value={community}>
                   {community}
