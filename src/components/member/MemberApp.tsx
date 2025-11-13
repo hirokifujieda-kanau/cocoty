@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   Home, 
   UserCog, 
@@ -8,12 +9,24 @@ import {
   Plus,
   Bell,
   Search,
-  Calendar
+  Calendar,
+  Users
 } from 'lucide-react';
 import SimpleFeed from '@/components/social/SimpleFeed';
 import Profile from '@/components/profile/Profile';
 import Store from '@/components/store/Store';
+import TeamView from '@/components/member/TeamView';
+import MemberTimeline from '@/components/member/MemberTimeline';
+import EventDetailModal from '@/components/social/EventDetailModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { 
+  getAllEvents, 
+  joinEvent, 
+  leaveEvent, 
+  isUserJoined,
+  getAllSurveys,
+  getAllPosts
+} from '@/lib/mock/mockSocialData';
 import Link from 'next/link';
 
 interface MemberAppProps {
@@ -50,15 +63,38 @@ const MemberApp: React.FC<MemberAppProps> = ({
   recentPosts,
   onSwitchToManager
 }) => {
+  const router = useRouter();
   const { currentUser } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'home' | 'events' | 'store'>('home');
+  const [activeTab, setActiveTab] = useState<'timeline' | 'store' | 'team'>('timeline');
   const [profile, setProfile] = useState<{
     nickname?: string;
     diagnosis?: string;
   } | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [events, setEvents] = useState(getAllEvents());
+  const [showTeamSelector, setShowTeamSelector] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [teamUnreadCounts, setTeamUnreadCounts] = useState<{[key: string]: number}>({});
 
   const STORAGE_KEY = 'cocoty_profile_v1';
+
+  const refreshData = () => {
+    setEvents(getAllEvents());
+  };
+
+  const handleJoinEvent = (eventId: string) => {
+    if (!currentUser) return;
+    
+    if (isUserJoined(eventId, currentUser.id)) {
+      leaveEvent(eventId, currentUser.id);
+    } else {
+      if (!joinEvent(eventId, currentUser.id)) {
+        alert('定員に達しているため参加できません');
+      }
+    }
+    refreshData();
+  };
 
   useEffect(() => {
     try {
@@ -71,6 +107,75 @@ const MemberApp: React.FC<MemberAppProps> = ({
       // ignore
     }
   }, []);
+
+  // ユーザーの所属チームを取得
+  const getUserTeams = () => {
+    if (!currentUser) return [];
+    // mockSocialDataのcommunityMembersから所属チームを取得
+    const teams = ['写真部', 'プログラミング部', '料理部', '音楽部', '読書会'];
+    return teams.filter(team => {
+      // 簡易的にuser_001は写真部と音楽部、user_002はプログラミング部に所属とする
+      if (currentUser.id === 'user_001') return team === '写真部' || team === '音楽部';
+      if (currentUser.id === 'user_002') return team === 'プログラミング部';
+      if (currentUser.id === 'user_003') return team === '料理部';
+      return team === '写真部'; // デフォルト
+    });
+  };
+
+  // 未読メッセージ数と重要なお知らせ数を計算
+  useEffect(() => {
+    if (!currentUser) return;
+    
+    const teams = getUserTeams();
+    const counts: {[key: string]: number} = {};
+    
+    teams.forEach(team => {
+      // 重要なお知らせの数を計算
+      const events = getAllEvents();
+      const surveys = getAllSurveys();
+      const posts = getAllPosts();
+      
+      const teamEventsCount = events.filter(event => event.community === team).length;
+      const teamSurveysCount = surveys.filter(survey => survey.community === team).length;
+      const managerPostsCount = posts.filter(post => 
+        post.author.community === team && post.author.id === 'user_001'
+      ).length;
+      
+      const importantCount = teamEventsCount + teamSurveysCount + managerPostsCount;
+      counts[team] = importantCount;
+    });
+    
+    setTeamUnreadCounts(counts);
+  }, [currentUser, activeTab]);
+
+  // チームタブクリック時の処理
+  const handleTeamTabClick = () => {
+    const teams = getUserTeams();
+    
+    if (teams.length === 0) {
+      alert('所属しているチームがありません');
+      return;
+    }
+    
+    if (teams.length === 1) {
+      // 1つだけなら直接遷移
+      setSelectedTeam(teams[0]);
+      setActiveTab('team');
+    } else {
+      // 複数ある場合はモーダル表示
+      setShowTeamSelector(true);
+    }
+  };
+
+  // チーム選択
+  const handleSelectTeam = (team: string) => {
+    setSelectedTeam(team);
+    setShowTeamSelector(false);
+    setActiveTab('team');
+  };
+
+  // 総未読数を計算
+  const totalUnreadCount = Object.values(teamUnreadCounts).reduce((sum, count) => sum + count, 0);
 
   const getInitials = (name?: string) => {
     if (!name) return '';
@@ -114,13 +219,15 @@ const MemberApp: React.FC<MemberAppProps> = ({
                 {!currentUser && <User className="h-5 w-5" />}
               </Link>
 
-              <button 
-                onClick={onSwitchToManager}
-                className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-colors border border-gray-200"
-              >
-                <UserCog className="h-4 w-4" />
-                <span className="text-sm font-medium hidden md:inline">管理画面</span>
-              </button>
+              {currentUser?.role === 'manager' && (
+                <button 
+                  onClick={onSwitchToManager}
+                  className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-colors border border-gray-200"
+                >
+                  <UserCog className="h-4 w-4" />
+                  <span className="text-sm font-medium hidden md:inline">管理画面</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -131,27 +238,15 @@ const MemberApp: React.FC<MemberAppProps> = ({
         <div className="max-w-4xl mx-auto px-6">
           <div className="flex space-x-8">
             <button
-              onClick={() => setActiveTab('home')}
+              onClick={() => setActiveTab('timeline')}
               className={`flex items-center space-x-2 py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'home'
+                activeTab === 'timeline'
                   ? 'border-slate-600 text-slate-700'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
               <Home className="h-4 w-4" />
-              <span>ホーム</span>
-            </button>
-            
-            <button
-              onClick={() => setActiveTab('events')}
-              className={`flex items-center space-x-2 py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'events'
-                  ? 'border-slate-600 text-slate-700'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <Calendar className="h-4 w-4" />
-              <span>イベント</span>
+              <span>タイムライン</span>
             </button>
             
             <button
@@ -165,6 +260,23 @@ const MemberApp: React.FC<MemberAppProps> = ({
               <Plus className="h-4 w-4" />
               <span>ストア</span>
             </button>
+            
+            <button
+              onClick={handleTeamTabClick}
+              className={`flex items-center space-x-2 py-4 text-sm font-medium border-b-2 transition-colors relative ${
+                activeTab === 'team'
+                  ? 'border-slate-600 text-slate-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Users className="h-4 w-4" />
+              <span>チーム</span>
+              {totalUnreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1.5">
+                  {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </nav>
@@ -172,65 +284,79 @@ const MemberApp: React.FC<MemberAppProps> = ({
       {/* Content */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-6 py-6">
-          {activeTab === 'home' ? (
-          <SimpleFeed 
-            communities={communities}
-            upcomingEvents={upcomingEvents}
-            recentPosts={recentPosts}
-          />
-        ) : activeTab === 'events' ? (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">イベント一覧</h2>
-              <span className="text-sm text-gray-500">
-                CMが企画したイベントに参加できます
-              </span>
-            </div>
-            {upcomingEvents.map((event) => (
-              <div key={event.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{event.title}</h3>
-                    <p className="text-sm text-blue-600">{event.community}</p>
-                  </div>
-                  <div className="flex flex-col items-end space-y-1">
-                    <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                      {event.status === 'open' ? '募集中' : '終了'}
-                    </span>
-                    {event.participants && event.capacity && (
-                      <span className="text-xs text-gray-500">
-                        {event.participants}/{event.capacity}名参加
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2 mb-4">
-                  <p className="text-sm text-gray-600">📅 {event.date}</p>
-                  {event.description && (
-                    <p className="text-sm text-gray-700">{event.description}</p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-slate-600 text-white rounded-md text-sm hover:bg-slate-700">
-                    参加する
-                  </button>
-                  <button className="px-4 py-2 bg-stone-100 text-stone-700 rounded-md text-sm hover:bg-stone-200">
-                    詳細を見る
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          {activeTab === 'timeline' ? (
+          <MemberTimeline />
         ) : activeTab === 'store' ? (
           <div className="py-6">
             <h2 className="text-xl font-bold mb-4">ストア / ショーケース</h2>
             <Store />
           </div>
+        ) : activeTab === 'team' && selectedTeam ? (
+          <TeamView teamName={selectedTeam} />
         ) : null}
         </div>
       </main>
 
       <Profile isOpen={profileOpen} onClose={() => setProfileOpen(false)} onSave={() => {}} />
+      
+      {/* Event Detail Modal */}
+      {selectedEventId && (
+        <EventDetailModal
+          eventId={selectedEventId}
+          isOpen={!!selectedEventId}
+          onClose={() => {
+            setSelectedEventId(null);
+            refreshData();
+          }}
+        />
+      )}
+
+      {/* チーム選択モーダル */}
+      {showTeamSelector && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">チームを選択</h2>
+              <button
+                onClick={() => setShowTeamSelector(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {getUserTeams().map((team) => (
+                <button
+                  key={team}
+                  onClick={() => handleSelectTeam(team)}
+                  className="w-full p-4 bg-gray-50 hover:bg-purple-50 rounded-xl text-left transition-all hover:shadow-md border border-gray-200 hover:border-purple-300"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                        <Users className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900">{team}</p>
+                        <p className="text-sm text-gray-500">タップして開く</p>
+                      </div>
+                    </div>
+                    {teamUnreadCounts[team] > 0 && (
+                      <span className="min-w-[24px] h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-2">
+                        {teamUnreadCounts[team] > 99 ? '99+' : teamUnreadCounts[team]}
+                      </span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Floating Action Button */}
       <button className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:scale-110 flex items-center justify-center z-50">
         <Plus className="h-7 w-7" />

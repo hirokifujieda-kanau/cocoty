@@ -214,11 +214,16 @@ const initVisitorStats = () => ({
   lastVisit: null as string | null
 });
 
-const ProfilePage: React.FC = () => {
+interface ProfilePageProps {
+  userId?: string; // 表示するユーザーID（未指定の場合は自分のプロフィール）
+  onClose?: () => void; // 他人のプロフィールを閉じる場合のコールバック
+}
+
+const ProfilePage: React.FC<ProfilePageProps> = ({ userId, onClose }) => {
   const [profile, setProfile] = useState<any | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [albums, setAlbums] = useState<any[]>([]);
-  const [designPattern, setDesignPattern] = useState<1>(1);
+  const [designPattern, setDesignPattern] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   // Phase 1-3: 新しいステート管理
   const [currentUser, setCurrentUser] = useState<any | null>(null);
@@ -258,7 +263,7 @@ const ProfilePage: React.FC = () => {
   };
 
   // Phase 3: 訪問者統計を更新
-  const updateVisitorStats = (userId: string) => {
+  const updateVisitorStats = (targetUserId: string, visitorUserId: string) => {
     try {
       const statsRaw = localStorage.getItem(VISITOR_STATS_KEY);
       const stats = statsRaw ? JSON.parse(statsRaw) : initVisitorStats();
@@ -267,13 +272,16 @@ const ProfilePage: React.FC = () => {
       stats.weeklyViews += 1;
       stats.lastVisit = new Date().toISOString();
       
+      // 訪問者の情報を取得
+      const visitor = getUserById(visitorUserId);
+      
       // 訪問者リストに追加（重複チェック）
-      const existingVisitor = stats.recentVisitors.find((v: any) => v.id === userId);
-      if (!existingVisitor && currentUser) {
+      const existingVisitor = stats.recentVisitors.find((v: any) => v.id === visitorUserId);
+      if (!existingVisitor && visitor) {
         stats.recentVisitors.unshift({
-          id: userId,
-          nickname: currentUser.nickname,
-          avatar: currentUser.avatar,
+          id: visitor.id,
+          nickname: visitor.nickname,
+          avatar: visitor.avatar,
           visitedAt: new Date().toISOString()
         });
         // 最大10件まで保持
@@ -357,27 +365,35 @@ const ProfilePage: React.FC = () => {
 
   // Phase 1: 初期化 - プロフィール、現在のユーザー、閲覧モード判定
   useEffect(() => {
-    // URLパラメータを取得
+    // URLパラメータまたはpropsからユーザーIDを取得
     const urlParams = new URLSearchParams(window.location.search);
     const viewMode = urlParams.get('view');
-    const targetUserId = urlParams.get('userId') || defaultUserId;
+    const urlUserId = urlParams.get('userId');
     
     // 現在のログインユーザー情報を読み込み
+    let loggedInUserId = defaultUserId;
     try {
       const currentUserRaw = localStorage.getItem(CURRENT_USER_KEY);
       if (currentUserRaw) {
-        setCurrentUser(JSON.parse(currentUserRaw));
+        const cu = JSON.parse(currentUserRaw);
+        setCurrentUser(cu);
+        loggedInUserId = cu.id;
       } else {
         const cu = seedCurrentUser();
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(cu));
         setCurrentUser(cu);
+        loggedInUserId = cu.id;
       }
     } catch (e) {
       const cu = seedCurrentUser();
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(cu));
       setCurrentUser(cu);
+      loggedInUserId = cu.id;
     }
 
+    // 表示対象のユーザーIDを決定
+    const targetUserId = userId || urlUserId || loggedInUserId;
+    
     // 表示するユーザーのプロフィールをダミーデータから取得
     const targetUser = getUserById(targetUserId);
     const profileData = {
@@ -393,16 +409,16 @@ const ProfilePage: React.FC = () => {
       setIsPreviewMode(true);
       setIsOwner(false);
       setShowWelcome(true);
-    } else if (targetUserId !== defaultUserId) {
+    } else if (targetUserId !== loggedInUserId) {
       // 他人のプロフィールを閲覧
       setIsOwner(false);
       setShowWelcome(true);
       
       // 訪問者統計を更新
-      updateVisitorStats(targetUserId);
+      updateVisitorStats(targetUserId, loggedInUserId);
       
       // 共通の友達を取得
-      const common = getCommonFriends(defaultUserId, targetUserId);
+      const common = getCommonFriends(loggedInUserId, targetUserId);
       setCommonFriends(common);
     } else {
       // 自分のプロフィール
@@ -416,7 +432,7 @@ const ProfilePage: React.FC = () => {
       const friendStatusRaw = localStorage.getItem(FRIEND_STATUS_KEY);
       if (friendStatusRaw) {
         const statuses = JSON.parse(friendStatusRaw);
-        setFriendStatus(statuses[targetUserId || 'default'] || 'none');
+        setFriendStatus(statuses[targetUserId] || 'none');
       }
     } catch (e) {
       console.error('Failed to load friend status', e);
@@ -517,7 +533,7 @@ const ProfilePage: React.FC = () => {
     } catch (e) {
       console.error('Failed to load seasonal diagnosis history', e);
     }
-  }, []);
+  }, [userId]); // userIdが変更されたら再読み込み
 
   // 日付範囲チェック用のヘルパー関数
   const isDateInRange = (date: Date, start: string, end: string) => {
@@ -562,6 +578,16 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* 他人のプロフィールの場合は戻るボタンを表示 */}
+      {userId && onClose && (
+        <button
+          onClick={onClose}
+          className="mb-4 px-4 py-2 text-sm text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors flex items-center space-x-2"
+        >
+          <span>← 戻る</span>
+        </button>
+      )}
+      
       {/* デザインパターン切り替えボタン & 表示モード切り替え */}
       {/* パターン1のみ使用するため切り替えUIを非表示 */}
       {false && (

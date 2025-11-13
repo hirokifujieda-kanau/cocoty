@@ -1,15 +1,33 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Heart, 
   MessageCircle, 
   Share2, 
-  Plus
+  Plus,
+  X,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 import Image from 'next/image';
 import PublicProfile from '@/components/profile/PublicProfile';
+import EventDetailModal from '@/components/social/EventDetailModal';
+import SurveyAnswerModal from '@/components/social/SurveyAnswerModal';
 import { PH1, PH2, PH3 } from '@/lib/placeholders';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  getAllEvents,
+  getAllSurveys,
+  getAllPosts,
+  joinEvent,
+  leaveEvent,
+  isUserJoined,
+  likePost,
+  isPostLiked,
+  addComment,
+  createPost
+} from '@/lib/mock/mockSocialData';
 
 interface SocialFeedProps {
   communities: Array<{
@@ -43,103 +61,122 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
   upcomingEvents,
   recentPosts
 }) => {
-  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const { currentUser } = useAuth();
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [selectedCommunity, setSelectedCommunity] = useState<string>('');
   const [publicProfileOpen, setPublicProfileOpen] = useState(false);
   const [publicProfileData, setPublicProfileData] = useState<any>(null);
+  
+  // 投稿フォーム
+  const [postText, setPostText] = useState('');
+  const [postImages, setPostImages] = useState<string[]>([]);
+  
+  // モーダル状態
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null);
+  const [commentInputs, setCommentInputs] = useState<{ [postId: string]: string }>({});
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+  
+  // データ状態
+  const [events, setEvents] = useState(getAllEvents());
+  const [surveys, setSurveys] = useState(getAllSurveys());
+  const [posts, setPosts] = useState(getAllPosts());
 
-  const samplePosts = [
-    {
-      id: '1',
-      author: {
-        name: '田中花子',
-        community: '写真部',
-        avatar: '',
-        diagnosis: 'ENFP'
-      },
-      content: {
-        text: '今日の撮影会、天気に恵まれて素晴らしい写真がたくさん撮れました！新しいメンバーの皆さんも上達が早くて驚きです 📸✨',
-        images: [PH1, PH2]
-      },
-      timestamp: '2時間前',
-      likes: 24,
-      comments: 8,
-      shares: 3
-    },
-    {
-      id: '2',
-      author: {
-        name: '山田太郎',
-        community: 'プログラミング部',
-        avatar: '',
-        diagnosis: 'INTP'
-      },
-      content: {
-        text: 'ハッカソン完了！React + TypeScriptで作ったアプリがついに形になりました 🎉 チーム開発の面白さを実感できた3日間でした。',
-        images: []
-      },
-      timestamp: '4時間前',
-      likes: 32,
-      comments: 12,
-      shares: 5
-    },
-    {
-      id: '3',
-      author: {
-        name: '佐藤美咲',
-        community: '料理部',
-        avatar: '',
-        diagnosis: 'ISFP'
-      },
-      content: {
-        text: '今日はパスタ作りに挑戦！手打ちは難しいけど、みんなでワイワイ作ると楽しいですね 🍝 来週はピザ作りの予定です！',
-        images: [PH3]
-      },
-      timestamp: '6時間前',
-      likes: 18,
-      comments: 6,
-      shares: 2
-    }
-  ];
+  // データを定期的に更新
+  const refreshData = () => {
+    setEvents(getAllEvents());
+    setSurveys(getAllSurveys());
+    setPosts(getAllPosts());
+  };
 
-  // CM投稿（イベント・アンケート通知）のサンプルデータ
-  const managerPosts = [
-    {
-      id: 'cm-1',
-      type: 'event',
-      title: '春の撮影会 - 参加者募集中！',
-      description: '桜の季節に合わせて屋外撮影を行います。カメラの基本操作から構図のコツまで、初心者の方も安心してご参加ください！',
-      community: '写真部',
-      author: 'コミュニティマネージャー',
-      date: '2024年4月10日 10:00-16:00',
-      location: '上野公園',
-      participants: 12,
-      capacity: 20,
-      timestamp: '30分前'
-    },
-    {
-      id: 'cm-2', 
-      type: 'survey',
-      title: '料理部の次回企画についてアンケート',
-      description: 'みんなで作ってみたい料理ジャンルを教えてください！回答期限は今週末までです。',
-      community: '料理部',
-      author: 'コミュニティマネージャー',
-      questions: ['和食', '洋食', 'イタリアン', 'デザート'],
-      timestamp: '1時間前'
+  const handleJoinEvent = (eventId: string) => {
+    if (!currentUser) return;
+    
+    if (isUserJoined(eventId, currentUser.id)) {
+      leaveEvent(eventId, currentUser.id);
+    } else {
+      if (!joinEvent(eventId, currentUser.id)) {
+        alert('定員に達しているため参加できません');
+      }
     }
-  ];
+    refreshData();
+  };
 
   const handleLike = (postId: string) => {
-    setLikedPosts(prev => {
-      const newLiked = new Set(prev);
-      if (newLiked.has(postId)) {
-        newLiked.delete(postId);
+    if (!currentUser) return;
+    likePost(postId, currentUser.id);
+    refreshData();
+  };
+
+  const handleAddComment = (postId: string) => {
+    if (!currentUser) return;
+    const text = commentInputs[postId];
+    if (!text?.trim()) return;
+
+    addComment(postId, currentUser.id, currentUser.name, currentUser.avatar, text);
+    setCommentInputs(prev => ({ ...prev, [postId]: '' }));
+    refreshData();
+  };
+
+  const toggleComments = (postId: string) => {
+    setExpandedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
       } else {
-        newLiked.add(postId);
+        newSet.add(postId);
       }
-      return newLiked;
+      return newSet;
     });
+  };
+
+  // 画像をBase64に変換
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const fileArray = Array.from(files);
+    const readers = fileArray.map(file => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readers).then(images => {
+      setPostImages(prev => [...prev, ...images].slice(0, 4)); // 最大4枚
+    });
+  };
+
+  // 画像を削除
+  const removeImage = (index: number) => {
+    setPostImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // 投稿を作成
+  const handleCreatePost = () => {
+    if (!currentUser || !postText.trim() || !selectedCommunity) return;
+
+    const newPost = createPost(
+      currentUser.id,
+      currentUser.name,
+      selectedCommunity,
+      currentUser.avatar,
+      currentUser.diagnosis,
+      postText,
+      postImages
+    );
+
+    if (newPost) {
+      setPostText('');
+      setPostImages([]);
+      setSelectedCommunity('');
+      setShowActivityModal(false);
+      refreshData();
+    }
   };
 
   const getCommunityGradient = (community: string) => {
@@ -180,78 +217,83 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
         </div>
 
         {/* CM Posts (Events & Surveys) */}
-        {managerPosts.map((cmPost) => (
-          <div key={cmPost.id} className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border-l-4 border-purple-400 overflow-hidden">
-            {cmPost.type === 'event' ? (
-              <div className="p-6">
-                <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">CM</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h3 className="font-semibold text-gray-900">🎯 {cmPost.title}</h3>
-                      <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
-                        イベント
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">{cmPost.description}</p>
-                    <div className="bg-white rounded-lg p-4 space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">📅 {cmPost.date}</span>
-                        <span className="text-sm text-green-600 font-medium">
-                          {cmPost.participants}/{cmPost.capacity}名参加
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600">📍 {cmPost.location}</div>
-                    </div>
-                    <div className="flex space-x-2 mt-4">
-                      <button className="px-4 py-2 bg-slate-600 text-white rounded-lg text-sm hover:bg-slate-700">
-                        参加する
-                      </button>
-                      <button className="px-4 py-2 bg-stone-100 text-stone-700 rounded-lg text-sm hover:bg-stone-200">
-                        詳細を見る
-                      </button>
-                    </div>
-                  </div>
+        {events.map((event) => (
+          <div key={event.id} className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border-l-4 border-purple-400 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-start space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">CM</span>
                 </div>
-              </div>
-            ) : (
-              <div className="p-6">
-                <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-stone-600 to-stone-700 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">CM</span>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h3 className="font-semibold text-gray-900">🎯 {event.title}</h3>
+                    <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                      イベント
+                    </span>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h3 className="font-semibold text-gray-900">📊 {cmPost.title}</h3>
-                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                        アンケート
+                  <p className="text-sm text-gray-600 mb-3">{event.description}</p>
+                  <div className="bg-white rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">📅 {event.date} {event.time}</span>
+                      <span className="text-sm text-green-600 font-medium">
+                        {(event.participants || []).length}/{event.capacity}名参加
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">{cmPost.description}</p>
-                    <div className="bg-white rounded-lg p-4 space-y-2">
-                      {cmPost.questions?.map((question, index) => (
-                        <button 
-                          key={index} 
-                          className="w-full text-left p-2 hover:bg-gray-50 rounded border border-gray-200"
-                        >
-                          {question}
-                        </button>
-                      ))}
-                    </div>
-                    <button className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600">
-                      アンケートに回答
+                    <div className="text-sm text-gray-600">📍 {event.location}</div>
+                  </div>
+                  <div className="flex space-x-2 mt-4">
+                    <button 
+                      onClick={() => handleJoinEvent(event.id)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentUser && isUserJoined(event.id, currentUser.id)
+                          ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          : 'bg-slate-600 text-white hover:bg-slate-700'
+                      }`}
+                    >
+                      {currentUser && isUserJoined(event.id, currentUser.id) ? 'キャンセル' : '参加する'}
+                    </button>
+                    <button 
+                      onClick={() => setSelectedEventId(event.id)}
+                      className="px-4 py-2 bg-stone-100 text-stone-700 rounded-lg text-sm hover:bg-stone-200"
+                    >
+                      詳細を見る
                     </button>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          </div>
+        ))}
+
+        {surveys.map((survey) => (
+          <div key={survey.id} className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border-l-4 border-green-400 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-start space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-stone-600 to-stone-700 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">CM</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h3 className="font-semibold text-gray-900">📊 {survey.title}</h3>
+                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                      アンケート
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">{survey.description}</p>
+                  <button 
+                    onClick={() => setSelectedSurveyId(survey.id)}
+                    className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 font-medium"
+                  >
+                    アンケートに回答
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
 
         {/* Community Posts */}
-        {samplePosts.map((post) => (
+        {posts.map((post) => (
           <div key={post.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Post Header */}
             <div className="p-6 pb-4">
@@ -280,7 +322,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
             <div className="px-6 pb-4">
               <p className="text-gray-800 leading-relaxed mb-4">{post.content.text}</p>
               
-              {post.content.images.length > 0 && (
+              {post.content.images && post.content.images.length > 0 && (
                 <div className={`grid gap-2 rounded-xl overflow-hidden ${
                   post.content.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
                 }`}>
@@ -296,9 +338,9 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
             {/* Post Stats */}
             <div className="px-6 py-3 border-t border-gray-100">
               <div className="flex items-center justify-between text-sm text-gray-500">
-                <span>{post.likes + (likedPosts.has(post.id) ? 1 : 0)}いいね</span>
+                <span>{post.likes.length}いいね</span>
                 <div className="flex space-x-4">
-                  <span>{post.comments}コメント</span>
+                  <span>{post.comments.length}コメント</span>
                   <span>{post.shares}シェア</span>
                 </div>
               </div>
@@ -310,15 +352,18 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
                 <button
                   onClick={() => handleLike(post.id)}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                    likedPosts.has(post.id)
+                    currentUser && isPostLiked(post.id, currentUser.id)
                       ? 'text-rose-700 bg-rose-50'
                       : 'text-stone-600 hover:text-rose-700 hover:bg-rose-50'
                   }`}
                 >
-                  <Heart className={`h-5 w-5 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
+                  <Heart className={`h-5 w-5 ${currentUser && isPostLiked(post.id, currentUser.id) ? 'fill-current' : ''}`} />
                   <span className="font-medium">いいね</span>
                 </button>
-                <button className="flex items-center space-x-2 px-4 py-2 rounded-lg text-stone-600 hover:text-slate-700 hover:bg-slate-50 transition-colors">
+                <button 
+                  onClick={() => toggleComments(post.id)}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-stone-600 hover:text-slate-700 hover:bg-slate-50 transition-colors"
+                >
                   <MessageCircle className="h-5 w-5" />
                   <span className="font-medium">コメント</span>
                 </button>
@@ -328,33 +373,90 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Comments Section */}
+            {expandedComments.has(post.id) && (
+              <div className="px-6 py-4 border-t border-gray-100 bg-white space-y-4">
+                {/* Comment Input */}
+                <div className="flex items-start space-x-3">
+                  <img
+                    src={currentUser?.avatar}
+                    alt={currentUser?.name}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={commentInputs[post.id] || ''}
+                      onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddComment(post.id)}
+                      placeholder="コメントを追加..."
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleAddComment(post.id)}
+                    className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 text-sm font-medium"
+                  >
+                    投稿
+                  </button>
+                </div>
+
+                {/* Comment List */}
+                {post.comments.length > 0 && (
+                  <div className="space-y-3">
+                    {post.comments.map((comment) => (
+                      <div key={comment.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <img
+                          src={comment.author.avatar}
+                          alt={comment.author.name}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <p className="font-medium text-sm text-gray-900">{comment.author.name}</p>
+                            <span className="text-xs text-gray-500">{comment.timestamp}</span>
+                          </div>
+                          <p className="text-sm text-gray-700">{comment.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>
 
       {/* Activity Post Modal */}
       {showActivityModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900">今日の活動を投稿</h3>
               <button 
-                onClick={() => setShowActivityModal(false)}
+                onClick={() => {
+                  setShowActivityModal(false);
+                  setPostText('');
+                  setPostImages([]);
+                  setSelectedCommunity('');
+                }}
                 className="text-gray-400 hover:text-gray-600"
               >
-                ✕
+                <X className="h-6 w-6" />
               </button>
             </div>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  所属部活
+                  所属部活 <span className="text-red-500">*</span>
                 </label>
                 <select 
                   value={selectedCommunity}
                   onChange={(e) => setSelectedCommunity(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 >
                   <option value="">選択してください</option>
                   {communities.map((community) => (
@@ -367,38 +469,79 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  活動内容
+                  活動内容 <span className="text-red-500">*</span>
                 </label>
                 <textarea 
+                  value={postText}
+                  onChange={(e) => setPostText(e.target.value)}
                   placeholder="今日はどんな活動をしましたか？"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
                   rows={4}
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  写真を追加（任意）
+                  写真を追加（任意・最大4枚）
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                  <span className="text-gray-500">クリックして写真を選択</span>
-                </div>
+                
+                {/* 画像プレビュー */}
+                {postImages.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    {postImages.map((image, index) => (
+                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+                        <img 
+                          src={image} 
+                          alt={`Upload ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          onClick={() => removeImage(index)}
+                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* アップロードボタン */}
+                {postImages.length < 4 && (
+                  <label className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-colors block">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <span className="text-sm text-gray-600">クリックして写真を選択</span>
+                    <p className="text-xs text-gray-400 mt-1">
+                      残り{4 - postImages.length}枚まで追加できます
+                    </p>
+                  </label>
+                )}
               </div>
             </div>
             
             <div className="flex space-x-3 mt-6">
               <button 
-                onClick={() => setShowActivityModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                onClick={() => {
+                  setShowActivityModal(false);
+                  setPostText('');
+                  setPostImages([]);
+                  setSelectedCommunity('');
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 キャンセル
               </button>
               <button 
-                onClick={() => {
-                  // 投稿処理（実装時に追加）
-                  setShowActivityModal(false);
-                }}
-                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                onClick={handleCreatePost}
+                disabled={!postText.trim() || !selectedCommunity}
+                className="flex-1 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 投稿する
               </button>
@@ -406,8 +549,32 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
           </div>
         </div>
       )}
-      {publicProfileOpen && (
+            {publicProfileOpen && (
         <PublicProfile onClose={() => { setPublicProfileOpen(false); setPublicProfileData(null); }} profileData={publicProfileData} />
+      )}
+      
+      {/* Event Detail Modal */}
+      {selectedEventId && (
+        <EventDetailModal
+          eventId={selectedEventId}
+          isOpen={!!selectedEventId}
+          onClose={() => {
+            setSelectedEventId(null);
+            refreshData();
+          }}
+        />
+      )}
+
+      {/* Survey Answer Modal */}
+      {selectedSurveyId && (
+        <SurveyAnswerModal
+          surveyId={selectedSurveyId}
+          isOpen={!!selectedSurveyId}
+          onClose={() => {
+            setSelectedSurveyId(null);
+            refreshData();
+          }}
+        />
       )}
     </div>
   );

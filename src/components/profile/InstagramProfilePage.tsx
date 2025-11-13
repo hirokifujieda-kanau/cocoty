@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Settings, Grid, Bookmark, Sparkles, TrendingUp, Heart as HeartIcon, Users, Calendar, BookOpen, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { PH1, PH2, PH3 } from '@/lib/placeholders';
@@ -13,10 +13,30 @@ import ProfileEditModal from '@/components/profile/ProfileEditModal';
 import ShareProfileModal from '@/components/profile/ShareProfileModal';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
+import { getUserById } from '@/lib/dummyUsers';
 
 const InstagramProfilePage: React.FC = () => {
   const { currentUser } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // URLパラメータからuserIdを取得、なければcurrentUser.idを使用
+  const userIdFromUrl = searchParams.get('userId');
+  
+  console.log('=== InstagramProfilePage Debug ===');
+  console.log('URL searchParams:', searchParams.toString());
+  console.log('userId from URL:', userIdFromUrl);
+  console.log('currentUser.id:', currentUser?.id);
+  
+  const userId = userIdFromUrl || currentUser?.id;
+  const displayUser = userId ? getUserById(userId) : currentUser;
+  const isOwner = currentUser?.id === displayUser?.id;
+  
+  console.log('Final userId:', userId);
+  console.log('displayUser:', displayUser?.name);
+  console.log('isOwner:', isOwner);
+  console.log('===================================');
+  
   const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'fortune'>('posts');
   
   // Fortune機能の状態
@@ -29,9 +49,64 @@ const InstagramProfilePage: React.FC = () => {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showShareProfile, setShowShareProfile] = useState(false);
   
+  // フォロー状態とメッセージ機能
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageText, setMessageText] = useState('');
+  
   // アクティビティカレンダー用の状態
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [activityData, setActivityData] = useState<{ [key: string]: any[] }>({});
+
+  // フォロー状態を読み込み
+  useEffect(() => {
+    if (!isOwner && currentUser && displayUser) {
+      const followKey = `follow_${currentUser.id}_${displayUser.id}`;
+      const following = localStorage.getItem(followKey) === 'true';
+      setIsFollowing(following);
+    }
+  }, [isOwner, currentUser, displayUser]);
+
+  // フォロー/フォロー解除
+  const handleFollowToggle = () => {
+    if (!currentUser || !displayUser) return;
+    
+    const followKey = `follow_${currentUser.id}_${displayUser.id}`;
+    const newFollowState = !isFollowing;
+    
+    localStorage.setItem(followKey, newFollowState.toString());
+    setIsFollowing(newFollowState);
+    
+    // トースト通知（オプション）
+    alert(newFollowState ? `${displayUser.name}をフォローしました` : `${displayUser.name}のフォローを解除しました`);
+  };
+
+  // メッセージ送信
+  const handleSendMessage = () => {
+    if (!messageText.trim()) {
+      alert('メッセージを入力してください');
+      return;
+    }
+    
+    // メッセージをlocalStorageに保存（実際のアプリではAPIに送信）
+    const messageKey = `messages_${currentUser?.id}_${displayUser?.id}`;
+    const existingMessages = JSON.parse(localStorage.getItem(messageKey) || '[]');
+    
+    const newMessage = {
+      id: Date.now(),
+      from: currentUser?.id,
+      to: displayUser?.id,
+      text: messageText,
+      timestamp: new Date().toISOString()
+    };
+    
+    existingMessages.push(newMessage);
+    localStorage.setItem(messageKey, JSON.stringify(existingMessages));
+    
+    setMessageText('');
+    setShowMessageModal(false);
+    alert(`${displayUser?.name}にメッセージを送信しました`);
+  };
 
   // 過去28日間のアクティビティデータを生成
   useEffect(() => {
@@ -85,7 +160,15 @@ const InstagramProfilePage: React.FC = () => {
   // アクティビティ合計
   const totalActivities = Object.values(activityData).reduce((sum, activities) => sum + activities.length, 0);
 
-  if (!currentUser) return null;
+  if (!currentUser || !displayUser) return null;
+
+  console.log('InstagramProfilePage:', {
+    userId,
+    currentUserId: currentUser.id,
+    displayUserId: displayUser.id,
+    displayUserName: displayUser.name,
+    isOwner
+  });
 
   return (
     <div className="min-h-screen bg-white">
@@ -99,13 +182,16 @@ const InstagramProfilePage: React.FC = () => {
             >
               <ArrowLeft className="h-6 w-6" />
             </button>
-            <h1 className="text-lg font-semibold">{currentUser.name}</h1>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <Settings className="h-6 w-6" />
-            </button>
+            <h1 className="text-lg font-semibold">{displayUser.name}</h1>
+            {isOwner && (
+              <button
+                onClick={() => setShowSettings(true)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <Settings className="h-6 w-6" />
+              </button>
+            )}
+            {!isOwner && <div className="w-10" />}
           </div>
         </div>
       </div>
@@ -118,8 +204,8 @@ const InstagramProfilePage: React.FC = () => {
             <div className="flex-shrink-0">
               <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-gray-200">
                 <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
+                  src={displayUser.avatar}
+                  alt={displayUser.name}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -144,30 +230,192 @@ const InstagramProfilePage: React.FC = () => {
 
               {/* Action Buttons */}
               <div className="flex gap-2">
-                <button
-                  onClick={() => setShowEditProfile(true)}
-                  className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-sm transition-colors"
-                >
-                  プロフィールを編集
-                </button>
-                <button
-                  onClick={() => setShowShareProfile(true)}
-                  className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-sm transition-colors"
-                >
-                  プロフィールをシェア
-                </button>
+                {isOwner ? (
+                  <>
+                    <button
+                      onClick={() => setShowEditProfile(true)}
+                      className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-sm transition-colors"
+                    >
+                      プロフィールを編集
+                    </button>
+                    <button
+                      onClick={() => setShowShareProfile(true)}
+                      className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-sm transition-colors"
+                    >
+                      プロフィールをシェア
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleFollowToggle}
+                      className={`flex-1 px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                        isFollowing
+                          ? 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                          : 'bg-blue-500 hover:bg-blue-600 text-white'
+                      }`}
+                    >
+                      {isFollowing ? 'フォロー中' : 'フォロー'}
+                    </button>
+                    <button
+                      onClick={() => setShowMessageModal(true)}
+                      className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-sm transition-colors"
+                    >
+                      メッセージ
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           {/* Bio */}
           <div className="space-y-2">
-            <div className="font-semibold">{currentUser.name}</div>
-            <div className="text-sm">{currentUser.bio}</div>
+            <div className="font-semibold">{displayUser.name}</div>
+            <div className="text-sm">{displayUser.bio}</div>
+            {displayUser.diagnosis && (
+              <div className="text-sm text-purple-600">
+                診断: {displayUser.diagnosis}
+              </div>
+            )}
           </div>
 
-          {/* 学習進捗サマリー - プロフィール内 */}
-          {currentUser && (() => {
+          {/* チームタスク進捗と個人課題進捗 */}
+          <div className="mt-6 space-y-4">
+            {/* チームタスク進捗 */}
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-100">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-4 w-4 text-blue-600" />
+                  <h3 className="font-bold text-gray-900 text-sm">チームタスク進捗</h3>
+                </div>
+                <span className="text-xs text-gray-500">
+                  {displayUser.id === 'user_001' || displayUser.id === 'user_002' ? '写真部' : 
+                   displayUser.id === 'user_003' || displayUser.id === 'user_004' ? 'プログラミング部' : 
+                   displayUser.id === 'user_005' || displayUser.id === 'user_006' ? '料理部' : '音楽部'}
+                </span>
+              </div>
+              
+              {/* 進捗バー */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                  <span>完了タスク</span>
+                  <span className="font-semibold">
+                    {(() => {
+                      const total = 12;
+                      const completed = Math.floor(Math.random() * 5) + 7; // 7-11の範囲
+                      return `${completed} / ${total}`;
+                    })()}
+                  </span>
+                </div>
+                <div className="w-full bg-blue-100 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-cyan-500 h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2"
+                    style={{ 
+                      width: `${(() => {
+                        const total = 12;
+                        const completed = Math.floor(Math.random() * 5) + 7;
+                        return Math.round((completed / total) * 100);
+                      })()}%` 
+                    }}
+                  >
+                    <span className="text-[10px] text-white font-bold">
+                      {(() => {
+                        const total = 12;
+                        const completed = Math.floor(Math.random() * 5) + 7;
+                        return Math.round((completed / total) * 100);
+                      })()}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 今週の貢献度 */}
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xs text-gray-600">今週の貢献</span>
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: 7 }).map((_, i) => {
+                    const height = Math.random() > 0.3 ? Math.floor(Math.random() * 20) + 10 : 5;
+                    return (
+                      <div 
+                        key={i}
+                        className="w-1.5 bg-blue-400 rounded-sm"
+                        style={{ height: `${height}px` }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* 個人課題進捗 */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle2 className="h-4 w-4 text-purple-600" />
+                  <h3 className="font-bold text-gray-900 text-sm">個人課題進捗</h3>
+                </div>
+                <span className="text-xs text-purple-600 font-semibold">
+                  {(displayUser as any).goalProgress || 0}%
+                </span>
+              </div>
+              
+              {/* 進捗バー */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                  <span className="truncate max-w-[200px]">{(displayUser as any).goal || '目標未設定'}</span>
+                  <span className="font-semibold">
+                    {(displayUser as any).milestones?.filter((m: any) => m.completed).length || 0} / {(displayUser as any).milestones?.length || 0}
+                  </span>
+                </div>
+                <div className="w-full bg-purple-100 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2"
+                    style={{ width: `${(displayUser as any).goalProgress || 0}%` }}
+                  >
+                    {((displayUser as any).goalProgress || 0) > 15 && (
+                      <span className="text-[10px] text-white font-bold">
+                        {(displayUser as any).goalProgress}%
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* マイルストーン */}
+              {(displayUser as any).milestones && (displayUser as any).milestones.length > 0 && (
+                <div className="mt-3 space-y-1">
+                  {(displayUser as any).milestones.slice(0, 3).map((milestone: any, index: number) => (
+                    <div key={index} className="flex items-center space-x-2 text-xs">
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        milestone.completed ? 'bg-green-500' : 'bg-gray-300'
+                      }`}>
+                        {milestone.completed && (
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <span className={`flex-1 truncate ${milestone.completed ? 'text-gray-600 line-through' : 'text-gray-900'}`}>
+                        {milestone.title}
+                      </span>
+                      {milestone.completed && milestone.date && (
+                        <span className="text-gray-400 text-[10px]">{milestone.date}</span>
+                      )}
+                    </div>
+                  ))}
+                  {(displayUser as any).milestones.length > 3 && (
+                    <div className="text-center text-xs text-purple-600 mt-2">
+                      +{(displayUser as any).milestones.length - 3}個のマイルストーン
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 個人実績（エアコース）- プロフィール内 (自分のプロフィールのみ) */}
+          {isOwner && currentUser && (() => {
             const stats = getTaskStats(currentUser.id);
             const courseProgress = getUserCourseProgress(currentUser.id);
             
@@ -176,7 +424,7 @@ const InstagramProfilePage: React.FC = () => {
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-bold text-gray-900 flex items-center gap-2">
                     <BookOpen className="h-5 w-5 text-purple-600" />
-                    学習進捗
+                    個人実績（エアコース）
                   </h3>
                   <button
                     onClick={() => router.push('/learning')}
@@ -638,6 +886,75 @@ const InstagramProfilePage: React.FC = () => {
         isOpen={showShareProfile}
         onClose={() => setShowShareProfile(false)}
       />
+
+      {/* メッセージモーダル */}
+      {showMessageModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                {displayUser?.name}にメッセージ
+              </h2>
+              <button
+                onClick={() => {
+                  setShowMessageModal(false);
+                  setMessageText('');
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <div className="flex items-center space-x-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                <img
+                  src={displayUser?.avatar}
+                  alt={displayUser?.name}
+                  className="w-12 h-12 rounded-full"
+                />
+                <div>
+                  <p className="font-medium text-gray-900">{displayUser?.name}</p>
+                  <p className="text-sm text-gray-500">{displayUser?.bio?.slice(0, 50)}...</p>
+                </div>
+              </div>
+
+              <textarea
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                placeholder="メッセージを入力..."
+                className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                rows={4}
+                maxLength={500}
+              />
+              <div className="text-right text-xs text-gray-400 mt-1">
+                {messageText.length} / 500
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  setShowMessageModal(false);
+                  setMessageText('');
+                }}
+                className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold transition-colors"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleSendMessage}
+                disabled={!messageText.trim()}
+                className="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                送信
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

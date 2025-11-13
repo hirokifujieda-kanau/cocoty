@@ -11,6 +11,7 @@ export interface MockUser {
   avatar: string;
   bio: string;
   diagnosis: string;
+  role: 'member' | 'manager'; // メンバーまたは管理者
   createdAt: string;
 }
 
@@ -24,6 +25,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=1',
     bio: '写真が好きな大学生です📷 風景とポートレートを撮っています',
     diagnosis: 'ENFP',
+    role: 'manager', // 管理者
     createdAt: '2024-01-15T10:00:00Z'
   },
   {
@@ -34,6 +36,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=12',
     bio: 'プログラマー兼フォトグラファー💻📸 技術とアートの融合を目指してます',
     diagnosis: 'INTP',
+    role: 'manager', // 管理者
     createdAt: '2024-01-20T11:30:00Z'
   },
   {
@@ -44,6 +47,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=5',
     bio: '料理とテーブルフォト🍽️✨ おいしい瞬間を記録しています',
     diagnosis: 'ISFP',
+    role: 'member',
     createdAt: '2024-02-01T09:15:00Z'
   },
   {
@@ -54,6 +58,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=13',
     bio: 'スポーツフォトグラファー⚽🏀 動きのある瞬間を切り取ります',
     diagnosis: 'ESTP',
+    role: 'member',
     createdAt: '2024-02-10T14:20:00Z'
   },
   {
@@ -64,6 +69,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=9',
     bio: 'ウェディングフォトグラファー💐👰 幸せな瞬間をお手伝い',
     diagnosis: 'ENFP',
+    role: 'member',
     createdAt: '2024-02-15T16:45:00Z'
   },
   {
@@ -74,6 +80,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=14',
     bio: '旅行写真家🌍✈️ 世界中の風景を撮影しています',
     diagnosis: 'ISFJ',
+    role: 'member',
     createdAt: '2024-03-01T08:00:00Z'
   },
   {
@@ -84,6 +91,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=10',
     bio: 'ペットフォトグラファー🐶🐱 大切な家族を可愛く撮影',
     diagnosis: 'ESFJ',
+    role: 'member',
     createdAt: '2024-03-05T13:30:00Z'
   },
   {
@@ -94,6 +102,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=15',
     bio: 'ストリートフォトグラファー🏙️ 都市の日常を切り取ります',
     diagnosis: 'ISTP',
+    role: 'member',
     createdAt: '2024-03-10T10:00:00Z'
   },
   {
@@ -104,6 +113,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=20',
     bio: 'ファッションフォトグラファー👗💄 スタイリングと光を楽しんでます',
     diagnosis: 'ENTJ',
+    role: 'member',
     createdAt: '2024-03-15T15:20:00Z'
   },
   {
@@ -114,6 +124,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=17',
     bio: 'ネイチャーフォトグラファー🌲🦅 自然の美しさを伝えたい',
     diagnosis: 'INFP',
+    role: 'member',
     createdAt: '2024-03-20T09:45:00Z'
   },
   {
@@ -124,6 +135,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=23',
     bio: 'コスプレイヤー&セルフポートレート📸✨ 表現することが好き',
     diagnosis: 'ENFJ',
+    role: 'member',
     createdAt: '2024-04-01T11:00:00Z'
   },
   {
@@ -134,6 +146,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=18',
     bio: 'フィルムカメラ愛好家📷🎞️ アナログな質感が好き',
     diagnosis: 'INFJ',
+    role: 'member',
     createdAt: '2024-04-05T14:15:00Z'
   },
   {
@@ -144,6 +157,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=19',
     bio: '建築写真家🏛️🌆 建物の美しさを追求しています',
     diagnosis: 'ISTJ',
+    role: 'member',
     createdAt: '2024-04-10T16:30:00Z'
   },
   {
@@ -154,6 +168,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=24',
     bio: 'ベビーフォトグラファー👶💕 かわいい笑顔を撮るのが幸せ',
     diagnosis: 'ESFP',
+    role: 'member',
     createdAt: '2024-04-15T12:00:00Z'
   },
   {
@@ -164,6 +179,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=21',
     bio: 'ドローンパイロット🚁📸 空からの景色を撮影してます',
     diagnosis: 'ENTP',
+    role: 'member',
     createdAt: '2024-04-20T10:30:00Z'
   },
   {
@@ -174,6 +190,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=26',
     bio: 'マタニティフォトグラファー🤰✨ 幸せな瞬間を残します',
     diagnosis: 'ISFP',
+    role: 'member',
     createdAt: '2024-05-01T13:45:00Z'
   },
   {
@@ -184,6 +201,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=22',
     bio: 'スポーツカーフォトグラファー🏎️💨 スピード感を表現',
     diagnosis: 'ESTJ',
+    role: 'member',
     createdAt: '2024-05-05T15:00:00Z'
   },
   {
@@ -194,6 +212,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=27',
     bio: 'カフェ巡り📸☕ おしゃれな空間とスイーツを撮影',
     diagnosis: 'ENFP',
+    role: 'member',
     createdAt: '2024-05-10T11:20:00Z'
   },
   {
@@ -204,6 +223,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=25',
     bio: '天体写真家🌌⭐ 星空の美しさに魅了されています',
     diagnosis: 'INTJ',
+    role: 'member',
     createdAt: '2024-05-15T09:00:00Z'
   },
   {
@@ -214,6 +234,7 @@ export const mockUsers: MockUser[] = [
     avatar: 'https://i.pravatar.cc/150?img=28',
     bio: 'フラワーアレンジメント🌸💐 お花の美しさを写真で表現',
     diagnosis: 'INFP',
+    role: 'member',
     createdAt: '2024-05-20T14:00:00Z'
   }
 ];

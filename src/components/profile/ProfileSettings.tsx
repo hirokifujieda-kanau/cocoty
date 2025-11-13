@@ -1,13 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, User, Lock, Bell, Shield, Globe, Moon, 
   ChevronRight, LogOut, Camera, Mail, Phone,
-  Eye, EyeOff
+  Eye, EyeOff, Check
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import {
+  getUserSettings,
+  updateAccountInfo,
+  updatePrivacySettings,
+  updateNotificationSettings,
+  updateSecuritySettings,
+  changePassword,
+  deleteAccount,
+  UserSettings
+} from '@/lib/mock/mockUserSettings';
 
 interface ProfileSettingsProps {
   isOpen: boolean;
@@ -18,13 +28,114 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
   const { currentUser, logout } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'account' | 'privacy' | 'notifications' | 'security'>('account');
+  const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    current: '',
+    new: '',
+    confirm: ''
+  });
+  const [deletePassword, setDeletePassword] = useState('');
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  if (!isOpen || !currentUser) return null;
+  useEffect(() => {
+    if (isOpen && currentUser) {
+      const userSettings = getUserSettings(currentUser.id, currentUser.name, currentUser.email, currentUser.avatar);
+      setSettings(userSettings);
+    }
+  }, [isOpen, currentUser]);
+
+  if (!isOpen || !currentUser || !settings) return null;
 
   const handleLogout = () => {
     logout();
     router.push('/login');
     onClose();
+  };
+
+  const handlePrivacyToggle = (key: keyof UserSettings['privacy']) => {
+    const updated = !settings.privacy[key];
+    if (updatePrivacySettings(currentUser.id, { [key]: updated })) {
+      setSettings({
+        ...settings,
+        privacy: { ...settings.privacy, [key]: updated }
+      });
+      showMessage('success', '設定を更新しました');
+    }
+  };
+
+  const handleNotificationToggle = (key: keyof UserSettings['notifications']) => {
+    const updated = !settings.notifications[key];
+    if (updateNotificationSettings(currentUser.id, { [key]: updated })) {
+      setSettings({
+        ...settings,
+        notifications: { ...settings.notifications, [key]: updated }
+      });
+      showMessage('success', '設定を更新しました');
+    }
+  };
+
+  const handleSecurityToggle = (key: keyof UserSettings['security']) => {
+    if (key === 'twoFactorEnabled') {
+      const updated = !settings.security[key];
+      if (updateSecuritySettings(currentUser.id, { [key]: updated })) {
+        setSettings({
+          ...settings,
+          security: { ...settings.security, [key]: updated }
+        });
+        showMessage('success', updated ? '2段階認証を有効にしました' : '2段階認証を無効にしました');
+      }
+    }
+  };
+
+  const handlePasswordChange = () => {
+    if (passwordForm.new !== passwordForm.confirm) {
+      showMessage('error', '新しいパスワードが一致しません');
+      return;
+    }
+
+    const result = changePassword(currentUser.id, passwordForm.current, passwordForm.new);
+    
+    if (result.success) {
+      showMessage('success', result.message);
+      setPasswordForm({ current: '', new: '', confirm: '' });
+      setShowPasswordChange(false);
+      // 設定を再読み込み
+      const updatedSettings = getUserSettings(currentUser.id, currentUser.name, currentUser.email, currentUser.avatar);
+      setSettings(updatedSettings);
+    } else {
+      showMessage('error', result.message);
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    const result = deleteAccount(currentUser.id, deletePassword);
+    
+    if (result.success) {
+      showMessage('success', result.message);
+      setTimeout(() => {
+        logout();
+        router.push('/login');
+      }, 1500);
+    } else {
+      showMessage('error', result.message);
+    }
+  };
+
+  const showMessage = (type: 'success' | 'error', text: string) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
+  const getPasswordChangeTime = () => {
+    const lastChange = new Date(settings.security.lastPasswordChange);
+    const now = new Date();
+    const diffMonths = Math.floor((now.getTime() - lastChange.getTime()) / (1000 * 60 * 60 * 24 * 30));
+    
+    if (diffMonths === 0) return '今月';
+    if (diffMonths === 1) return '1ヶ月前';
+    return `${diffMonths}ヶ月前`;
   };
 
   return (
@@ -40,6 +151,16 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
             <X className="h-6 w-6" />
           </button>
         </div>
+
+        {/* Success/Error Message */}
+        {message && (
+          <div className={`mx-6 mt-4 p-4 rounded-lg flex items-center gap-2 ${
+            message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+          }`}>
+            {message.type === 'success' && <Check className="h-5 w-5" />}
+            <span>{message.text}</span>
+          </div>
+        )}
 
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
@@ -115,10 +236,10 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <User className="h-5 w-5 text-gray-600" />
                         <div>
                           <div className="text-sm text-gray-600">ユーザー名</div>
-                          <div className="font-semibold text-gray-900">{currentUser.name}</div>
+                          <div className="font-semibold text-gray-900">{settings.account.name}</div>
                         </div>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                      <div className="text-xs text-gray-400">変更不可</div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
@@ -126,10 +247,10 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <Mail className="h-5 w-5 text-gray-600" />
                         <div>
                           <div className="text-sm text-gray-600">メールアドレス</div>
-                          <div className="font-semibold text-gray-900">{currentUser.email}</div>
+                          <div className="font-semibold text-gray-900">{settings.account.email}</div>
                         </div>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                      <div className="text-xs text-gray-400">変更不可</div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
@@ -137,10 +258,10 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <Phone className="h-5 w-5 text-gray-600" />
                         <div>
                           <div className="text-sm text-gray-600">電話番号</div>
-                          <div className="font-semibold text-gray-900">090-1234-5678</div>
+                          <div className="font-semibold text-gray-900">{settings.account.phone}</div>
                         </div>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                      <div className="text-xs text-gray-400">モックデータ</div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
@@ -148,19 +269,58 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <Camera className="h-5 w-5 text-gray-600" />
                         <div>
                           <div className="text-sm text-gray-600">プロフィール画像</div>
-                          <div className="text-sm text-purple-600 font-semibold">変更する</div>
+                          <div className="text-sm text-gray-400">プロフィール編集から変更できます</div>
                         </div>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-6 border-t border-gray-200">
-                  <button className="text-red-600 hover:text-red-700 font-semibold">
+                  <button 
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="text-red-600 hover:text-red-700 font-semibold"
+                  >
                     アカウントを削除
                   </button>
                 </div>
+
+                {/* アカウント削除確認モーダル */}
+                {showDeleteConfirm && (
+                  <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">アカウントを削除しますか？</h3>
+                      <p className="text-gray-600 mb-4">
+                        この操作は取り消せません。すべてのデータが削除されます。
+                      </p>
+                      <input
+                        type="password"
+                        placeholder="パスワードを入力して確認"
+                        value={deletePassword}
+                        onChange={(e) => setDeletePassword(e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      />
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => {
+                            setShowDeleteConfirm(false);
+                            setDeletePassword('');
+                          }}
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                        >
+                          キャンセル
+                        </button>
+                        <button
+                          onClick={handleDeleteAccount}
+                          disabled={!deletePassword}
+                          className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        >
+                          削除する
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -175,8 +335,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">非公開アカウント</div>
                         <div className="text-sm text-gray-600">フォロワーのみがあなたのコンテンツを見られます</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.privacy.isPrivateAccount}
+                          onChange={() => handlePrivacyToggle('isPrivateAccount')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -187,8 +352,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">アクティビティステータス</div>
                         <div className="text-sm text-gray-600">オンライン状態を表示</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.privacy.showActivityStatus}
+                          onChange={() => handlePrivacyToggle('showActivityStatus')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -199,8 +369,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">検索結果に表示</div>
                         <div className="text-sm text-gray-600">他のユーザーがあなたを検索できます</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.privacy.showInSearch}
+                          onChange={() => handlePrivacyToggle('showInSearch')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -211,8 +386,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">タグ付けを許可</div>
                         <div className="text-sm text-gray-600">他のユーザーがあなたをタグ付けできます</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.privacy.allowTagging}
+                          onChange={() => handlePrivacyToggle('allowTagging')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -225,6 +405,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                     <Shield className="h-5 w-5" />
                     ブロックリストを管理
                   </button>
+                  <p className="text-sm text-gray-500 mt-2">※ 機能は今後実装予定です</p>
                 </div>
               </div>
             )}
@@ -240,8 +421,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">いいね</div>
                         <div className="text-sm text-gray-600">投稿にいいねされたとき</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.notifications.likes}
+                          onChange={() => handleNotificationToggle('likes')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -252,8 +438,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">コメント</div>
                         <div className="text-sm text-gray-600">投稿にコメントされたとき</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.notifications.comments}
+                          onChange={() => handleNotificationToggle('comments')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -264,8 +455,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">新しいフォロワー</div>
                         <div className="text-sm text-gray-600">フォローされたとき</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.notifications.followers}
+                          onChange={() => handleNotificationToggle('followers')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -276,8 +472,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">メッセージ</div>
                         <div className="text-sm text-gray-600">新しいメッセージを受信したとき</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.notifications.messages}
+                          onChange={() => handleNotificationToggle('messages')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -288,8 +489,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">学習リマインダー</div>
                         <div className="text-sm text-gray-600">タスクの期限が近づいたとき</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.notifications.learningReminders}
+                          onChange={() => handleNotificationToggle('learningReminders')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -300,8 +506,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">メール通知</div>
                         <div className="text-sm text-gray-600">メールで通知を受け取る</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.notifications.emailNotifications}
+                          onChange={() => handleNotificationToggle('emailNotifications')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -317,12 +528,15 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                   <h3 className="text-lg font-bold text-gray-900 mb-4">セキュリティ</h3>
                   
                   <div className="space-y-4">
-                    <button className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <button 
+                      onClick={() => setShowPasswordChange(true)}
+                      className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                    >
                       <div className="flex items-center gap-3">
                         <Lock className="h-5 w-5 text-gray-600" />
                         <div className="text-left">
                           <div className="font-semibold text-gray-900">パスワードを変更</div>
-                          <div className="text-sm text-gray-600">最終更新: 3ヶ月前</div>
+                          <div className="text-sm text-gray-600">最終更新: {getPasswordChangeTime()}</div>
                         </div>
                       </div>
                       <ChevronRight className="h-5 w-5 text-gray-400" />
@@ -333,8 +547,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                         <div className="font-semibold text-gray-900">2段階認証</div>
                         <div className="text-sm text-gray-600">ログイン時に追加の認証を要求</div>
                       </div>
-                      <label className="relative inline-block w-12 h-6">
-                        <input type="checkbox" className="sr-only peer" />
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={settings.security.twoFactorEnabled}
+                          onChange={() => handleSecurityToggle('twoFactorEnabled')}
+                          className="sr-only peer" 
+                        />
                         <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-purple-600 transition-colors"></div>
                         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
                       </label>
@@ -348,7 +567,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                           <div className="text-sm text-gray-600">最近のログイン記録を確認</div>
                         </div>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                      <div className="text-xs text-gray-400">実装予定</div>
                     </button>
 
                     <button className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
@@ -359,7 +578,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                           <div className="text-sm text-gray-600">外部アプリとの連携を管理</div>
                         </div>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                      <div className="text-xs text-gray-400">実装予定</div>
                     </button>
                   </div>
                 </div>
@@ -375,6 +594,65 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ isOpen, onClose }) =>
                     </div>
                   </div>
                 </div>
+
+                {/* パスワード変更モーダル */}
+                {showPasswordChange && (
+                  <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">パスワードを変更</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">現在のパスワード</label>
+                          <input
+                            type="password"
+                            value={passwordForm.current}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="現在のパスワード"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">新しいパスワード</label>
+                          <input
+                            type="password"
+                            value={passwordForm.new}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="新しいパスワード（8文字以上）"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">パスワード（確認）</label>
+                          <input
+                            type="password"
+                            value={passwordForm.confirm}
+                            onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="もう一度入力"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          onClick={() => {
+                            setShowPasswordChange(false);
+                            setPasswordForm({ current: '', new: '', confirm: '' });
+                          }}
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                        >
+                          キャンセル
+                        </button>
+                        <button
+                          onClick={handlePasswordChange}
+                          disabled={!passwordForm.current || !passwordForm.new || !passwordForm.confirm}
+                          className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        >
+                          変更する
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
