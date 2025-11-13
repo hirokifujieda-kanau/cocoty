@@ -20,13 +20,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<MockUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 初期化: セッションから復元
+  // 初期化: セッションから復元（なければnullのまま = ゲストとして閲覧可能）
   useEffect(() => {
     try {
       const user = initializeSession();
       setCurrentUser(user);
     } catch (e) {
       console.error('Failed to initialize session:', e);
+      // エラーが発生してもゲストとして続行
+      setCurrentUser(null);
     } finally {
       setIsLoading(false);
     }

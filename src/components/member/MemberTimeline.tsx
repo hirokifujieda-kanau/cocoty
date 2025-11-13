@@ -40,7 +40,10 @@ const MemberTimeline: React.FC = () => {
   };
 
   const handleJoinEvent = (eventId: string) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      // ログインしていない場合は何もしない（サイレント）
+      return;
+    }
     
     if (isUserJoined(eventId, currentUser.id)) {
       leaveEvent(eventId, currentUser.id);
@@ -53,13 +56,20 @@ const MemberTimeline: React.FC = () => {
   };
 
   const handleLike = (postId: string) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      // ログインしていない場合は何もしない（サイレント）
+      return;
+    }
     likePost(postId, currentUser.id);
     refreshData();
   };
 
   const handleComment = (postId: string) => {
-    if (!currentUser || !commentInputs[postId]?.trim()) return;
+    if (!currentUser) {
+      // ログインしていない場合は何もしない（サイレント）
+      return;
+    }
+    if (!commentInputs[postId]?.trim()) return;
     
     addComment(postId, currentUser.id, currentUser.name, currentUser.avatar, commentInputs[postId]);
     setCommentInputs(prev => ({ ...prev, [postId]: '' }));

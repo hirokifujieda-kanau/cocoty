@@ -30,14 +30,14 @@ import {
 import Link from 'next/link';
 
 interface MemberAppProps {
-  communities: Array<{
+  communities?: Array<{
     name: string;
     memberCount: number;
     recentPosts: number;
     upcomingEvents: number;
     activeRate: number;
   }>;
-  upcomingEvents: Array<{
+  upcomingEvents?: Array<{
     id: string;
     title: string;
     date: string;
@@ -47,14 +47,14 @@ interface MemberAppProps {
     capacity?: number;
     description?: string;
   }>;
-  recentPosts: Array<{
+  recentPosts?: Array<{
     id: string;
     title: string;
     author: string;
     community: string;
     timestamp: string;
   }>;
-  onSwitchToManager: () => void;
+  onSwitchToManager?: () => void;
 }
 
 const MemberApp: React.FC<MemberAppProps> = ({

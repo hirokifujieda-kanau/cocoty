@@ -81,14 +81,9 @@ const CommunityPlatformContent: React.FC = () => {
     );
   }
 
+  // ログインしていない場合でも、通常通りメンバーアプリを表示（制限なし）
   if (!currentUser) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-purple-50 to-pink-50">
-        <div className="text-center">
-          <p className="text-gray-600">ユーザー情報を読み込めませんでした</p>
-        </div>
-      </div>
-    );
+    return <MemberApp />;
   }
 
   // Sample data for demonstration
@@ -349,16 +344,16 @@ const CommunityPlatformContent: React.FC = () => {
             communities={sampleData.communities}
           />
         );
-      case 'events':
-        return (
-          <EventManagement
-            events={sampleData.events}
-            onCreateEvent={() => {}}
-            onUpdateAttendance={() => {}}
-            onSendReminder={() => {}}
-            onUpdateTask={() => {}}
-          />
-        );
+      // case 'events':
+      //   return (
+      //     <EventManagement
+      //       events={sampleData.events}
+      //       onCreateEvent={() => {}}
+      //       onUpdateAttendance={() => {}}
+      //       onSendReminder={() => {}}
+      //       onUpdateTask={() => {}}
+      //     />
+      //   );
       case 'survey':
         return (
           <EventSurvey
