@@ -278,7 +278,101 @@ const InstagramProfilePage: React.FC = () => {
                 診断: {displayUser.diagnosis}
               </div>
             )}
+
+            {/* 拡張プロフィール情報 */}
+            {(displayUser as any).birthday && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {/* 年齢・生年月日 */}
+                {(displayUser as any).age && (
+                  <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                    🎂 {(displayUser as any).age}歳
+                  </span>
+                )}
+                
+                {/* 出身地 */}
+                {(displayUser as any).birthplace && (
+                  <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                    📍 {(displayUser as any).birthplace}
+                  </span>
+                )}
+                
+                {/* 血液型 */}
+                {(displayUser as any).bloodType && (
+                  <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
+                    🩸 {(displayUser as any).bloodType}型
+                  </span>
+                )}
+                
+                {/* MBTI */}
+                {(displayUser as any).mbtiType && (
+                  <span className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                    🧠 {(displayUser as any).mbtiType}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* 趣味 */}
+            {(displayUser as any).hobbies && (displayUser as any).hobbies.length > 0 && (
+              <div className="mt-3">
+                <div className="text-xs font-semibold text-gray-500 mb-1">趣味</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {(displayUser as any).hobbies.map((hobby: string, idx: number) => (
+                    <span key={idx} className="inline-flex items-center px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded-md border border-orange-200">
+                      {hobby}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 好きな食べ物 */}
+            {(displayUser as any).favoriteFood && (displayUser as any).favoriteFood.length > 0 && (
+              <div className="mt-3">
+                <div className="text-xs font-semibold text-gray-500 mb-1">好きな食べ物</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {(displayUser as any).favoriteFood.map((food: string, idx: number) => (
+                    <span key={idx} className="inline-flex items-center px-2 py-1 bg-pink-50 text-pink-700 text-xs rounded-md border border-pink-200">
+                      🍽️ {food}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* タロット・診断ボタン（最上部） */}
+          {isOwner && (
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* タロット占い */}
+              <button
+                onClick={() => setShowDailyTarot(true)}
+                className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+              >
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">🔮</span>
+                  <div className="text-left">
+                    <h3 className="font-bold text-base">今日のタロット占い</h3>
+                    <p className="text-xs opacity-90">毎日の運勢をチェック</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* 季節診断 */}
+              <button
+                onClick={() => setShowSeasonalDiagnosis(true)}
+                className="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+              >
+                <div className="flex items-center space-x-3">
+                  <Sparkles className="h-6 w-6" />
+                  <div className="text-left">
+                    <h3 className="font-bold text-base">パーソナル診断</h3>
+                    <p className="text-xs opacity-90">あなたの季節タイプは？</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          )}
 
           {/* チームタスク進捗と個人課題進捗 */}
           <div className="mt-6 space-y-4">

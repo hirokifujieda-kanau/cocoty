@@ -16,6 +16,11 @@ export interface Event {
   participants: string[]; // ユーザーID
   comments: Comment[]; // コメント
   timestamp: string;
+  coverImage?: string; // イベントカバー画像
+  teamPhoto?: string; // チーム集合写真
+  requiresApproval?: boolean; // 承認制かどうか
+  status?: 'open' | 'closed' | 'cancelled' | 'full'; // イベントステータス
+  attendees?: string[]; // participants のエイリアス（互換性のため）
 }
 
 export interface Survey {
@@ -105,8 +110,13 @@ const initialEvents: Event[] = [
     organizer: 'コミュニティマネージャー',
     capacity: 20,
     participants: [],
+    attendees: [],
     comments: [],
-    timestamp: '30分前'
+    timestamp: '30分前',
+    coverImage: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=800',
+    teamPhoto: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400',
+    requiresApproval: false,
+    status: 'open'
   },
   {
     id: 'event_002',
@@ -119,8 +129,12 @@ const initialEvents: Event[] = [
     organizer: 'コミュニティマネージャー',
     capacity: 30,
     participants: [],
+    attendees: [],
     comments: [],
-    timestamp: '1時間前'
+    timestamp: '1時間前',
+    coverImage: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800',
+    requiresApproval: false,
+    status: 'open'
   },
   {
     id: 'event_003',
@@ -133,8 +147,13 @@ const initialEvents: Event[] = [
     organizer: 'コミュニティマネージャー',
     capacity: 15,
     participants: [],
+    attendees: [],
     comments: [],
-    timestamp: '2時間前'
+    timestamp: '2時間前',
+    coverImage: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800',
+    teamPhoto: 'https://images.unsplash.com/photo-1577219491135-ce391730fb4c?w=400',
+    requiresApproval: false,
+    status: 'open'
   },
   {
     id: 'event_004',

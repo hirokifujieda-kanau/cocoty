@@ -17,7 +17,13 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
     email: currentUser?.email || '',
     phone: '090-1234-5678',
     website: '',
-    location: '東京都'
+    location: '東京都',
+    birthday: (currentUser as any)?.birthday || '',
+    birthplace: (currentUser as any)?.birthplace || '',
+    hobbies: (currentUser as any)?.hobbies?.join(', ') || '',
+    favoriteFood: (currentUser as any)?.favoriteFood?.join(', ') || '',
+    mbtiType: (currentUser as any)?.mbtiType || '',
+    bloodType: (currentUser as any)?.bloodType || ''
   });
 
   if (!isOpen || !currentUser) return null;
@@ -165,6 +171,109 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose }) 
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="東京都"
             />
+          </div>
+
+          {/* Birthday */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              生年月日
+            </label>
+            <input
+              type="date"
+              value={formData.birthday}
+              onChange={(e) => setFormData({ ...formData, birthday: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Birthplace */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              出身地
+            </label>
+            <input
+              type="text"
+              value={formData.birthplace}
+              onChange={(e) => setFormData({ ...formData, birthplace: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="例: 大阪府大阪市"
+            />
+          </div>
+
+          {/* Hobbies */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              趣味（カンマ区切り）
+            </label>
+            <input
+              type="text"
+              value={formData.hobbies}
+              onChange={(e) => setFormData({ ...formData, hobbies: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="例: 写真, カフェ巡り, 映画鑑賞"
+            />
+          </div>
+
+          {/* Favorite Food */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              好きな食べ物（カンマ区切り）
+            </label>
+            <input
+              type="text"
+              value={formData.favoriteFood}
+              onChange={(e) => setFormData({ ...formData, favoriteFood: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="例: パスタ, タピオカ, パンケーキ"
+            />
+          </div>
+
+          {/* MBTI Type */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              MBTIタイプ
+            </label>
+            <select
+              value={formData.mbtiType}
+              onChange={(e) => setFormData({ ...formData, mbtiType: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <option value="">選択してください</option>
+              <option value="INTJ">INTJ - 建築家</option>
+              <option value="INTP">INTP - 論理学者</option>
+              <option value="ENTJ">ENTJ - 指揮官</option>
+              <option value="ENTP">ENTP - 討論者</option>
+              <option value="INFJ">INFJ - 提唱者</option>
+              <option value="INFP">INFP - 仲介者</option>
+              <option value="ENFJ">ENFJ - 主人公</option>
+              <option value="ENFP">ENFP - 広報運動家</option>
+              <option value="ISTJ">ISTJ - 管理者</option>
+              <option value="ISFJ">ISFJ - 擁護者</option>
+              <option value="ESTJ">ESTJ - 幹部</option>
+              <option value="ESFJ">ESFJ - 領事官</option>
+              <option value="ISTP">ISTP - 巨匠</option>
+              <option value="ISFP">ISFP - 冒険家</option>
+              <option value="ESTP">ESTP - 起業家</option>
+              <option value="ESFP">ESFP - エンターテイナー</option>
+            </select>
+          </div>
+
+          {/* Blood Type */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              血液型
+            </label>
+            <select
+              value={formData.bloodType}
+              onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <option value="">選択してください</option>
+              <option value="A">A型</option>
+              <option value="B">B型</option>
+              <option value="O">O型</option>
+              <option value="AB">AB型</option>
+            </select>
           </div>
         </div>
 

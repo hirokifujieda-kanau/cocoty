@@ -28,7 +28,12 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
     category: editEvent?.category || 'workshop' as Event['category'],
     capacity: editEvent?.capacity || 20,
     tags: editEvent?.tags.join(', ') || '',
-    price: editEvent?.price || 0
+    price: editEvent?.price || 0,
+    coverImage: editEvent?.coverImage || '',
+    requiresApproval: editEvent?.requiresApproval || false,
+    minAge: editEvent?.participantRestrictions?.minAge || undefined,
+    maxAge: editEvent?.participantRestrictions?.maxAge || undefined,
+    memberOnly: editEvent?.participantRestrictions?.memberOnly || false
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -85,7 +90,14 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
       capacity: formData.capacity,
       tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
       price: formData.price,
-      status: 'open' as const
+      status: 'open' as const,
+      coverImage: formData.coverImage,
+      requiresApproval: formData.requiresApproval,
+      participantRestrictions: formData.requiresApproval ? {
+        minAge: formData.minAge,
+        maxAge: formData.maxAge,
+        memberOnly: formData.memberOnly
+      } : undefined
     };
 
     try {
@@ -299,6 +311,84 @@ export const EventFormModal: React.FC<EventFormModalProps> = ({
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="例: 撮影, 初心者歓迎, 屋外"
             />
+          </div>
+
+          {/* カバー画像 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              カバー画像URL
+            </label>
+            <input
+              type="url"
+              name="coverImage"
+              value={formData.coverImage}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="https://example.com/image.jpg"
+            />
+            <p className="text-xs text-gray-500 mt-1">イベントのカバー画像URLを入力してください</p>
+          </div>
+
+          {/* 承認制 */}
+          <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.requiresApproval}
+                onChange={(e) => setFormData(prev => ({ ...prev, requiresApproval: e.target.checked }))}
+                className="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
+              />
+              <div>
+                <div className="font-medium text-gray-900">承認制イベント</div>
+                <div className="text-xs text-gray-600">主催者が参加者を承認する必要があります</div>
+              </div>
+            </label>
+
+            {/* 参加条件（承認制の場合のみ表示） */}
+            {formData.requiresApproval && (
+              <div className="mt-4 space-y-3 pt-3 border-t border-purple-200">
+                <div className="text-sm font-semibold text-gray-700">参加条件</div>
+                
+                {/* 年齢制限 */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">最小年齢</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.minAge || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, minAge: e.target.value ? Number(e.target.value) : undefined }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="制限なし"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">最大年齢</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.maxAge || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, maxAge: e.target.value ? Number(e.target.value) : undefined }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="制限なし"
+                    />
+                  </div>
+                </div>
+
+                {/* メンバー限定 */}
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.memberOnly}
+                    onChange={(e) => setFormData(prev => ({ ...prev, memberOnly: e.target.checked }))}
+                    className="w-4 h-4 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
+                  />
+                  <span className="text-sm text-gray-700">コミュニティメンバー限定</span>
+                </label>
+              </div>
+            )}
           </div>
 
           {/* ボタン */}

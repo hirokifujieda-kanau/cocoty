@@ -18,6 +18,19 @@ export interface Event {
   tags: string[];
   price: number;
   image?: string;
+  coverImage?: string; // イベントカバー画像（TOP画面表示用）
+  teamPhoto?: string; // チーム集合写真
+  requiresApproval: boolean; // 承認制かどうか
+  participantRestrictions?: { // 参加条件
+    minAge?: number;
+    maxAge?: number;
+    requiredSkills?: string[];
+    memberOnly?: boolean;
+    requiredTeams?: string[];
+  };
+  participantStatus?: { // 承認制の場合の参加者ステータス
+    [userId: string]: 'pending' | 'approved' | 'rejected';
+  };
   status: 'open' | 'closed' | 'cancelled' | 'full';
   createdAt: string;
   updatedAt: string;
@@ -43,6 +56,9 @@ const initialEvents: Event[] = [
     attendees: ['user_002', 'user_003', 'user_005', 'user_007'],
     tags: ['撮影', '初心者歓迎', '屋外', '桜'],
     price: 500,
+    coverImage: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=800',
+    teamPhoto: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400',
+    requiresApproval: false,
     status: 'open',
     createdAt: '2025-03-01T10:00:00Z',
     updatedAt: '2025-03-15T14:30:00Z'
@@ -62,6 +78,8 @@ const initialEvents: Event[] = [
     attendees: ['user_001', 'user_004', 'user_008', 'user_012'],
     tags: ['React', 'JavaScript', 'ハンズオン', 'オンライン'],
     price: 0,
+    coverImage: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800',
+    requiresApproval: false,
     status: 'open',
     createdAt: '2025-03-05T09:00:00Z',
     updatedAt: '2025-03-20T11:00:00Z'
@@ -81,6 +99,17 @@ const initialEvents: Event[] = [
     attendees: ['user_006', 'user_009', 'user_014'],
     tags: ['料理', 'コンテスト', '春野菜'],
     price: 1500,
+    coverImage: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800',
+    teamPhoto: 'https://images.unsplash.com/photo-1577219491135-ce391730fb4c?w=400',
+    requiresApproval: true, // 承認制の例
+    participantRestrictions: {
+      memberOnly: true,
+    },
+    participantStatus: {
+      'user_006': 'approved',
+      'user_009': 'approved',
+      'user_014': 'pending'
+    },
     status: 'open',
     createdAt: '2025-03-10T15:00:00Z',
     updatedAt: '2025-03-25T10:00:00Z'
@@ -100,6 +129,8 @@ const initialEvents: Event[] = [
     attendees: ['user_001', 'user_007', 'user_011'],
     tags: ['ポートレート', '撮影会', '自然光'],
     price: 800,
+    coverImage: 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=800',
+    requiresApproval: false,
     status: 'open',
     createdAt: '2025-03-12T12:00:00Z',
     updatedAt: '2025-03-28T16:00:00Z'
@@ -119,6 +150,8 @@ const initialEvents: Event[] = [
     attendees: ['user_008', 'user_015'],
     tags: ['映像', 'ワークショップ', '編集'],
     price: 3000,
+    coverImage: 'https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800',
+    requiresApproval: false,
     status: 'open',
     createdAt: '2025-03-15T10:00:00Z',
     updatedAt: '2025-04-01T09:00:00Z'
@@ -138,6 +171,9 @@ const initialEvents: Event[] = [
     attendees: ['user_002', 'user_003', 'user_005', 'user_007', 'user_011'],
     tags: ['写真展', '展示', '四季'],
     price: 0,
+    coverImage: 'https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=800',
+    teamPhoto: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+    requiresApproval: false,
     status: 'open',
     createdAt: '2025-03-20T14:00:00Z',
     updatedAt: '2025-04-05T11:00:00Z'
