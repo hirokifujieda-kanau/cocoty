@@ -1,5 +1,6 @@
-import CommunityPlatform from '@/components/CommunityPlatform';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return <CommunityPlatform />;
+  // 認証システム実装前なので、直接プロフィールページへリダイレクト
+  redirect('/profile');
 }

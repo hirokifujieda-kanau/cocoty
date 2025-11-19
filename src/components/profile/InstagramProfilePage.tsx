@@ -20,19 +20,16 @@ const InstagramProfilePage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // URLパラメータからuserIdを取得、なければcurrentUser.idを使用
+  // URLパラメータからuserIdを取得、なければデフォルトユーザー（user_001）を使用
   const userIdFromUrl = searchParams.get('userId');
+  const userId = userIdFromUrl || currentUser?.id || 'user_001';
+  const displayUser = getUserById(userId);
+  
+  // currentUserがない場合は、displayUserを自分として扱う
+  const isOwner = currentUser ? (currentUser.id === displayUser?.id) : true;
   
   console.log('=== InstagramProfilePage Debug ===');
-  console.log('URL searchParams:', searchParams.toString());
-  console.log('userId from URL:', userIdFromUrl);
-  console.log('currentUser.id:', currentUser?.id);
-  
-  const userId = userIdFromUrl || currentUser?.id;
-  const displayUser = userId ? getUserById(userId) : currentUser;
-  const isOwner = currentUser?.id === displayUser?.id;
-  
-  console.log('Final userId:', userId);
+  console.log('userId:', userId);
   console.log('displayUser:', displayUser?.name);
   console.log('isOwner:', isOwner);
   console.log('===================================');
@@ -238,12 +235,15 @@ const InstagramProfilePage: React.FC = () => {
                     >
                       プロフィールを編集
                     </button>
+                    {/* プロフィールをシェアは非表示 */}
+                    {false && (
                     <button
                       onClick={() => setShowShareProfile(true)}
                       className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-sm transition-colors"
                     >
                       プロフィールをシェア
                     </button>
+                    )}
                   </>
                 ) : (
                   <>
@@ -374,7 +374,8 @@ const InstagramProfilePage: React.FC = () => {
             </div>
           )}
 
-          {/* チームタスク進捗と個人課題進捗 */}
+          {/* チームタスク進捗と個人課題進捗 - 今後実装予定のため非表示 */}
+          {false && (
           <div className="mt-6 space-y-4">
             {/* チームタスク進捗 */}
             <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-100">
@@ -507,9 +508,10 @@ const InstagramProfilePage: React.FC = () => {
               )}
             </div>
           </div>
+          )}
 
-          {/* 個人実績（エアコース）- プロフィール内 (自分のプロフィールのみ) */}
-          {isOwner && currentUser && (() => {
+          {/* 個人実績（エアコース）- 今後実装予定のため非表示 */}
+          {false && isOwner && currentUser && (() => {
             const stats = getTaskStats(currentUser.id);
             const courseProgress = getUserCourseProgress(currentUser.id);
             
@@ -600,6 +602,9 @@ const InstagramProfilePage: React.FC = () => {
               </div>
               <div className="text-xs text-gray-600">メンタル</div>
             </button>
+            {/* 学習・イベント・チーム機能は今後実装予定のため非表示 */}
+            {false && (
+            <>
             <button
               onClick={() => router.push('/learning')}
               className="flex flex-col items-center gap-2 flex-shrink-0"
@@ -627,10 +632,13 @@ const InstagramProfilePage: React.FC = () => {
               </div>
               <div className="text-xs text-gray-600">写真部</div>
             </div>
+            </>
+            )}
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - 投稿/保存済みタブは非表示 */}
+        {false && (
         <div className="border-t border-gray-200">
           <div className="flex">
             <button
@@ -668,8 +676,10 @@ const InstagramProfilePage: React.FC = () => {
             </button>
           </div>
         </div>
+        )}
 
-        {/* Content Grid */}
+        {/* Content Grid - 投稿/保存済み/活動カレンダーは非表示 */}
+        {false && (
         <div className="px-1">
           {activeTab === 'posts' && (
             <>
@@ -703,7 +713,7 @@ const InstagramProfilePage: React.FC = () => {
                 </div>
               )}
 
-              {/* アクティビティカレンダー */}
+              {/* アクティビティカレンダーは非表示 */}
               <div className="mt-6 p-4 bg-gray-50 rounded-2xl border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                   <div>
@@ -937,6 +947,7 @@ const InstagramProfilePage: React.FC = () => {
             </div>
           )}
         </div>
+        )}
       </div>
 
       {/* Fortune Modals */}
