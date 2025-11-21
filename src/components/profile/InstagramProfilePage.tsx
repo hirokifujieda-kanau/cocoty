@@ -11,6 +11,7 @@ import MentalStatsAdmin from '@/components/fortune/MentalStatsAdmin';
 import ProfileSettings from '@/components/profile/ProfileSettings';
 import ProfileEditModal from '@/components/profile/ProfileEditModal';
 import ShareProfileModal from '@/components/profile/ShareProfileModal';
+import MandalaGallery from '@/components/profile/MandalaGallery';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getUserById } from '@/lib/dummyUsers';
@@ -305,40 +306,62 @@ const InstagramProfilePage: React.FC = () => {
                 
                 {/* MBTI */}
                 {(displayUser as any).mbtiType && (
-                  <span className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                  <button
+                    onClick={() => router.push(`/tags/${encodeURIComponent((displayUser as any).mbtiType)}`)}
+                    className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full hover:bg-purple-200 hover:shadow-sm transition-all cursor-pointer"
+                  >
                     🧠 {(displayUser as any).mbtiType}
-                  </span>
+                  </button>
                 )}
               </div>
             )}
 
-            {/* 趣味 */}
-            {(displayUser as any).hobbies && (displayUser as any).hobbies.length > 0 && (
-              <div className="mt-3">
-                <div className="text-xs font-semibold text-gray-500 mb-1">趣味</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {(displayUser as any).hobbies.map((hobby: string, idx: number) => (
-                    <span key={idx} className="inline-flex items-center px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded-md border border-orange-200">
-                      {hobby}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* 趣味・好きな食べ物と曼荼羅アートを横並びに */}
+            <div className="flex gap-6 items-start mt-3">
+              {/* 左側：趣味・好きな食べ物 */}
+              <div className="flex-1 min-w-0 space-y-3">
+                {/* 趣味 */}
+                {(displayUser as any).hobbies && (displayUser as any).hobbies.length > 0 && (
+                  <div>
+                    <div className="text-xs font-semibold text-gray-500 mb-1">趣味</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(displayUser as any).hobbies.map((hobby: string, idx: number) => (
+                        <button
+                          key={idx}
+                          onClick={() => router.push(`/tags/${encodeURIComponent(hobby)}`)}
+                          className="inline-flex items-center px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded-md border border-orange-200 hover:bg-orange-100 hover:shadow-sm transition-all cursor-pointer"
+                        >
+                          {hobby}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-            {/* 好きな食べ物 */}
-            {(displayUser as any).favoriteFood && (displayUser as any).favoriteFood.length > 0 && (
-              <div className="mt-3">
-                <div className="text-xs font-semibold text-gray-500 mb-1">好きな食べ物</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {(displayUser as any).favoriteFood.map((food: string, idx: number) => (
-                    <span key={idx} className="inline-flex items-center px-2 py-1 bg-pink-50 text-pink-700 text-xs rounded-md border border-pink-200">
-                      🍽️ {food}
-                    </span>
-                  ))}
-                </div>
+                {/* 好きな食べ物 */}
+                {(displayUser as any).favoriteFood && (displayUser as any).favoriteFood.length > 0 && (
+                  <div>
+                    <div className="text-xs font-semibold text-gray-500 mb-1">好きな食べ物</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(displayUser as any).favoriteFood.map((food: string, idx: number) => (
+                        <button
+                          key={idx}
+                          onClick={() => router.push(`/tags/${encodeURIComponent(food)}`)}
+                          className="inline-flex items-center px-2 py-1 bg-pink-50 text-pink-700 text-xs rounded-md border border-pink-200 hover:bg-pink-100 hover:shadow-sm transition-all cursor-pointer"
+                        >
+                          🍽️ {food}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* 右側：曼荼羅アート */}
+              <div className="flex-shrink-0">
+                <MandalaGallery userId={displayUser.id} isOwner={isOwner} />
+              </div>
+            </div>
           </div>
 
           {/* タロット・診断ボタン（最上部） */}
