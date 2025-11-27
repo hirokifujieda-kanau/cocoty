@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Heart, MessageCircle, Share2, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/context/AuthContext';
 import { getAllPosts } from '@/lib/mock/mockSocialData';
 
 const TeamPostsPage: React.FC = () => {

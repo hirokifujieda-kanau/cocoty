@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Calendar, Clock, MapPin, Users } from 'lucide-react';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/context/AuthContext';
 
 const TeamActivitiesPage: React.FC = () => {
   const router = useRouter();

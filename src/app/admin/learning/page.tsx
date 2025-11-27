@@ -1,6 +1,6 @@
 import React from 'react';
 import AdminLearningDashboard from '@/components/learning/AdminLearningDashboard';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/context/AuthContext';
 
 export default function AdminLearningPage() {
   return (

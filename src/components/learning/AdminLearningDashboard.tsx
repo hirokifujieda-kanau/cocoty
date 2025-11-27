@@ -5,7 +5,7 @@ import {
   Users, TrendingUp, BookOpen, CheckCircle2, AlertCircle,
   Search, Filter, Plus, Calendar, Clock, BarChart3
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import {
   getAllTasks,
   getAllUserStats,

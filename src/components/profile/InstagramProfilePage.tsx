@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Settings, Grid, Bookmark, Sparkles, TrendingUp, Heart as HeartIcon, Users, Calendar, BookOpen, CheckCircle2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { ArrowLeft, Settings, Grid, Bookmark, Sparkles, TrendingUp, Heart as HeartIcon, Users, Calendar, BookOpen, CheckCircle2, LogOut } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { PH1, PH2, PH3 } from '@/lib/placeholders';
 import DailyTarot from '@/components/fortune/DailyTarot';
 import SeasonalDiagnosisHub from '@/components/fortune/SeasonalDiagnosisHub';
@@ -17,20 +17,25 @@ import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getUserById } from '@/lib/dummyUsers';
 
 const InstagramProfilePage: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   
   // URLパラメータからuserIdを取得、なければデフォルトユーザー（user_001）を使用
   const userIdFromUrl = searchParams.get('userId');
-  const userId = userIdFromUrl || currentUser?.id || 'user_001';
+  const userId = userIdFromUrl || 'user_001';
   const displayUser = getUserById(userId);
   
-  // currentUserがない場合は、displayUserを自分として扱う
-  const isOwner = currentUser ? (currentUser.id === displayUser?.id) : true;
+  // Firebase userとダミーユーザーシステムの統合
+  const currentUser = displayUser; // ダミーユーザーシステムとの互換性のため
+  
+  // URLパラメータがない場合は自分のプロフィール（オーナー）として扱う
+  const isOwner = !userIdFromUrl;
   
   console.log('=== InstagramProfilePage Debug ===');
+  console.log('Firebase user:', user?.email);
   console.log('userId:', userId);
+  console.log('userIdFromUrl:', userIdFromUrl);
   console.log('displayUser:', displayUser?.name);
   console.log('isOwner:', isOwner);
   console.log('===================================');
@@ -182,12 +187,27 @@ const InstagramProfilePage: React.FC = () => {
             </button>
             <h1 className="text-lg font-semibold">{displayUser.name}</h1>
             {isOwner && (
-              <button
-                onClick={() => setShowSettings(true)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <Settings className="h-6 w-6" />
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  title="設定"
+                >
+                  <Settings className="h-6 w-6" />
+                </button>
+                <button
+                  onClick={async () => {
+                    if (confirm('ログアウトしますか？')) {
+                      await logout();
+                      router.push('/login');
+                    }
+                  }}
+                  className="p-2 hover:bg-red-50 text-red-600 rounded-full transition-colors"
+                  title="ログアウト"
+                >
+                  <LogOut className="h-6 w-6" />
+                </button>
+              </div>
             )}
             {!isOwner && <div className="w-10" />}
           </div>

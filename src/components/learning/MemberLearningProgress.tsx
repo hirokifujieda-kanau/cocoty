@@ -6,7 +6,7 @@ import {
   BookOpen, Trophy, TrendingUp, AlertCircle, ChevronRight,
   Filter, Search
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { 
   getUserTasks, 
   getTaskStats, 

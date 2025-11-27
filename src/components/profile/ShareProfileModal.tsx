@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, Link as LinkIcon, Copy, Check, Facebook, Twitter, Instagram, MessageCircle, Mail, QrCode } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface ShareProfileModalProps {
   isOpen: boolean;

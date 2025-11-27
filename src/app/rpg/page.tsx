@@ -1,7 +1,73 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import { useSpring as useReactSpring, animated, config } from 'react-spring';
+import gsap from 'gsap';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Sphere, MeshDistortMaterial, Stars } from '@react-three/drei';
+import ParticlesBg from 'particles-bg';
+import * as THREE from 'three';
+import { 
+  GiSwordman, 
+  GiTreasureMap, 
+  GiCrystalBall, 
+  GiCrossedSwords,
+  GiSparkles,
+  GiHeartPlus,
+  GiHealthPotion,
+  GiShield,
+  GiMagicSwirl,
+  GiDragonOrb,
+  GiFireRing,
+  GiIceBolt,
+  GiLightningStorm,
+  GiTornado
+} from 'react-icons/gi';
+import './rpg.css';
+
+// 3D回転する魔法陣
+const MagicCircle = () => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.getElapsedTime() * 0.3;
+      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.5;
+    }
+  });
+
+  return (
+    <Sphere ref={meshRef} args={[1, 100, 100]} scale={2}>
+      <MeshDistortMaterial
+        color="#9b59b6"
+        attach="material"
+        distort={0.5}
+        speed={2}
+        roughness={0.2}
+      />
+    </Sphere>
+  );
+};
+
+// 3D浮遊する宝石
+const FloatingGem = ({ position }: { position: [number, number, number] }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.position.y = position[1] + Math.sin(state.clock.getElapsedTime() * 2) * 0.5;
+      meshRef.current.rotation.y += 0.02;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={position}>
+      <octahedronGeometry args={[0.5, 0]} />
+      <meshStandardMaterial color="#FFD700" metalness={0.8} roughness={0.2} />
+    </mesh>
+  );
+};
 
 // ドット絵キャラクターのSVGコンポーネント
 const PixelCharacter = ({ walking }: { walking: boolean }) => {
@@ -274,6 +340,158 @@ export default function RPGHomePage() {
   const [walking, setWalking] = useState(false);
   const [treasureOpen, setTreasureOpen] = useState(false);
   const [hp, setHp] = useState(5);
+  const [mp, setMp] = useState(100);
+  const [exp, setExp] = useState(450);
+  const [level, setLevel] = useState(5);
+  const [gold, setGold] = useState(3250);
+  const [showBattle, setShowBattle] = useState(false);
+  const [enemyHp, setEnemyHp] = useState(100);
+  const [showDamage, setShowDamage] = useState<{x: number, y: number, damage: number} | null>(null);
+  const [particles, setParticles] = useState<Array<{id: number, x: number, y: number}>>([]);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [combo, setCombo] = useState(0);
+  const [shake, setShake] = useState(false);
+  const [skillEffect, setSkillEffect] = useState<string | null>(null);
+  const [show3DScene, setShow3DScene] = useState(false);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 200, damping: 30 });
+  const springY = useSpring(mouseY, { stiffness: 200, damping: 30 });
+
+  const battleRef = useRef<HTMLDivElement>(null);
+  const expBarRef = useRef<HTMLDivElement>(null);
+
+  // マウス追従
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX - window.innerWidth / 2);
+      mouseY.set(e.clientY - window.innerHeight / 2);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  // パーティクル生成
+  const createParticles = (x: number, y: number) => {
+    const newParticles = Array.from({ length: 10 }, (_, i) => ({
+      id: Date.now() + i,
+      x: x + (Math.random() - 0.5) * 100,
+      y: y + (Math.random() - 0.5) * 100
+    }));
+    setParticles(prev => [...prev, ...newParticles]);
+    setTimeout(() => {
+      setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
+    }, 1000);
+  };
+
+  // 攻撃アニメーション
+  const attack = () => {
+    if (!battleRef.current) return;
+    
+    const damage = Math.floor(Math.random() * 30) + 20;
+    setEnemyHp(prev => Math.max(0, prev - damage));
+    setCombo(prev => prev + 1);
+    
+    // ダメージ表示
+    setShowDamage({
+      x: Math.random() * 200 + 100,
+      y: Math.random() * 100 + 50,
+      damage
+    });
+    setTimeout(() => setShowDamage(null), 1000);
+
+    // パーティクル
+    createParticles(300, 200);
+
+    // シェイク
+    setShake(true);
+    setTimeout(() => setShake(false), 200);
+
+    // GSAP アニメーション
+    gsap.fromTo(battleRef.current, 
+      { scale: 1 },
+      { scale: 1.05, duration: 0.1, yoyo: true, repeat: 1 }
+    );
+
+    // 経験値
+    setExp(prev => {
+      const newExp = prev + 50;
+      if (newExp >= 1000) {
+        setShowLevelUp(true);
+        setLevel(prev => prev + 1);
+        setTimeout(() => setShowLevelUp(false), 2000);
+        return 0;
+      }
+      return newExp;
+    });
+  };
+
+  // スキルアニメーション
+  const useSkill = () => {
+    if (mp < 30) return;
+    setMp(prev => prev - 30);
+    
+    const damage = Math.floor(Math.random() * 50) + 50;
+    setEnemyHp(prev => Math.max(0, prev - damage));
+    
+    setShowDamage({
+      x: 150,
+      y: 100,
+      damage
+    });
+    setTimeout(() => setShowDamage(null), 1000);
+
+    createParticles(300, 200);
+    
+    if (expBarRef.current) {
+      gsap.fromTo(expBarRef.current,
+        { opacity: 0.5 },
+        { opacity: 1, duration: 0.3, yoyo: true, repeat: 3 }
+      );
+    }
+  };
+
+  // 新しい魔法スキル
+  const useMagicSkill = (skillType: string) => {
+    if (mp < 50) return;
+    setMp(prev => prev - 50);
+    setSkillEffect(skillType);
+    
+    const damage = Math.floor(Math.random() * 80) + 70;
+    setEnemyHp(prev => Math.max(0, prev - damage));
+    
+    setShowDamage({
+      x: 150,
+      y: 100,
+      damage
+    });
+    
+    // GSAP タイムライン
+    const tl = gsap.timeline();
+    tl.to(battleRef.current, { scale: 1.1, duration: 0.2 })
+      .to(battleRef.current, { scale: 1, duration: 0.2 });
+    
+    createParticles(300, 200);
+    
+    setTimeout(() => setSkillEffect(null), 2000);
+  };
+
+  // React Spring アニメーション
+  const hpBarSpring = useReactSpring({
+    width: `${(hp / 5) * 100}%`,
+    config: config.wobbly
+  });
+
+  const mpBarSpring = useReactSpring({
+    width: `${mp}%`,
+    config: config.molasses
+  });
+
+  const expBarSpring = useReactSpring({
+    width: `${(exp / 1000) * 100}%`,
+    config: config.slow
+  });
 
   const quests = [
     {
@@ -314,6 +532,146 @@ export default function RPGHomePage() {
         imageRendering: 'pixelated',
       }}
     >
+      {/* パーティクル背景 */}
+      <div className="fixed inset-0 z-0">
+        <ParticlesBg type="cobweb" bg={true} color="#9b59b6" num={50} />
+      </div>
+
+      {/* 3Dシーン */}
+      <AnimatePresence>
+        {show3DScene && (
+          <motion.div
+            className="fixed inset-0 z-30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <Canvas>
+              <Suspense fallback={null}>
+                <ambientLight intensity={0.5} />
+                <pointLight position={[10, 10, 10]} />
+                <MagicCircle />
+                <FloatingGem position={[-3, 0, 0]} />
+                <FloatingGem position={[3, 0, 0]} />
+                <FloatingGem position={[0, 3, 0]} />
+                <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+                <OrbitControls enableZoom={false} />
+              </Suspense>
+            </Canvas>
+            <button
+              onClick={() => setShow3DScene(false)}
+              className="absolute top-4 right-4 px-4 py-2 bg-red-600 border-4 border-red-700 text-white text-xs z-40"
+            >
+              CLOSE 3D
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* スキルエフェクト */}
+      <AnimatePresence>
+        {skillEffect && (
+          <motion.div
+            className="fixed inset-0 pointer-events-none z-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {skillEffect === 'fire' && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-t from-red-500 to-orange-500 mix-blend-screen"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 0.5, repeat: 3 }}
+              />
+            )}
+            {skillEffect === 'ice' && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-b from-blue-300 to-cyan-500 mix-blend-screen"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 0.5, repeat: 3 }}
+              />
+            )}
+            {skillEffect === 'lightning' && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-tr from-yellow-300 to-purple-500 mix-blend-screen"
+                animate={{ opacity: [0.8, 1, 0.8] }}
+                transition={{ duration: 0.1, repeat: 10 }}
+              />
+            )}
+            {skillEffect === 'tornado' && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-green-400 to-teal-500 mix-blend-screen"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2 }}
+              />
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* パーティクルエフェクト */}
+      <AnimatePresence>
+        {particles.map(particle => (
+          <motion.div
+            key={particle.id}
+            className="absolute w-2 h-2 bg-yellow-400 rounded-full pointer-events-none"
+            initial={{ x: particle.x, y: particle.y, scale: 1, opacity: 1 }}
+            animate={{ 
+              y: particle.y - 100,
+              scale: 0,
+              opacity: 0
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            style={{ left: particle.x, top: particle.y }}
+          />
+        ))}
+      </AnimatePresence>
+
+      {/* レベルアップエフェクト */}
+      <AnimatePresence>
+        {showLevelUp && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="text-6xl font-bold text-yellow-400"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: [0, 1.5, 1], rotate: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="flex items-center gap-4">
+                <GiSparkles className="animate-spin" />
+                LEVEL UP!
+                <GiSparkles className="animate-spin" />
+              </div>
+              <motion.div
+                className="text-2xl text-center mt-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                Lv.{level} → Lv.{level + 1}
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* マウス追従カーソル */}
+      <motion.div
+        className="fixed w-8 h-8 pointer-events-none z-50"
+        style={{
+          x: springX,
+          y: springY,
+          left: '50%',
+          top: '50%'
+        }}
+      >
+        <GiMagicSwirl className="w-full h-full text-purple-400 animate-spin" />
+      </motion.div>
       {/* ドット絵背景グリッド */}
       <div 
         className="absolute inset-0 opacity-20"
@@ -349,14 +707,369 @@ export default function RPGHomePage() {
             <div className="flex items-center gap-3">
               <div className="bg-black border-4 border-yellow-500 px-3 py-2 flex items-center gap-2">
                 <PixelCoin />
-                <span className="text-yellow-400 text-xs">3250G</span>
+                <span className="text-yellow-400 text-xs">{gold}G</span>
+              </div>
+              <div className="bg-black border-4 border-purple-500 px-3 py-2 flex items-center gap-2">
+                <GiSwordman className="text-purple-400" />
+                <span className="text-purple-400 text-xs">Lv.{level}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 新しいステータスバー */}
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+            {/* HP Bar */}
+            <div className="bg-black/70 border-2 border-red-500 p-2 rounded">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-red-400">❤ HP</span>
+                <span className="text-white">{hp * 20}/100</span>
+              </div>
+              <div className="w-full bg-gray-800 h-3 rounded-full overflow-hidden">
+                <animated.div 
+                  className="bg-gradient-to-r from-red-600 to-red-400 h-full"
+                  style={hpBarSpring}
+                />
+              </div>
+            </div>
+
+            {/* MP Bar */}
+            <div className="bg-black/70 border-2 border-blue-500 p-2 rounded">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-blue-400">✦ MP</span>
+                <span className="text-white">{mp}/100</span>
+              </div>
+              <div className="w-full bg-gray-800 h-3 rounded-full overflow-hidden">
+                <animated.div 
+                  className="bg-gradient-to-r from-blue-600 to-blue-400 h-full"
+                  style={mpBarSpring}
+                />
+              </div>
+            </div>
+
+            {/* EXP Bar */}
+            <div className="bg-black/70 border-2 border-green-500 p-2 rounded">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-green-400">⭐ EXP</span>
+                <span className="text-white">{exp}/1000</span>
+              </div>
+              <div ref={expBarRef} className="w-full bg-gray-800 h-3 rounded-full overflow-hidden">
+                <animated.div 
+                  className="bg-gradient-to-r from-green-600 to-green-400 h-full"
+                  style={expBarSpring}
+                />
               </div>
             </div>
           </div>
         </div>
       </motion.div>
 
+      {/* バトルシステム */}
+      <AnimatePresence>
+        {showBattle && (
+          <motion.div
+            className="fixed inset-0 bg-black/90 flex items-center justify-center z-40"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="max-w-4xl w-full px-4">
+              <motion.div
+                ref={battleRef}
+                className={`bg-gradient-to-br from-purple-900 to-red-900 border-8 border-yellow-500 p-8 relative ${shake ? 'animate-shake' : ''}`}
+                initial={{ scale: 0.8, rotateY: 180 }}
+                animate={{ scale: 1, rotateY: 0 }}
+                transition={{ type: "spring", duration: 0.8 }}
+              >
+                {/* コンボ表示 */}
+                {combo > 0 && (
+                  <motion.div
+                    className="absolute -top-8 right-4 text-4xl font-bold text-yellow-400"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: [0, 1.5, 1] }}
+                  >
+                    {combo} COMBO!
+                  </motion.div>
+                )}
+
+                {/* ダメージ表示 */}
+                <AnimatePresence>
+                  {showDamage && (
+                    <motion.div
+                      className="absolute text-6xl font-bold text-red-500"
+                      style={{ left: showDamage.x, top: showDamage.y }}
+                      initial={{ opacity: 1, scale: 0, y: 0 }}
+                      animate={{ opacity: 0, scale: 2, y: -100 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 1 }}
+                    >
+                      -{showDamage.damage}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <h2 className="text-2xl text-yellow-400 text-center mb-6 flex items-center justify-center gap-3">
+                  <GiCrossedSwords />
+                  BATTLE MODE
+                  <GiCrossedSwords />
+                </h2>
+
+                <div className="grid grid-cols-2 gap-8 mb-8">
+                  {/* プレイヤー */}
+                  <div className="text-center">
+                    <motion.div
+                      className="text-6xl mb-4"
+                      animate={{ 
+                        rotate: [0, -10, 10, 0],
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                    >
+                      <GiSwordman className="inline-block text-blue-400" />
+                    </motion.div>
+                    <div className="text-sm text-blue-300">HERO</div>
+                    <div className="text-xs text-white mt-2">HP: {hp * 20}/100</div>
+                    <div className="text-xs text-white">MP: {mp}/100</div>
+                  </div>
+
+                  {/* 敵 */}
+                  <div className="text-center">
+                    <motion.div
+                      className="text-6xl mb-4"
+                      animate={enemyHp > 0 ? { 
+                        rotate: [0, 10, -10, 0],
+                        scale: [1, 1.05, 1]
+                      } : {
+                        opacity: 0,
+                        scale: 0,
+                        rotate: 360
+                      }}
+                      transition={{ repeat: enemyHp > 0 ? Infinity : 0, duration: 1.5 }}
+                    >
+                      <GiCrystalBall className="inline-block text-red-400" />
+                    </motion.div>
+                    <div className="text-sm text-red-300">ENEMY</div>
+                    <div className="text-xs text-white mt-2">HP: {enemyHp}/100</div>
+                    <div className="w-full bg-gray-800 h-2 rounded-full mt-2">
+                      <motion.div
+                        className="bg-red-500 h-full rounded-full"
+                        initial={{ width: '100%' }}
+                        animate={{ width: `${enemyHp}%` }}
+                        transition={{ type: "spring" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* バトルコマンド */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  <motion.button
+                    onClick={attack}
+                    className="bg-red-600 border-4 border-red-700 p-3 text-white text-xs hover:bg-red-500 relative overflow-hidden"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={enemyHp <= 0}
+                  >
+                    <GiCrossedSwords className="inline mr-1" />
+                    ATTACK
+                  </motion.button>
+
+                  <motion.button
+                    onClick={useSkill}
+                    className={`border-4 p-3 text-white text-xs relative overflow-hidden ${
+                      mp >= 30 ? 'bg-blue-600 border-blue-700 hover:bg-blue-500' : 'bg-gray-600 border-gray-700 cursor-not-allowed'
+                    }`}
+                    whileHover={mp >= 30 ? { scale: 1.05 } : {}}
+                    whileTap={mp >= 30 ? { scale: 0.95 } : {}}
+                    disabled={mp < 30 || enemyHp <= 0}
+                  >
+                    <GiMagicSwirl className="inline mr-1" />
+                    SKILL
+                    <span className="block text-xs">(30MP)</span>
+                  </motion.button>
+
+                  <motion.button
+                    onClick={() => {
+                      setHp(prev => Math.min(5, prev + 1));
+                      setMp(prev => Math.min(100, prev + 20));
+                    }}
+                    className="bg-green-600 border-4 border-green-700 p-3 text-white text-xs hover:bg-green-500"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <GiHealthPotion className="inline mr-1" />
+                    POTION
+                  </motion.button>
+
+                  <motion.button
+                    onClick={() => {
+                      setShowBattle(false);
+                      setEnemyHp(100);
+                      setCombo(0);
+                    }}
+                    className="bg-gray-600 border-4 border-gray-700 p-3 text-white text-xs hover:bg-gray-500"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <GiShield className="inline mr-1" />
+                    {enemyHp <= 0 ? 'VICTORY!' : 'FLEE'}
+                  </motion.button>
+                </div>
+
+                {/* 魔法スキル */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <motion.button
+                    onClick={() => useMagicSkill('fire')}
+                    className={`border-4 p-2 text-white text-xs relative ${
+                      mp >= 50 ? 'bg-red-700 border-red-800 hover:bg-red-600' : 'bg-gray-700 border-gray-800 cursor-not-allowed'
+                    }`}
+                    whileHover={mp >= 50 ? { scale: 1.05 } : {}}
+                    whileTap={mp >= 50 ? { scale: 0.95 } : {}}
+                    disabled={mp < 50 || enemyHp <= 0}
+                  >
+                    <GiFireRing className="inline mr-1 animate-pulse" />
+                    FIRE
+                  </motion.button>
+
+                  <motion.button
+                    onClick={() => useMagicSkill('ice')}
+                    className={`border-4 p-2 text-white text-xs relative ${
+                      mp >= 50 ? 'bg-cyan-700 border-cyan-800 hover:bg-cyan-600' : 'bg-gray-700 border-gray-800 cursor-not-allowed'
+                    }`}
+                    whileHover={mp >= 50 ? { scale: 1.05 } : {}}
+                    whileTap={mp >= 50 ? { scale: 0.95 } : {}}
+                    disabled={mp < 50 || enemyHp <= 0}
+                  >
+                    <GiIceBolt className="inline mr-1" />
+                    ICE
+                  </motion.button>
+
+                  <motion.button
+                    onClick={() => useMagicSkill('lightning')}
+                    className={`border-4 p-2 text-white text-xs relative ${
+                      mp >= 50 ? 'bg-yellow-600 border-yellow-700 hover:bg-yellow-500' : 'bg-gray-700 border-gray-800 cursor-not-allowed'
+                    }`}
+                    whileHover={mp >= 50 ? { scale: 1.05 } : {}}
+                    whileTap={mp >= 50 ? { scale: 0.95 } : {}}
+                    disabled={mp < 50 || enemyHp <= 0}
+                  >
+                    <GiLightningStorm className="inline mr-1 animate-bounce" />
+                    THUNDER
+                  </motion.button>
+
+                  <motion.button
+                    onClick={() => useMagicSkill('tornado')}
+                    className={`border-4 p-2 text-white text-xs relative ${
+                      mp >= 50 ? 'bg-green-700 border-green-800 hover:bg-green-600' : 'bg-gray-700 border-gray-800 cursor-not-allowed'
+                    }`}
+                    whileHover={mp >= 50 ? { scale: 1.05 } : {}}
+                    whileTap={mp >= 50 ? { scale: 0.95 } : {}}
+                    disabled={mp < 50 || enemyHp <= 0}
+                  >
+                    <GiTornado className="inline mr-1 animate-spin" />
+                    WIND
+                  </motion.button>
+                </div>
+
+                {enemyHp <= 0 && (
+                  <motion.div
+                    className="mt-6 text-center text-yellow-400 text-xl"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <GiSparkles className="inline mr-2" />
+                    VICTORY!
+                    <GiSparkles className="inline ml-2" />
+                    <div className="text-sm mt-2">
+                      獲得: +200 EXP, +150 GOLD
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* 新しいアクションボタンセクション */}
+        <motion.div
+          className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <motion.button
+            onClick={() => setShowBattle(true)}
+            className="bg-gradient-to-r from-red-600 to-orange-600 border-4 border-red-700 p-4 text-white text-xs hover:from-red-500 hover:to-orange-500 relative overflow-hidden"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255,0,0,0.5)" }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <motion.div
+              className="absolute inset-0 bg-white opacity-20"
+              animate={{ x: ['-100%', '200%'] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+            />
+            <GiCrossedSwords className="inline text-2xl mb-2" />
+            <div>START BATTLE</div>
+          </motion.button>
+
+          <motion.button
+            onClick={() => setShow3DScene(!show3DScene)}
+            className="bg-gradient-to-r from-purple-700 to-indigo-700 border-4 border-purple-800 p-4 text-white text-xs hover:from-purple-600 hover:to-indigo-600 relative overflow-hidden"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(147,51,234,0.5)" }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <GiCrystalBall className="inline text-2xl mb-2 animate-pulse" />
+            <div>{show3DScene ? 'HIDE 3D' : 'SHOW 3D'}</div>
+          </motion.button>
+
+          <motion.button
+            onClick={() => {
+              setHp(5);
+              setMp(100);
+              createParticles(200, 200);
+            }}
+            className="bg-gradient-to-r from-green-600 to-emerald-600 border-4 border-green-700 p-4 text-white text-xs hover:from-green-500 hover:to-emerald-500"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(0,255,0,0.5)" }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <GiHeartPlus className="inline text-2xl mb-2" />
+            <div>FULL HEAL</div>
+          </motion.button>
+
+          <motion.button
+            onClick={() => {
+              const newGold = gold + 500;
+              setGold(newGold);
+              createParticles(400, 200);
+            }}
+            className="bg-gradient-to-r from-yellow-600 to-amber-600 border-4 border-yellow-700 p-4 text-white text-xs hover:from-yellow-500 hover:to-amber-500"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255,215,0,0.5)" }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <PixelCoin />
+            <div className="mt-2">GET GOLD</div>
+          </motion.button>
+
+          <motion.button
+            onClick={() => {
+              const newExp = exp + 200;
+              if (newExp >= 1000) {
+                setShowLevelUp(true);
+                setLevel(prev => prev + 1);
+                setTimeout(() => setShowLevelUp(false), 2000);
+                setExp(newExp - 1000);
+              } else {
+                setExp(newExp);
+              }
+            }}
+            className="bg-gradient-to-r from-purple-600 to-pink-600 border-4 border-purple-700 p-4 text-white text-xs hover:from-purple-500 hover:to-pink-500"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(128,0,128,0.5)" }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <GiSparkles className="inline text-2xl mb-2 animate-spin" />
+            <div>GAIN EXP</div>
+          </motion.button>
+        </motion.div>
         {/* 説明セクション */}
         <motion.div 
           className="bg-purple-900/80 border-8 border-purple-500 p-6 mb-8 relative"

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2 } from 'lucide-react';
 import { Survey, getSurveyById, answerSurvey, getSurveyResults, hasUserAnswered } from '@/lib/mock/mockSocialData';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface SurveyAnswerModalProps {
   surveyId: string;

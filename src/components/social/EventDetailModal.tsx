@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, MapPin, Users, MessageCircle, Share2 } from 'lucide-react';
 import { Event, getEventById, joinEvent, leaveEvent, isUserJoined, addComment, getCommentsForPost } from '@/lib/mock/mockSocialData';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { getUserById } from '@/lib/mock/mockAuth';
 
 interface EventDetailModalProps {

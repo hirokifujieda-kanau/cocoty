@@ -27,7 +27,7 @@ import Analytics from '@/components/analytics/Analytics';
 import AIAssistant from '@/components/ai/AIAssistant';
 import DailyTarot from '@/components/fortune/DailyTarot';
 import UserSwitcher from '@/components/auth/UserSwitcher';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 
 type PageType = 'dashboard' | 'events' | 'survey' | 'event-builder' | 'manager-dashboard' | 'member-management' | 'analytics';
 type UserRole = 'member' | 'manager';

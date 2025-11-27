@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Check, LogOut, User } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { getAllUsers } from '@/lib/mock/mockAuth';
 
 const UserSwitcher: React.FC = () => {

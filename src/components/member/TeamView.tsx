@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Users, Bell, MessageSquare, Calendar } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { getUserCommunities } from '@/lib/mock/mockSocialData';
 import TeamHome from '@/components/member/TeamHome';
 

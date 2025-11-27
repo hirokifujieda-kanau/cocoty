@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Users, Pin, Clock, Calendar, FileText, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { 
   getTeamMembers, 
   type TeamMember,
