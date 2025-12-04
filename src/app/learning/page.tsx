@@ -1,6 +1,6 @@
 import React from 'react';
 import MemberLearningProgress from '@/components/learning/MemberLearningProgress';
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export default function LearningPage() {
   return (

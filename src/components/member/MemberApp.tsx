@@ -18,7 +18,7 @@ import Store from '@/components/store/Store';
 import TeamView from '@/components/member/TeamView';
 import MemberTimeline from '@/components/member/MemberTimeline';
 import EventDetailModal from '@/components/social/EventDetailModal';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   getAllEvents, 
   joinEvent, 

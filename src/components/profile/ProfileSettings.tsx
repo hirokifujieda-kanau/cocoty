@@ -6,7 +6,7 @@ import {
   ChevronRight, LogOut, Camera, Mail, Phone,
   Eye, EyeOff, Check
 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import {
   getUserSettings,

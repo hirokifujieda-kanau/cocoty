@@ -5,7 +5,7 @@ import { Calendar, MapPin, Users, Plus, Search } from 'lucide-react';
 import { Event, getUpcomingEvents, getPastEvents, getEventsByCategory, getEventsByStatus, searchEvents } from '@/lib/mock/mockEvents';
 import { EventFormModal } from './EventFormModal';
 import { EventDetailModal } from './EventDetailModal';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 type FilterType = 'all' | 'upcoming' | 'past' | Event['category'] | Event['status'];
 

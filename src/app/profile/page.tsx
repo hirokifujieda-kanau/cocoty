@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import InstagramProfilePage from '@/components/profile/InstagramProfilePage';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Page: React.FC = () => {
   const { user, loading } = useAuth();

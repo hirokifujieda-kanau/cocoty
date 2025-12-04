@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Heart, MessageCircle, Calendar, MapPin, Users as UsersIcon, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import EventDetailModal from '@/components/social/EventDetailModal';
 import SurveyAnswerModal from '@/components/social/SurveyAnswerModal';
 import {

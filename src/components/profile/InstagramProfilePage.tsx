@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Settings, Grid, Bookmark, Sparkles, TrendingUp, Heart as HeartIcon, Users, Calendar, BookOpen, CheckCircle2, LogOut } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { PH1, PH2, PH3 } from '@/lib/placeholders';
 import DailyTarot from '@/components/fortune/DailyTarot';
 import SeasonalDiagnosisHub from '@/components/fortune/SeasonalDiagnosisHub';
@@ -16,14 +16,14 @@ import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getUserById } from '@/lib/dummyUsers';
 
-const InstagramProfilePage: React.FC = () => {
-  const { user, logout } = useAuth();
+const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdProp }) => {
+  const { user, signOut } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // URLパラメータからuserIdを取得、なければデフォルトユーザー（user_001）を使用
+  // propsからuserIdを取得、なければURLパラメータ、それもなければデフォルトユーザー（user_001）を使用
   const userIdFromUrl = searchParams.get('userId');
-  const userId = userIdFromUrl || 'user_001';
+  const userId = userIdProp || userIdFromUrl || 'user_001';
   const displayUser = getUserById(userId);
   
   // Firebase userとダミーユーザーシステムの統合
@@ -198,7 +198,7 @@ const InstagramProfilePage: React.FC = () => {
                 <button
                   onClick={async () => {
                     if (confirm('ログアウトしますか？')) {
-                      await logout();
+                      await signOut();
                       router.push('/login');
                     }
                   }}
@@ -796,15 +796,15 @@ const InstagramProfilePage: React.FC = () => {
                 {selectedDate && (
                   <div className="mt-4 p-4 bg-white rounded-xl border border-purple-200">
                     <h5 className="font-semibold text-gray-900 mb-3">
-                      {new Date(selectedDate).toLocaleDateString('ja-JP', { 
+                      {new Date(selectedDate as string).toLocaleDateString('ja-JP', { 
                         month: 'long', 
                         day: 'numeric', 
                         weekday: 'short' 
                       })} のアクティビティ
                     </h5>
                     <div className="space-y-2">
-                      {activityData[selectedDate]?.length > 0 ? (
-                        activityData[selectedDate].map((activity: any) => (
+                      {activityData[selectedDate as string]?.length > 0 ? (
+                        activityData[selectedDate as string].map((activity: any) => (
                           <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                             <div className="w-10 h-10 rounded-lg overflow-hidden bg-white flex-shrink-0 flex items-center justify-center border">
                               {activity.image ? (

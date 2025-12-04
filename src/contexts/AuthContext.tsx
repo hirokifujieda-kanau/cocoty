@@ -1,13 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { MockUser, getCurrentUser, login as mockLogin, logout as mockLogout, initializeSession } from '@/lib/mock/mockAuth';
+import { User, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
+import { auth } from '@/lib/firebaseConfig';
 
 interface AuthContextType {
-  currentUser: MockUser | null;
-  login: (userId: string) => void;
-  logout: () => void;
-  isLoading: boolean;
+  user: User | null;
+  idToken: string | null;
+  loading: boolean;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,54 +18,62 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<MockUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [idToken, setIdToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // 初期化: セッションから復元（なければnullのまま = ゲストとして閲覧可能）
   useEffect(() => {
-    try {
-      const user = initializeSession();
-      setCurrentUser(user);
-    } catch (e) {
-      console.error('Failed to initialize session:', e);
-      // エラーが発生してもゲストとして続行
-      setCurrentUser(null);
-    } finally {
-      setIsLoading(false);
-    }
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
+      
+      if (user) {
+        try {
+          // IDトークンを取得（強制更新）
+          const token = await user.getIdToken(true);
+          setIdToken(token);
+          console.log('✅ Firebase Auth: User signed in', user.email);
+        } catch (error) {
+          console.error('❌ Failed to get ID token:', error);
+          setIdToken(null);
+        }
+      } else {
+        setIdToken(null);
+        console.log('⚠️ Firebase Auth: No user signed in');
+      }
+      
+      setLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
-  // ログイン処理
-  const login = (userId: string) => {
-    const user = mockLogin(userId);
-    if (user) {
-      setCurrentUser(user);
-      // ページをリロードしてすべての状態を更新
-      window.location.reload();
+  const handleSignOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+      setUser(null);
+      setIdToken(null);
+      console.log('✅ User signed out');
+    } catch (error) {
+      console.error('❌ Sign out error:', error);
+      throw error;
     }
-  };
-
-  // ログアウト処理
-  const logout = () => {
-    mockLogout();
-    setCurrentUser(null);
-    window.location.reload();
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, idToken, loading, signOut: handleSignOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 /**
- * 認証状態を取得するカスタムフック
+ * useAuth Hook
+ * Firebase認証の状態とIDトークンを取得
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

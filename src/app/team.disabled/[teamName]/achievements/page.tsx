@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Award, TrendingUp, Star, Trophy, Target, Zap } from 'lucide-react';
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 const TeamAchievementsPage: React.FC = () => {
   const router = useRouter();

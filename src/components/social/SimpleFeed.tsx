@@ -15,7 +15,7 @@ import PublicProfile from '@/components/profile/PublicProfile';
 import EventDetailModal from '@/components/social/EventDetailModal';
 import SurveyAnswerModal from '@/components/social/SurveyAnswerModal';
 import { PH1, PH2, PH3 } from '@/lib/placeholders';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   getAllEvents,
   getAllSurveys,
