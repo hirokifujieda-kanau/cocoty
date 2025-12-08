@@ -1,13 +1,21 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
+import { 
+  User, 
+  onAuthStateChanged, 
+  signOut as firebaseSignOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
+} from 'firebase/auth';
 import { auth } from '@/lib/firebaseConfig';
 
 interface AuthContextType {
   user: User | null;
   idToken: string | null;
   loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -59,8 +67,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      console.log('🔐 Logging in with email:', email);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('✅ Login successful:', userCredential.user.email);
+      
+      // Get ID token
+      const token = await userCredential.user.getIdToken(true);
+      setIdToken(token);
+    } catch (error: any) {
+      console.error('❌ Login error:', error);
+      throw error;
+    }
+  };
+
+  const handleSignup = async (email: string, password: string) => {
+    try {
+      console.log('🔐 Creating account with email:', email);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('✅ Signup successful:', userCredential.user.email);
+      
+      // Get ID token
+      const token = await userCredential.user.getIdToken(true);
+      setIdToken(token);
+    } catch (error: any) {
+      console.error('❌ Signup error:', error);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, idToken, loading, signOut: handleSignOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      idToken, 
+      loading, 
+      login: handleLogin,
+      signup: handleSignup,
+      signOut: handleSignOut 
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,10 +2,11 @@
 
 import React from 'react';
 import BackButton from '@/components/ui/BackButton';
+import AuthGuard from '@/components/auth/AuthGuard';
 
 const ALBUM_KEY = 'cocoty_albums_v1';
 
-export default function CreateAlbumPage() {
+function CreateAlbumContent() {
   const [title, setTitle] = React.useState('');
   const [isCreating, setIsCreating] = React.useState(false);
 
@@ -95,5 +96,13 @@ export default function CreateAlbumPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CreateAlbumPage() {
+  return (
+    <AuthGuard requireAuth={true}>
+      <CreateAlbumContent />
+    </AuthGuard>
   );
 }

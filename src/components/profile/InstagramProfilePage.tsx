@@ -14,31 +14,203 @@ import ShareProfileModal from '@/components/profile/ShareProfileModal';
 import MandalaGallery from '@/components/profile/MandalaGallery';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
-import { getUserById } from '@/lib/dummyUsers';
+import { getCurrentUser, getProfile, Profile } from '@/lib/api/client';
 
 const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdProp }) => {
   const { user, signOut } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // propsからuserIdを取得、なければURLパラメータ、それもなければデフォルトユーザー（user_001）を使用
-  const userIdFromUrl = searchParams.get('userId');
-  const userId = userIdProp || userIdFromUrl || 'user_001';
-  const displayUser = getUserById(userId);
+  // プロフィールデータの状態
+  const [displayUser, setDisplayUser] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
-  // Firebase userとダミーユーザーシステムの統合
-  const currentUser = displayUser; // ダミーユーザーシステムとの互換性のため
+  // propsからuserIdを取得、なければURLパラメータを確認
+  const userIdFromUrl = searchParams.get('userId');
+  const userId = userIdProp || userIdFromUrl;
   
   // URLパラメータがない場合は自分のプロフィール（オーナー）として扱う
-  const isOwner = !userIdFromUrl;
+  const isOwner = !userId;
   
   console.log('=== InstagramProfilePage Debug ===');
   console.log('Firebase user:', user?.email);
-  console.log('userId:', userId);
-  console.log('userIdFromUrl:', userIdFromUrl);
-  console.log('displayUser:', displayUser?.name);
+  console.log('userId from props/URL:', userId);
   console.log('isOwner:', isOwner);
   console.log('===================================');
+  
+  // プロフィールデータを再取得する関数
+  const refetchProfile = async () => {
+    console.log('🔄 refetchProfile called!');
+    
+    if (!user) {
+      console.log('⚠️ No Firebase user found, skipping profile fetch');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      if (isOwner) {
+        // 自分のプロフィールを取得
+        console.log('🔍 Refetching my profile...');
+        const response = await getCurrentUser();
+        console.log('API response:', response);
+        
+        if (response.profile) {
+          setDisplayUser(response.profile);
+          console.log('✅ My profile reloaded:', response.profile);
+        } else {
+          console.warn('⚠️ Profile not found in response');
+          setError('プロフィールが見つかりません。初回ログインの場合は、プロフィールを作成してください。');
+        }
+      } else if (userId) {
+        // 他のユーザーのプロフィールを取得
+        console.log('🔍 Refetching profile for user:', userId);
+        const profile = await getProfile(Number(userId));
+        setDisplayUser(profile);
+        console.log('✅ Profile reloaded:', profile);
+      }
+    } catch (err: any) {
+      console.error('❌ Failed to fetch profile:', err);
+      
+      // エラーの詳細をログ出力
+      if (err.message) {
+        console.error('Error message:', err.message);
+      }
+      if (err.response) {
+        console.error('Error response:', err.response);
+      }
+      
+      // ユーザーに分かりやすいエラーメッセージを表示
+      if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
+        setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
+      } else if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
+        setError('認証エラー: ログインし直してください');
+      } else if (err.message?.includes('404')) {
+        setError('プロフィールが見つかりません');
+      } else {
+        setError(`プロフィールの読み込みに失敗しました: ${err.message || '不明なエラー'}`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // プロフィールデータ取得
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) {
+        console.log('⚠️ No Firebase user found, skipping profile fetch');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        if (isOwner) {
+          // 自分のプロフィールを取得
+          console.log('🔍 Fetching my profile...');
+          console.log('Firebase user:', user.email, user.uid);
+          
+          const response = await getCurrentUser();
+          console.log('API response:', response);
+          
+          if (response.profile) {
+            setDisplayUser(response.profile);
+            console.log('✅ My profile loaded:', response.profile);
+          } else {
+            console.warn('⚠️ Profile not found in response');
+            setError('プロフィールが見つかりません。初回ログインの場合は、プロフィールを作成してください。');
+          }
+        } else if (userId) {
+          // 他のユーザーのプロフィールを取得
+          console.log('🔍 Fetching profile for user:', userId);
+          const profile = await getProfile(Number(userId));
+          setDisplayUser(profile);
+          console.log('✅ Profile loaded:', profile);
+        }
+      } catch (err: any) {
+        console.error('❌ Failed to fetch profile:', err);
+        
+        // エラーの詳細をログ出力
+        if (err.message) {
+          console.error('Error message:', err.message);
+        }
+        if (err.response) {
+          console.error('Error response:', err.response);
+        }
+        
+        // ユーザーに分かりやすいエラーメッセージを表示
+        if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
+          setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
+        } else if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
+          setError('認証エラー: ログインし直してください');
+        } else if (err.message?.includes('404')) {
+          setError('プロフィールが見つかりません');
+        } else {
+          setError(`プロフィールの読み込みに失敗しました: ${err.message || '不明なエラー'}`);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user, userId, isOwner]);
+  
+  // アバターアップロード処理
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !displayUser) return;
+
+    try {
+      setUploadingAvatar(true);
+      console.log('📤 Uploading avatar...');
+
+      // Cloudinaryにアップロード
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default');
+      formData.append('public_id', `${user.uid}_avatar_${Date.now()}`);
+
+      const cloudinaryResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (!cloudinaryResponse.ok) {
+        throw new Error('Cloudinary upload failed');
+      }
+
+      const cloudinaryData = await cloudinaryResponse.json();
+      const avatarUrl = cloudinaryData.secure_url;
+      console.log('✅ Avatar uploaded to Cloudinary:', avatarUrl);
+
+      // プロフィールを更新
+      const { updateProfile } = await import('@/lib/api/client');
+      await updateProfile(displayUser.id, { avatar_url: avatarUrl });
+      console.log('✅ Avatar URL saved to profile');
+
+      // プロフィールを再読み込み
+      await refetchProfile();
+
+      alert('プロフィール画像を更新しました！');
+    } catch (error) {
+      console.error('❌ Avatar upload failed:', error);
+      alert('画像のアップロードに失敗しました');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
   
   const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'fortune'>('posts');
   
@@ -63,18 +235,18 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
   // フォロー状態を読み込み
   useEffect(() => {
-    if (!isOwner && currentUser && displayUser) {
-      const followKey = `follow_${currentUser.id}_${displayUser.id}`;
+    if (!isOwner && user && displayUser) {
+      const followKey = `follow_${user.uid}_${displayUser.id}`;
       const following = localStorage.getItem(followKey) === 'true';
       setIsFollowing(following);
     }
-  }, [isOwner, currentUser, displayUser]);
+  }, [isOwner, user, displayUser]);
 
   // フォロー/フォロー解除
   const handleFollowToggle = () => {
-    if (!currentUser || !displayUser) return;
+    if (!user || !displayUser) return;
     
-    const followKey = `follow_${currentUser.id}_${displayUser.id}`;
+    const followKey = `follow_${user.uid}_${displayUser.id}`;
     const newFollowState = !isFollowing;
     
     localStorage.setItem(followKey, newFollowState.toString());
@@ -92,12 +264,12 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     }
     
     // メッセージをlocalStorageに保存（実際のアプリではAPIに送信）
-    const messageKey = `messages_${currentUser?.id}_${displayUser?.id}`;
+    const messageKey = `messages_${user?.uid}_${displayUser?.id}`;
     const existingMessages = JSON.parse(localStorage.getItem(messageKey) || '[]');
     
     const newMessage = {
       id: Date.now(),
-      from: currentUser?.id,
+      from: user?.uid,
       to: displayUser?.id,
       text: messageText,
       timestamp: new Date().toISOString()
@@ -163,11 +335,37 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   // アクティビティ合計
   const totalActivities = Object.values(activityData).reduce((sum, activities) => sum + activities.length, 0);
 
-  if (!currentUser || !displayUser) return null;
+  // ローディング状態
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">プロフィールを読み込んでいます...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // エラー状態
+  if (error || !displayUser) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error || 'プロフィールが見つかりません'}</p>
+          <button
+            onClick={() => router.back()}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            戻る
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   console.log('InstagramProfilePage:', {
     userId,
-    currentUserId: currentUser.id,
     displayUserId: displayUser.id,
     displayUserName: displayUser.name,
     isOwner
@@ -220,12 +418,35 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           <div className="flex items-start gap-6 mb-6">
             {/* Avatar */}
             <div className="flex-shrink-0">
-              <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-gray-200">
+              <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-gray-200">
                 <img
-                  src={displayUser.avatar}
+                  src={displayUser.avatar_url || PH1}
                   alt={displayUser.name}
                   className="w-full h-full object-cover"
                 />
+                {isOwner && (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                      id="avatar-upload-icon"
+                      disabled={uploadingAvatar}
+                    />
+                    <label
+                      htmlFor="avatar-upload-icon"
+                      className="absolute bottom-0 right-0 w-7 h-7 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors shadow-lg cursor-pointer flex items-center justify-center"
+                      title="プロフィール画像を変更"
+                    >
+                      {uploadingAvatar ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                      ) : (
+                        <span className="text-lg font-bold leading-none">+</span>
+                      )}
+                    </label>
+                  </>
+                )}
               </div>
             </div>
 
@@ -301,36 +522,36 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             )}
 
             {/* 拡張プロフィール情報 */}
-            {(displayUser as any).birthday && (
+            {(displayUser.birthday || displayUser.age || displayUser.birthplace || displayUser.blood_type || displayUser.mbti_type) && (
               <div className="flex flex-wrap gap-2 mt-3">
                 {/* 年齢・生年月日 */}
-                {(displayUser as any).age && (
+                {displayUser.age && (
                   <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                    🎂 {(displayUser as any).age}歳
+                    🎂 {displayUser.age}歳
                   </span>
                 )}
                 
                 {/* 出身地 */}
-                {(displayUser as any).birthplace && (
+                {displayUser.birthplace && (
                   <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                    📍 {(displayUser as any).birthplace}
+                    📍 {displayUser.birthplace}
                   </span>
                 )}
                 
                 {/* 血液型 */}
-                {(displayUser as any).bloodType && (
+                {displayUser.blood_type && (
                   <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
-                    🩸 {(displayUser as any).bloodType}型
+                    🩸 {displayUser.blood_type}型
                   </span>
                 )}
                 
                 {/* MBTI */}
-                {(displayUser as any).mbtiType && (
+                {displayUser.mbti_type && (
                   <button
-                    onClick={() => router.push(`/tags/${encodeURIComponent((displayUser as any).mbtiType)}`)}
+                    onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.mbti_type!)}`)}
                     className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full hover:bg-purple-200 hover:shadow-sm transition-all cursor-pointer"
                   >
-                    🧠 {(displayUser as any).mbtiType}
+                    🧠 {displayUser.mbti_type}
                   </button>
                 )}
               </div>
@@ -379,7 +600,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
               {/* 右側：曼荼羅アート */}
               <div className="flex-shrink-0">
-                <MandalaGallery userId={displayUser.id} isOwner={isOwner} />
+                <MandalaGallery userId={displayUser.id.toString()} isOwner={isOwner} />
               </div>
             </div>
           </div>
@@ -428,9 +649,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                   <h3 className="font-bold text-gray-900 text-sm">チームタスク進捗</h3>
                 </div>
                 <span className="text-xs text-gray-500">
-                  {displayUser.id === 'user_001' || displayUser.id === 'user_002' ? '写真部' : 
-                   displayUser.id === 'user_003' || displayUser.id === 'user_004' ? 'プログラミング部' : 
-                   displayUser.id === 'user_005' || displayUser.id === 'user_006' ? '料理部' : '音楽部'}
+                  一般グループ
                 </span>
               </div>
               
@@ -554,9 +773,9 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           )}
 
           {/* 個人実績（エアコース）- 今後実装予定のため非表示 */}
-          {false && isOwner && currentUser && (() => {
-            const stats = getTaskStats(currentUser.id);
-            const courseProgress = getUserCourseProgress(currentUser.id);
+          {false && isOwner && displayUser && (() => {
+            const stats = getTaskStats(displayUser.id.toString());
+            const courseProgress = getUserCourseProgress(displayUser.id.toString());
             
             return (
               <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 via-pink-50 to-orange-50 rounded-2xl border border-purple-100">
@@ -932,9 +1151,9 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     <span className="text-sm text-green-600 font-semibold">詳細を見る →</span>
                   </div>
                   
-                  {currentUser && (() => {
-                    const tasks = getUserTasks(currentUser.id);
-                    const stats = getTaskStats(currentUser.id);
+                  {displayUser && (() => {
+                    const tasks = getUserTasks(displayUser.id.toString());
+                    const stats = getTaskStats(displayUser.id.toString());
                     const recentTasks = tasks.slice(0, 3);
                     
                     return (
@@ -994,28 +1213,28 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       </div>
 
       {/* Fortune Modals */}
-      {showDailyTarot && (
+      {showDailyTarot && displayUser && (
         <DailyTarot 
           isOpen={showDailyTarot}
           onClose={() => setShowDailyTarot(false)}
-          userId={currentUser.id}
-          userName={currentUser.name}
+          userId={displayUser.id.toString()}
+          userName={displayUser.name}
         />
       )}
       
-      {showSeasonalDiagnosis && (
+      {showSeasonalDiagnosis && displayUser && (
         <SeasonalDiagnosisHub 
           isOpen={showSeasonalDiagnosis}
           onClose={() => setShowSeasonalDiagnosis(false)}
-          userId={currentUser.id}
+          userId={displayUser.id.toString()}
         />
       )}
       
-      {showMentalStats && (
+      {showMentalStats && displayUser && (
         <MentalStatsAdmin 
           isOpen={showMentalStats}
           onClose={() => setShowMentalStats(false)}
-          userId={currentUser.id}
+          userId={displayUser.id.toString()}
         />
       )}
       
@@ -1028,6 +1247,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       <ProfileEditModal
         isOpen={showEditProfile}
         onClose={() => setShowEditProfile(false)}
+        onSave={refetchProfile}
+        userId={userId || undefined}
       />
       
       <ShareProfileModal
@@ -1059,7 +1280,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             <div className="mb-4">
               <div className="flex items-center space-x-3 mb-4 p-3 bg-gray-50 rounded-lg">
                 <img
-                  src={displayUser?.avatar}
+                  src={displayUser?.avatar_url || PH1}
                   alt={displayUser?.name}
                   className="w-12 h-12 rounded-full"
                 />

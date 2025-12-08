@@ -12,12 +12,21 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3
  */
 async function getIdToken(): Promise<string | null> {
   const user = auth.currentUser;
-  if (!user) return null;
+  
+  console.log('🔐 Getting ID token...');
+  console.log('Firebase currentUser:', user?.email, user?.uid);
+  
+  if (!user) {
+    console.warn('⚠️ No Firebase user found');
+    return null;
+  }
   
   try {
-    return await user.getIdToken();
+    const token = await user.getIdToken(true); // 強制的に最新のトークンを取得
+    console.log('✅ ID token obtained:', token ? `${token.substring(0, 20)}...` : 'null');
+    return token;
   } catch (error) {
-    console.error('Failed to get ID token:', error);
+    console.error('❌ Failed to get ID token:', error);
     return null;
   }
 }
@@ -32,8 +41,14 @@ async function getHeaders(requireAuth: boolean = false): Promise<HeadersInit> {
   
   if (requireAuth) {
     const token = await getIdToken();
+    console.log('🔑 Auth required, token:', token ? 'Present' : 'Missing');
+    
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+      console.log('✅ Authorization header added');
+    } else {
+      console.error('❌ Authorization required but token is null!');
+      throw new Error('Firebase authentication required. Please log in again.');
     }
   }
   
@@ -50,21 +65,50 @@ async function apiRequest<T>(
   const { requireAuth = false, ...fetchOptions } = options;
   
   const headers = await getHeaders(requireAuth);
+  const url = `${API_BASE_URL}${endpoint}`;
   
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...fetchOptions,
-    headers: {
-      ...headers,
-      ...fetchOptions.headers,
-    },
-  });
+  console.log(`🌐 API Request: ${fetchOptions.method || 'GET'} ${url}`);
+  console.log('Headers:', headers);
   
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(error.error || error.errors?.join(', ') || 'API request failed');
+  try {
+    const response = await fetch(url, {
+      ...fetchOptions,
+      headers: {
+        ...headers,
+        ...fetchOptions.headers,
+      },
+    });
+    
+    console.log(`📡 API Response: ${response.status} ${response.statusText}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ API Error Response:', errorText);
+      
+      let errorMessage = 'API request failed';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || errorJson.errors?.join(', ') || errorMessage;
+      } catch {
+        errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
+      }
+      
+      throw new Error(errorMessage);
+    }
+    
+    const data = await response.json();
+    console.log('✅ API Response Data:', data);
+    return data;
+  } catch (error: any) {
+    console.error('❌ API Request Error:', error);
+    
+    // ネットワークエラーの場合
+    if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+      throw new Error(`Rails APIサーバーに接続できません。${url} が起動しているか確認してください。`);
+    }
+    
+    throw error;
   }
-  
-  return response.json();
 }
 
 // ========================================
@@ -150,14 +194,19 @@ export async function getProfiles(page: number = 1, perPage: number = 20): Promi
 
 /**
  * プロフィール詳細を取得
+ * @param id プロフィールID
+ * @param requireAuth 認証が必要な場合はtrue（デフォルト: true）
  */
-export async function getProfile(id: number): Promise<Profile> {
-  return apiRequest<Profile>(`/profiles/${id}`);
+export async function getProfile(id: number, requireAuth: boolean = true): Promise<Profile> {
+  return apiRequest<Profile>(`/profiles/${id}`, { requireAuth });
 }
 
 export interface UpdateProfileParams {
+  name?: string;
   nickname?: string;
   bio?: string;
+  avatar_url?: string;
+  cover_url?: string;
   hobbies?: string[];
   favorite_food?: string[];
   mbti_type?: string;
