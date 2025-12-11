@@ -5,7 +5,7 @@
 
 import { auth } from '@/lib/firebaseConfig';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1';
 
 /**
  * Firebase ID Tokenを取得
@@ -189,7 +189,7 @@ export interface ProfilesResponse {
  * プロフィール一覧を取得
  */
 export async function getProfiles(page: number = 1, perPage: number = 20): Promise<ProfilesResponse> {
-  return apiRequest<ProfilesResponse>(`/profiles?page=${page}&per_page=${perPage}`);
+  return apiRequest<ProfilesResponse>(`/profiles?page=${page}&per_page=${perPage}`, { requireAuth: true });
 }
 
 /**
