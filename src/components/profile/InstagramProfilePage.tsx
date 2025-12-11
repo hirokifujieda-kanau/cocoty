@@ -14,7 +14,7 @@ import ShareProfileModal from '@/components/profile/ShareProfileModal';
 import MandalaGallery from '@/components/profile/MandalaGallery';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
-import { getCurrentUser, getProfile, Profile } from '@/lib/api/client';
+import { getCurrentUser, getProfile, updateProfile, type Profile } from '@/lib/api/client';
 
 const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdProp }) => {
   const { user, signOut } = useAuth();
@@ -196,7 +196,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       console.log('✅ Avatar uploaded to Cloudinary:', avatarUrl);
 
       // プロフィールを更新
-      const { updateProfile } = await import('@/lib/api/client');
       await updateProfile(displayUser.id, { avatar_url: avatarUrl });
       console.log('✅ Avatar URL saved to profile');
 
@@ -417,55 +416,46 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         <div className="px-4 py-6">
           <div className="flex items-start gap-6 mb-6">
             {/* Avatar */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 relative">
               <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-gray-200">
                 <img
                   src={displayUser.avatar_url || PH1}
                   alt={displayUser.name}
                   className="w-full h-full object-cover"
                 />
-                {isOwner && (
-                  <>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                      id="avatar-upload-icon"
-                      disabled={uploadingAvatar}
-                    />
-                    <label
-                      htmlFor="avatar-upload-icon"
-                      className="absolute bottom-0 right-0 w-7 h-7 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors shadow-lg cursor-pointer flex items-center justify-center"
-                      title="プロフィール画像を変更"
-                    >
-                      {uploadingAvatar ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                      ) : (
-                        <span className="text-lg font-bold leading-none">+</span>
-                      )}
-                    </label>
-                  </>
-                )}
               </div>
+              {isOwner && (
+                <>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                    id="avatar-upload-icon"
+                    disabled={uploadingAvatar}
+                  />
+                  <label
+                    htmlFor="avatar-upload-icon"
+                    className="absolute bottom-0 right-0 w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors shadow-lg cursor-pointer flex items-center justify-center z-10"
+                    style={{ transform: 'translate(25%, 25%)' }}
+                    title="プロフィール画像を変更"
+                  >
+                    {uploadingAvatar ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                    ) : (
+                      <span className="text-2xl font-bold leading-none">+</span>
+                    )}
+                  </label>
+                </>
+              )}
             </div>
 
             {/* Stats */}
             <div className="flex-1">
-              <div className="flex items-center gap-6 mb-4">
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-semibold">{displayedPosts.length}</div>
-                  <div className="text-xs sm:text-sm text-gray-500">投稿</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-semibold">245</div>
-                  <div className="text-xs sm:text-sm text-gray-500">フォロワー</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-semibold">180</div>
-                  <div className="text-xs sm:text-sm text-gray-500">フォロー中</div>
-                </div>
-              </div>
+              {/* Stats削除 - 今後実装予定 */}
+
+              {/* ユーザー名 */}
+              <div className="font-semibold mb-3">{displayUser.name}</div>
 
               {/* Action Buttons */}
               <div className="flex gap-2">
@@ -513,8 +503,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
           {/* Bio */}
           <div className="space-y-2">
-            <div className="font-semibold">{displayUser.name}</div>
-            <div className="text-sm">{displayUser.bio}</div>
+            <div className="font-medium text-sm leading-[1.3] text-gray-500 mb-[26px]">{displayUser.bio}</div>
             {displayUser.diagnosis && (
               <div className="text-sm text-purple-600">
                 診断: {displayUser.diagnosis}
@@ -523,120 +512,127 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
             {/* 拡張プロフィール情報 */}
             {(displayUser.birthday || displayUser.age || displayUser.birthplace || displayUser.blood_type || displayUser.mbti_type) && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {/* 年齢・生年月日 */}
-                {displayUser.age && (
-                  <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                    🎂 {displayUser.age}歳
-                  </span>
-                )}
-                
-                {/* 出身地 */}
-                {displayUser.birthplace && (
-                  <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                    📍 {displayUser.birthplace}
-                  </span>
-                )}
-                
-                {/* 血液型 */}
-                {displayUser.blood_type && (
-                  <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
-                    🩸 {displayUser.blood_type}型
-                  </span>
-                )}
-                
-                {/* MBTI */}
-                {displayUser.mbti_type && (
-                  <button
-                    onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.mbti_type!)}`)}
-                    className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full hover:bg-purple-200 hover:shadow-sm transition-all cursor-pointer"
-                  >
-                    🧠 {displayUser.mbti_type}
-                  </button>
-                )}
+              <div className="space-y-2">
+                <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">基本情報</div>
+                <div className="flex flex-wrap gap-2">
+                  {/* 年齢・生年月日 */}
+                  {displayUser.age && (
+                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
+                      🎂 {displayUser.age}歳
+                    </span>
+                  )}
+                  
+                  {/* 出身地 */}
+                  {displayUser.birthplace && (
+                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
+                      📍 {displayUser.birthplace}
+                    </span>
+                  )}
+                  
+                  {/* 血液型 */}
+                  {displayUser.blood_type && (
+                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
+                      🩸 {displayUser.blood_type}型
+                    </span>
+                  )}
+                  
+                  {/* MBTI */}
+                  {displayUser.mbti_type && (
+                    <button
+                      onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.mbti_type!)}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full hover:opacity-80 transition-all cursor-pointer"
+                      style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #F0AC3C' }}
+                    >
+                      🧠 {displayUser.mbti_type}
+                    </button>
+                  )}
+                </div>
               </div>
             )}
+          </div>
 
-            {/* 趣味・好きな食べ物と曼荼羅アートを横並びに */}
-            <div className="flex gap-6 items-start mt-3">
-              {/* 左側：趣味・好きな食べ物 */}
-              <div className="flex-1 min-w-0 space-y-3">
-                {/* 趣味 */}
-                {(displayUser as any).hobbies && (displayUser as any).hobbies.length > 0 && (
-                  <div>
-                    <div className="text-xs font-semibold text-gray-500 mb-1">趣味</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(displayUser as any).hobbies.map((hobby: string, idx: number) => (
-                        <button
-                          key={idx}
-                          onClick={() => router.push(`/tags/${encodeURIComponent(hobby)}`)}
-                          className="inline-flex items-center px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded-md border border-orange-200 hover:bg-orange-100 hover:shadow-sm transition-all cursor-pointer"
-                        >
-                          {hobby}
-                        </button>
-                      ))}
+          {/* 趣味・好きな食べ物と曼荼羅アートを縦並びに */}
+          <div className="flex flex-col gap-6 items-start mt-3">
+            {/* 上側：趣味・好きな食べ物 */}
+            <div className="w-full space-y-3">
+              {/* 趣味 */}
+              {(displayUser as any).hobbies && (displayUser as any).hobbies.length > 0 && (
+                <div>
+                  <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">趣味</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(displayUser as any).hobbies.map((hobby: string, idx: number) => (
+                      <button
+                        key={idx}
+                        onClick={() => router.push(`/tags/${encodeURIComponent(hobby)}`)}
+                        className="inline-flex items-center px-2 py-1 text-xs rounded-full cursor-pointer"
+                        style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #E891A2' }}
+                      >
+                        {hobby}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 好きな食べ物 */}
+              {(displayUser as any).favoriteFood && (displayUser as any).favoriteFood.length > 0 && (
+                <div className="mt-[18px]">
+                  <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">好きな食べ物</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(displayUser as any).favoriteFood.map((food: string, idx: number) => (
+                      <button
+                        key={idx}
+                        onClick={() => router.push(`/tags/${encodeURIComponent(food)}`)}
+                        className="inline-flex items-center px-2 py-1 text-xs rounded-full cursor-pointer"
+                        style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #E891A2' }}
+                      >
+                        🍽️ {food}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 下側：タロット・診断ボタン */}
+            {isOwner && (
+              <div className="w-full grid grid-cols-2 gap-3">
+                {/* タロット占い */}
+                <button
+                  onClick={() => setShowDailyTarot(true)}
+                  className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                >
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">🔮</span>
+                    <div className="text-left">
+                      <h3 className="font-bold text-base">今日のタロット占い</h3>
+                      <p className="text-xs opacity-90">毎日の運勢をチェック</p>
                     </div>
                   </div>
-                )}
+                </button>
 
-                {/* 好きな食べ物 */}
-                {(displayUser as any).favoriteFood && (displayUser as any).favoriteFood.length > 0 && (
-                  <div>
-                    <div className="text-xs font-semibold text-gray-500 mb-1">好きな食べ物</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(displayUser as any).favoriteFood.map((food: string, idx: number) => (
-                        <button
-                          key={idx}
-                          onClick={() => router.push(`/tags/${encodeURIComponent(food)}`)}
-                          className="inline-flex items-center px-2 py-1 bg-pink-50 text-pink-700 text-xs rounded-md border border-pink-200 hover:bg-pink-100 hover:shadow-sm transition-all cursor-pointer"
-                        >
-                          🍽️ {food}
-                        </button>
-                      ))}
+                {/* 季節診断 */}
+                <button
+                  onClick={() => setShowSeasonalDiagnosis(true)}
+                  className="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Sparkles className="h-6 w-6" />
+                    <div className="text-left">
+                      <h3 className="font-bold text-base">パーソナル診断</h3>
+                      <p className="text-xs opacity-90">あなたの季節タイプは？</p>
                     </div>
                   </div>
-                )}
-              </div>
+                  </button>
+                </div>
+              )}
 
-              {/* 右側：曼荼羅アート */}
-              <div className="flex-shrink-0">
+              {/* 曼荼羅アート */}
+              <div className="w-full flex items-center justify-center">
                 <MandalaGallery userId={displayUser.id.toString()} isOwner={isOwner} />
               </div>
             </div>
           </div>
-
-          {/* タロット・診断ボタン（最上部） */}
-          {isOwner && (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* タロット占い */}
-              <button
-                onClick={() => setShowDailyTarot(true)}
-                className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-              >
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">🔮</span>
-                  <div className="text-left">
-                    <h3 className="font-bold text-base">今日のタロット占い</h3>
-                    <p className="text-xs opacity-90">毎日の運勢をチェック</p>
-                  </div>
-                </div>
-              </button>
-
-              {/* 季節診断 */}
-              <button
-                onClick={() => setShowSeasonalDiagnosis(true)}
-                className="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-              >
-                <div className="flex items-center space-x-3">
-                  <Sparkles className="h-6 w-6" />
-                  <div className="text-left">
-                    <h3 className="font-bold text-base">パーソナル診断</h3>
-                    <p className="text-xs opacity-90">あなたの季節タイプは？</p>
-                  </div>
-                </div>
-              </button>
-            </div>
-          )}
 
           {/* チームタスク進捗と個人課題進捗 - 今後実装予定のため非表示 */}
           {false && (
@@ -829,74 +825,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             );
           })()}
 
-          {/* Highlights */}
-          <div className="mt-6 flex gap-4 overflow-x-auto pb-2">
-            <button
-              onClick={() => setShowDailyTarot(true)}
-              className="flex flex-col items-center gap-2 flex-shrink-0"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <Sparkles className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">タロット</div>
-            </button>
-            <button
-              onClick={() => setShowSeasonalDiagnosis(true)}
-              className="flex flex-col items-center gap-2 flex-shrink-0"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-red-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-2xl">
-                  🌸
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">季節診断</div>
-            </button>
-            <button
-              onClick={() => setShowMentalStats(true)}
-              className="flex flex-col items-center gap-2 flex-shrink-0"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-blue-600" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">メンタル</div>
-            </button>
-            {/* 学習・イベント・チーム機能は今後実装予定のため非表示 */}
-            {false && (
-            <>
-            <button
-              onClick={() => router.push('/learning')}
-              className="flex flex-col items-center gap-2 flex-shrink-0"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <BookOpen className="h-6 w-6 text-orange-600" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">学習</div>
-            </button>
-            <div className="flex flex-col items-center gap-2 flex-shrink-0">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-emerald-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <Calendar className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">イベント</div>
-            </div>
-            <div className="flex flex-col items-center gap-2 flex-shrink-0">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-violet-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <Users className="h-6 w-6 text-indigo-600" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">写真部</div>
-            </div>
-            </>
-            )}
-          </div>
+          {/* Highlights - 占い機能は別タブで提供 */}
         </div>
 
         {/* Tabs - 投稿/保存済みタブは非表示 */}
@@ -1210,7 +1139,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           )}
         </div>
         )}
-      </div>
 
       {/* Fortune Modals */}
       {showDailyTarot && displayUser && (
