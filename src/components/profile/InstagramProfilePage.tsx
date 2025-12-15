@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Settings, Grid, Bookmark, Sparkles, TrendingUp, Heart as HeartIcon, Users, Calendar, BookOpen, CheckCircle2, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -374,7 +375,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 bg-white border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
-        <div className="max-w-4xl mx-auto px-4 py-3 h-[30px] flex items-center">
+        <div className="mx-auto px-4 h-[30px] flex items-center" style={{ maxWidth: '812px' }}>
           <div className="flex items-center justify-between w-full px-1">
             <h1 
               className="font-semibold"
@@ -384,13 +385,59 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                 fontSize: '16px',
                 lineHeight: '100%',
                 letterSpacing: '0%',
-                color: '#FFFFFF'
+                color: '#FFFFFF',
+                verticalAlign: 'middle'
               }}
             >
               {displayUser.name}
             </h1>
             {isOwner && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
+                <div style={{ marginLeft: '9px', marginTop: '5px', marginBottom: '5px' }}>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <img 
+                    src="/search.svg" 
+                    alt="search" 
+                    style={{ 
+                      position: 'absolute', 
+                      left: '12px',
+                      width: '10px',
+                      height: '10px',
+                      pointerEvents: 'none'
+                    }} 
+                  />
+                  <input
+                    type="text"
+                    placeholder="ユーザー一覧"
+                    className="px-4 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    style={{
+                      width: '150px',
+                      height: '20px',
+                      fontSize: '10px',
+                      fontFamily: 'Noto Sans JP',
+                      fontWeight: 500,
+                      backgroundColor: '#FFFFFF',
+                      marginTop: '5px',
+                      marginBottom: '5px',
+                      paddingLeft: '32px',
+                      borderRadius: '8px',
+                      boxShadow: '0px 1px 2px 0px #0000000D',
+                      lineHeight: '100%',
+                      letterSpacing: '0%'
+                    }}
+                  />
+                  <style>{`
+                    input::placeholder {
+                      font-family: Noto Sans JP;
+                      font-weight: 500;
+                      font-size: 10px;
+                      line-height: 100%;
+                      letter-spacing: 0%;
+                      color: #5C5C5C;
+                    }
+                  `}</style>
+                </div>
+                </div>
                 <button
                   onClick={() => setShowSettings(true)}
                   className="hover:bg-gray-100 rounded-full transition-colors"
@@ -419,13 +466,13 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto" style={{ maxWidth: '812px' }}>
         {/* Profile Section */}
         <div className="px-4 py-6">
-          <div className="flex items-start gap-6 mb-6">
+          <div className="flex items-center gap-6 mb-6">
             {/* Avatar */}
             <div className="flex-shrink-0 relative">
-              <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-gray-200">
+              <div className="relative rounded-full overflow-hidden ring-2 ring-gray-200" style={{ width: '65.66px', height: '62.85px' }}>
                 <img
                   src={displayUser.avatar_url || PH1}
                   alt={displayUser.name}
@@ -444,14 +491,32 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                   />
                   <label
                     htmlFor="avatar-upload-icon"
-                    className="absolute bottom-0 right-0 w-10 h-10 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors shadow-lg cursor-pointer flex items-center justify-center z-10"
-                    style={{ transform: 'translate(25%, 25%)' }}
+                    className="absolute bottom-0 right-0 hover:opacity-80 transition-all cursor-pointer flex items-center justify-center z-10"
+                    style={{ transform: 'translate(calc(25% - 4px), calc(25% - 4px))' }}
                     title="プロフィール画像を変更"
                   >
                     {uploadingAvatar ? (
-                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-purple-600 border-t-transparent" />
                     ) : (
-                      <span className="text-2xl font-bold leading-none">+</span>
+                      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Image src="/circle.svg" alt="プロフィール画像を変更" width={25} height={25} />
+                        <span
+                          style={{
+                            position: 'absolute',
+                            fontFamily: 'Noto Sans JP',
+                            fontWeight: 900,
+                            fontSize: '10px',
+                            lineHeight: '100%',
+                            letterSpacing: '0%',
+                            color: '#5C5C5C',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -60%)'
+                          }}
+                        >
+                          +
+                        </span>
+                      </div>
                     )}
                   </label>
                 </>
@@ -463,18 +528,24 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
               {/* Stats削除 - 今後実装予定 */}
 
               {/* ユーザー名 */}
-              <div className="font-semibold mb-3">{displayUser.name}</div>
+              <div className="flex items-center justify-between">
+                <div className="font-semibold">{displayUser.name}</div>
+                {isOwner && (
+                  <button
+                    onClick={() => setShowEditProfile(true)}
+                    className="hover:opacity-80 transition-all"
+                    title="プロフィールを編集"
+                  >
+                    <Image src="/edit.svg" alt="プロフィールを編集" width={15} height={15} />
+                  </button>
+                )}
+              </div>
 
               {/* Action Buttons */}
               <div className="flex gap-2">
                 {isOwner ? (
                   <>
-                    <button
-                      onClick={() => setShowEditProfile(true)}
-                      className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-sm transition-colors"
-                    >
-                      プロフィールを編集
-                    </button>
+                    {/* プロフィール編集ボタンはアイコンで上に移動 */}
                     {/* プロフィールをシェアは非表示 */}
                     {false && (
                     <button
@@ -604,23 +675,33 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
             {/* 下側：タロット・診断ボタン */}
             {isOwner && (
-              <div className="w-full grid grid-cols-2 gap-3">
+              <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 5%, 40px)' }}>
                 {/* タロット占い */}
                 <button
                   onClick={() => setShowDailyTarot(true)}
-                  className="w-full hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
-                  style={{ paddingLeft: '13.5px' }}
+                  className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
+                  style={{ 
+                    width: '150px', 
+                    height: '56px',
+                    flexShrink: 0,
+                    boxSizing: 'border-box'
+                  }}
                 >
-                  <img src="/タロット占い.svg" alt="今日のタロット占い" className="w-full h-auto shadow-lg hover:shadow-xl rounded-xl" />
+                  <img src="/タロット占い.svg" alt="今日のタロット占い" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
                 </button>
 
                 {/* 季節診断 */}
                 <button
                   onClick={() => setShowSeasonalDiagnosis(true)}
-                  className="w-full hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
-                  style={{ paddingRight: '13.5px' }}
+                  className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
+                  style={{ 
+                    width: '150px', 
+                    height: '56px',
+                    flexShrink: 0,
+                    boxSizing: 'border-box'
+                  }}
                 >
-                  <img src="/診断.svg" alt="パーソナル診断" className="w-full h-auto shadow-lg hover:shadow-xl rounded-xl" />
+                  <img src="/診断.svg" alt="パーソナル診断" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
                 </button>
                 </div>
               )}
