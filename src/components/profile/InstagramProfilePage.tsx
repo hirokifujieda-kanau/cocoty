@@ -445,20 +445,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                 >
                   <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
                 </button>
-                {/* ログアウトボタン - 後で有効にする可能性あり
-                <button
-                  onClick={async () => {
-                    if (confirm('ログアウトしますか？')) {
-                      await signOut();
-                      router.push('/login');
-                    }
-                  }}
-                  className="p-2 hover:bg-red-50 text-red-600 rounded-full transition-colors"
-                  title="ログアウト"
-                >
-                  <LogOut className="h-6 w-6" />
-                </button>
-                */}
               </div>
             )}
             {!isOwner && <div className="w-10" />}
