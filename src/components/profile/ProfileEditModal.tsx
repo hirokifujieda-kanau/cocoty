@@ -115,7 +115,6 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
       console.log('✅ Avatar uploaded to Cloudinary:', avatarUrl);
 
       // プロフィールを更新
-      const { updateProfile } = await import('@/lib/api/client');
       await updateProfile(profile.id, { avatar_url: avatarUrl });
       console.log('✅ Avatar URL saved to profile');
 

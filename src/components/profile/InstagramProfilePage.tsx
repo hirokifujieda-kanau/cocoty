@@ -373,25 +373,32 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.push('/')}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+      <div className="sticky top-0 bg-white border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
+        <div className="max-w-4xl mx-auto px-4 py-3 h-[30px] flex items-center">
+          <div className="flex items-center justify-between w-full px-1">
+            <h1 
+              className="font-semibold"
+              style={{
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 500,
+                fontSize: '16px',
+                lineHeight: '100%',
+                letterSpacing: '0%',
+                color: '#FFFFFF'
+              }}
             >
-              <ArrowLeft className="h-6 w-6" />
-            </button>
-            <h1 className="text-lg font-semibold">{displayUser.name}</h1>
+              {displayUser.name}
+            </h1>
             {isOwner && (
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="hover:bg-gray-100 rounded-full transition-colors"
                   title="設定"
                 >
-                  <Settings className="h-6 w-6" />
+                  <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
                 </button>
+                {/* ログアウトボタン - 後で有効にする可能性あり
                 <button
                   onClick={async () => {
                     if (confirm('ログアウトしますか？')) {
@@ -404,6 +411,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                 >
                   <LogOut className="h-6 w-6" />
                 </button>
+                */}
               </div>
             )}
             {!isOwner && <div className="w-10" />}
@@ -512,7 +520,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
             {/* 拡張プロフィール情報 */}
             {(displayUser.birthday || displayUser.age || displayUser.birthplace || displayUser.blood_type || displayUser.mbti_type) && (
-              <div className="space-y-2">
+              <div className="space-y-2 px-2">
                 <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">基本情報</div>
                 <div className="flex flex-wrap gap-2">
                   {/* 年齢・生年月日 */}
@@ -554,7 +562,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           {/* 趣味・好きな食べ物と曼荼羅アートを縦並びに */}
           <div className="flex flex-col gap-6 items-start mt-3">
             {/* 上側：趣味・好きな食べ物 */}
-            <div className="w-full space-y-3">
+            <div className="w-full space-y-3 px-2">
               {/* 趣味 */}
               {(displayUser as any).hobbies && (displayUser as any).hobbies.length > 0 && (
                 <div>
@@ -600,30 +608,20 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                 {/* タロット占い */}
                 <button
                   onClick={() => setShowDailyTarot(true)}
-                  className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                  className="w-full hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
+                  style={{ paddingLeft: '13.5px' }}
                 >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">🔮</span>
-                    <div className="text-left">
-                      <h3 className="font-bold text-base">今日のタロット占い</h3>
-                      <p className="text-xs opacity-90">毎日の運勢をチェック</p>
-                    </div>
-                  </div>
+                  <img src="/タロット占い.svg" alt="今日のタロット占い" className="w-full h-auto shadow-lg hover:shadow-xl rounded-xl" />
                 </button>
 
                 {/* 季節診断 */}
                 <button
                   onClick={() => setShowSeasonalDiagnosis(true)}
-                  className="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                  className="w-full hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
+                  style={{ paddingRight: '13.5px' }}
                 >
-                  <div className="flex items-center space-x-3">
-                    <Sparkles className="h-6 w-6" />
-                    <div className="text-left">
-                      <h3 className="font-bold text-base">パーソナル診断</h3>
-                      <p className="text-xs opacity-90">あなたの季節タイプは？</p>
-                    </div>
-                  </div>
-                  </button>
+                  <img src="/診断.svg" alt="パーソナル診断" className="w-full h-auto shadow-lg hover:shadow-xl rounded-xl" />
+                </button>
                 </div>
               )}
 

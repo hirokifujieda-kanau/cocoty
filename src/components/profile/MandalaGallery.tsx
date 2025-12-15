@@ -80,10 +80,10 @@ const MandalaGallery: React.FC<MandalaGalleryProps> = ({ userId, isOwner }) => {
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`w-[300px] h-[300px] border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+          className={`w-[343px] h-[231px] rounded-xl cursor-pointer transition-all ${
             isDragging
-              ? 'border-purple-500 bg-purple-100'
-              : 'border-purple-300 bg-purple-50/50 hover:bg-purple-50'
+              ? 'bg-purple-100'
+              : 'bg-gray-100'
           }`}
         >
           <input
@@ -107,9 +107,28 @@ const MandalaGallery: React.FC<MandalaGalleryProps> = ({ userId, isOwner }) => {
 
       {/* 画像表示 */}
       {images.length > 0 && (
-        <div className="relative w-[300px] h-[300px]">
+        <div className="relative w-[343px]">
+          <div 
+            className="w-full px-10 py-3 bg-yellow-400 rounded-t-lg text-center shadow-md"
+            style={{ 
+              backgroundColor: '#FFBA48',
+              paddingTop: '12px',
+              paddingBottom: '12px',
+              paddingLeft: '40px',
+              paddingRight: '40px',
+              boxShadow: '0px 1px 1px 0px #F0AC3C',
+              fontFamily: 'Noto Sans JP',
+              fontWeight: 700,
+              fontSize: '16px',
+              lineHeight: '16px',
+              letterSpacing: '0%',
+              color: '#FFFFFF'
+            }}
+          >
+            マンダラチャート
+          </div>
           <div
-            className="relative w-full h-full group cursor-pointer rounded-xl overflow-hidden shadow-md"
+            className="relative w-[343px] h-[231px] group cursor-pointer rounded-b-xl overflow-hidden shadow-md"
             onClick={() => setSelectedImage(images[0].url)}
           >
             <img

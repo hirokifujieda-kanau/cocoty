@@ -7,6 +7,11 @@ import { auth } from '@/lib/firebaseConfig';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1';
 
+// デバッグ用：API設定確認
+console.log('🔧 API Configuration:');
+console.log('API_BASE_URL:', API_BASE_URL);
+console.log('NEXT_PUBLIC_API_BASE_URL env:', process.env.NEXT_PUBLIC_API_BASE_URL);
+
 /**
  * Firebase ID Tokenを取得
  */
@@ -16,6 +21,10 @@ async function getIdToken(): Promise<string | null> {
   console.log('🔐 Getting ID token...');
   console.log('Firebase currentUser:', user?.email, user?.uid);
   
+  // localStorage のトークンも確認
+  const storedToken = typeof window !== 'undefined' ? localStorage.getItem('firebaseIdToken') : null;
+  console.log('📦 Token in localStorage:', storedToken ? `${storedToken.substring(0, 20)}...` : 'not found');
+  
   if (!user) {
     console.warn('⚠️ No Firebase user found');
     return null;
@@ -24,6 +33,13 @@ async function getIdToken(): Promise<string | null> {
   try {
     const token = await user.getIdToken(true); // 強制的に最新のトークンを取得
     console.log('✅ ID token obtained:', token ? `${token.substring(0, 20)}...` : 'null');
+    
+    // localStorage に保存（バックエンドの確認用）
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('firebaseIdToken', token);
+      console.log('💾 Token saved to localStorage');
+    }
+    
     return token;
   } catch (error) {
     console.error('❌ Failed to get ID token:', error);
@@ -68,7 +84,15 @@ async function apiRequest<T>(
   const url = `${API_BASE_URL}${endpoint}`;
   
   console.log(`🌐 API Request: ${fetchOptions.method || 'GET'} ${url}`);
-  console.log('Headers:', headers);
+  console.log('📋 Request Headers:', headers);
+  
+  // Authorization ヘッダーの詳細確認
+  const headersObj = headers as Record<string, string>;
+  if (headersObj['Authorization']) {
+    console.log('🔑 Authorization Header:', `${headersObj['Authorization'].substring(0, 30)}...`);
+  } else {
+    console.warn('⚠️ No Authorization header present (requireAuth:', requireAuth, ')');
+  }
   
   try {
     const response = await fetch(url, {
