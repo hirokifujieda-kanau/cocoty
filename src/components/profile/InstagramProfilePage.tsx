@@ -375,7 +375,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 bg-white border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
-        <div className="mx-auto px-4 h-[30px] flex items-center" style={{ maxWidth: '812px' }}>
+        <div className="mx-auto px-4 h-[30px] flex items-center" style={{ maxWidth: '750px' }}>
           <div className="flex items-center justify-between w-full px-1">
             <h1 
               className="font-semibold"
@@ -389,7 +389,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                 verticalAlign: 'middle'
               }}
             >
-              {displayUser.name}
+              ここてぃ
             </h1>
             {isOwner && (
               <div className="flex gap-2 items-center">
@@ -452,9 +452,9 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         </div>
       </div>
 
-      <div className="mx-auto" style={{ maxWidth: '812px' }}>
-        {/* Profile Section */}
-        <div className="px-4 py-6">
+      <div className="mx-auto" style={{ maxWidth: '750px', width: '100%' }}>
+        {/* Profile Section - 内部コンテンツ最大幅 626px（750px - 88px*2 - 18px*2） */}
+        <div className="py-6" style={{ paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
           <div className="flex items-center gap-6 mb-6">
             {/* Avatar */}
             <div className="flex-shrink-0 relative">
@@ -566,18 +566,14 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             </div>
           </div>
 
-          {/* Bio */}
-          <div className="space-y-2">
-            <div className="font-medium text-sm leading-[1.3] text-gray-500 mb-[26px]">{displayUser.bio}</div>
-            {displayUser.diagnosis && (
-              <div className="text-sm text-purple-600">
-                診断: {displayUser.diagnosis}
-              </div>
-            )}
+          {/* Bio - 独立表示 */}
+          <div className="font-medium text-sm leading-[1.3] text-gray-500 mb-[26px]">{displayUser.bio}</div>
 
-            {/* 拡張プロフィール情報 */}
+          {/* 基本情報・趣味・好きな食べ物をまとめたセクション */}
+          <div className="space-y-4 mb-6">
+            {/* 基本情報 */}
             {(displayUser.birthday || displayUser.age || displayUser.birthplace || displayUser.blood_type || displayUser.mbti_type) && (
-              <div className="space-y-2 px-2">
+              <div className="space-y-2">
                 <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">基本情報</div>
                 <div className="flex flex-wrap gap-2">
                   {/* 年齢・生年月日 */}
@@ -614,61 +610,57 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                 </div>
               </div>
             )}
+
+            {/* 趣味 */}
+            {(displayUser as any).hobbies && (displayUser as any).hobbies.length > 0 && (
+              <div className="space-y-2">
+                <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">趣味</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {(displayUser as any).hobbies.map((hobby: string, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => router.push(`/tags/${encodeURIComponent(hobby)}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full cursor-pointer"
+                      style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #E891A2' }}
+                    >
+                      {hobby}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 好きな食べ物 */}
+            {(displayUser as any).favoriteFood && (displayUser as any).favoriteFood.length > 0 && (
+              <div className="space-y-2">
+                <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">好きな食べ物</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {(displayUser as any).favoriteFood.map((food: string, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => router.push(`/tags/${encodeURIComponent(food)}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full cursor-pointer"
+                      style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #E891A2' }}
+                    >
+                      🍽️ {food}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* 趣味・好きな食べ物と曼荼羅アートを縦並びに */}
-          <div className="flex flex-col gap-6 items-start mt-3">
-            {/* 上側：趣味・好きな食べ物 */}
-            <div className="w-full space-y-3 px-2">
-              {/* 趣味 */}
-              {(displayUser as any).hobbies && (displayUser as any).hobbies.length > 0 && (
-                <div>
-                  <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">趣味</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(displayUser as any).hobbies.map((hobby: string, idx: number) => (
-                      <button
-                        key={idx}
-                        onClick={() => router.push(`/tags/${encodeURIComponent(hobby)}`)}
-                        className="inline-flex items-center px-2 py-1 text-xs rounded-full cursor-pointer"
-                        style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #E891A2' }}
-                      >
-                        {hobby}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 好きな食べ物 */}
-              {(displayUser as any).favoriteFood && (displayUser as any).favoriteFood.length > 0 && (
-                <div className="mt-[18px]">
-                  <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">好きな食べ物</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(displayUser as any).favoriteFood.map((food: string, idx: number) => (
-                      <button
-                        key={idx}
-                        onClick={() => router.push(`/tags/${encodeURIComponent(food)}`)}
-                        className="inline-flex items-center px-2 py-1 text-xs rounded-full cursor-pointer"
-                        style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #E891A2' }}
-                      >
-                        🍽️ {food}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 下側：タロット・診断ボタン */}
+          {/* 曼荼羅アートとタロット・診断ボタンを縦並びに */}
+          <div className="flex flex-col gap-6 items-start mt-6">
             {isOwner && (
-              <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 5%, 40px)' }}>
+              <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
                 {/* タロット占い */}
                 <button
                   onClick={() => setShowDailyTarot(true)}
                   className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
                   style={{ 
-                    width: '150px', 
-                    height: '56px',
+                    width: 'clamp(150px, 26vw, 200px)', 
+                    height: 'clamp(56px, 10vw, 75px)',
                     flexShrink: 0,
                     boxSizing: 'border-box'
                   }}
@@ -681,8 +673,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                   onClick={() => setShowSeasonalDiagnosis(true)}
                   className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
                   style={{ 
-                    width: '150px', 
-                    height: '56px',
+                    width: 'clamp(150px, 26vw, 200px)', 
+                    height: 'clamp(56px, 10vw, 75px)',
                     flexShrink: 0,
                     boxSizing: 'border-box'
                   }}

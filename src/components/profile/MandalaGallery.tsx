@@ -107,10 +107,11 @@ const MandalaGallery: React.FC<MandalaGalleryProps> = ({ userId, isOwner }) => {
 
       {/* 画像表示 */}
       {images.length > 0 && (
-        <div className="relative w-[343px]">
+        <div className="relative" style={{ width: 'clamp(343px, 60vw, 472px)' }}>
           <div 
             className="w-full px-10 py-3 bg-yellow-400 rounded-t-lg text-center shadow-md"
             style={{ 
+              height: '40px',
               backgroundColor: '#FFBA48',
               paddingTop: '12px',
               paddingBottom: '12px',
@@ -128,13 +129,22 @@ const MandalaGallery: React.FC<MandalaGalleryProps> = ({ userId, isOwner }) => {
             マンダラチャート
           </div>
           <div
-            className="relative w-[343px] h-[231px] group cursor-pointer rounded-b-xl overflow-hidden shadow-md"
+            className="relative flex items-center justify-center group cursor-pointer rounded-b-xl overflow-hidden shadow-md"
+            style={{ 
+              width: 'clamp(343px, 60vw, 472px)',
+              height: 'clamp(231px, 40vw, 243px)',
+              backgroundColor: '#F9F9F9'
+            }}
             onClick={() => setSelectedImage(images[0].url)}
           >
             <img
               src={images[0].url}
               alt="Mandala art"
-              className="w-full h-full object-cover"
+              style={{
+                width: '251px',
+                height: '187px',
+                objectFit: 'cover'
+              }}
             />
             {isOwner && (
               <button
