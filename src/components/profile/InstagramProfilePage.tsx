@@ -375,8 +375,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 bg-white border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
-        <div className="mx-auto px-4 h-[30px] flex items-center" style={{ maxWidth: '750px' }}>
-          <div className="flex items-center justify-between w-full px-1">
+        <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
+          <div className="flex items-center justify-between w-full">
             <h1 
               className="font-semibold"
               style={{
@@ -458,7 +458,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           <div className="flex items-center gap-6 mb-6">
             {/* Avatar */}
             <div className="flex-shrink-0 relative">
-              <div className="relative rounded-full overflow-hidden ring-2 ring-gray-200" style={{ width: '65.66px', height: '62.85px' }}>
+              <div className="relative rounded-full overflow-hidden ring-2 ring-gray-200" style={{ width: 'clamp(65.66px, 22vw, 165px)', height: 'clamp(62.85px, 21vw, 157.96px)' }}>
                 <img
                   src={displayUser.avatar_url || PH1}
                   alt={displayUser.name}
@@ -515,7 +515,18 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
               {/* ユーザー名 */}
               <div className="flex items-center justify-between">
-                <div className="font-semibold">{displayUser.name}</div>
+                <div 
+                  style={{
+                    fontFamily: 'Noto Sans JP',
+                    fontWeight: 700,
+                    fontSize: 'clamp(16px, 2.67vw, 20px)',
+                    lineHeight: 1.3,
+                    letterSpacing: '0%',
+                    color: '#1A1A1A'
+                  }}
+                >
+                  {displayUser.name}
+                </div>
                 {isOwner && (
                   <button
                     onClick={() => setShowEditProfile(true)}
