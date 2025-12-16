@@ -4,6 +4,18 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 
+const styles = `
+  input::placeholder {
+    color: #A3A3A3;
+    font-family: Inter;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 130%;
+    letter-spacing: 0%;
+    opacity: 1;
+  }
+`;
+
 const SignupPage: React.FC = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -19,11 +31,15 @@ const SignupPage: React.FC = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const isFormValid = formData.name.trim() && formData.email.trim() && formData.password.length >= 8 && formData.confirmPassword.length >= 8;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setPasswordErrors([]);
 
     // Validation
     if (!formData.name.trim()) {
@@ -41,13 +57,18 @@ const SignupPage: React.FC = () => {
       return;
     }
 
-    if (!/[0-9]/.test(formData.password) || !/[a-zA-Z]/.test(formData.password)) {
-      setError('パスワードは英字と数字を混合させてください');
-      return;
+    const errors: string[] = [];
+    
+    if (formData.password !== formData.confirmPassword) {
+      errors.push('パスワードが一致しません');
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('パスワードが一致しません');
+    if (!/[0-9]/.test(formData.password) || !/[a-zA-Z]/.test(formData.password)) {
+      errors.push('パスワードには英語も使用してください');
+    }
+
+    if (errors.length > 0) {
+      setPasswordErrors(errors);
       return;
     }
 
@@ -70,6 +91,7 @@ const SignupPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      <style>{styles}</style>
       {/* Header */}
       <div className="sticky top-0 bg-white py-8 px-4">
         <div className="flex items-center justify-center gap-4 relative">
@@ -160,15 +182,17 @@ const SignupPage: React.FC = () => {
               >
                 生年月日
               </label>
-              <div className="flex items-center gap-2" style={{ marginBottom: '14px' }}>
+              <div className="flex items-center" style={{ marginBottom: '14px', gap: '4px' }}>
                 <input
                   type="number"
                   min="1900"
                   max="2024"
                   value={formData.year}
                   onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                  className="flex-1 px-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-center"
+                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-center placeholder-gray-400"
+                  placeholder="1999"
                   style={{
+                    width: '60px',
                     height: '28px',
                     fontFamily: 'Inter',
                     fontWeight: 500,
@@ -178,15 +202,17 @@ const SignupPage: React.FC = () => {
                     color: '#1A1A1A'
                   }}
                 />
-                <span className="text-gray-600">年</span>
+                <span style={{ fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '12px', letterSpacing: '0%', color: '#5C5C5C' }}>年</span>
                 <input
                   type="number"
                   min="1"
                   max="12"
                   value={formData.month}
                   onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400"
+                  placeholder="1"
                   style={{
+                    width: '35px',
                     height: '28px',
                     paddingLeft: '8.5px',
                     paddingRight: '8.5px',
@@ -198,15 +224,17 @@ const SignupPage: React.FC = () => {
                     color: '#1A1A1A'
                   }}
                 />
-                <span className="text-gray-600">月</span>
+                <span style={{ fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '12px', letterSpacing: '0%', color: '#5C5C5C' }}>月</span>
                 <input
                   type="number"
                   min="1"
                   max="31"
                   value={formData.day}
                   onChange={(e) => setFormData({ ...formData, day: e.target.value })}
-                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400"
+                  placeholder="1"
                   style={{
+                    width: '35px',
                     height: '28px',
                     paddingLeft: '8.5px',
                     paddingRight: '8.5px',
@@ -218,15 +246,49 @@ const SignupPage: React.FC = () => {
                     color: '#1A1A1A'
                   }}
                 />
-                <span className="text-gray-600">日</span>
-                <label className="flex items-center gap-2 ml-auto cursor-pointer">
+                <span style={{ fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '12px', letterSpacing: '0%', color: '#5C5C5C' }}>日</span>
+                <label className="flex items-center gap-2 ml-auto cursor-pointer relative">
+                  <span style={{ fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '12px', letterSpacing: '0%', color: '#1A1A1A' }}>
+                    {formData.isPrivate ? '公開' : '非公開'}
+                  </span>
                   <input
                     type="checkbox"
                     checked={formData.isPrivate}
                     onChange={(e) => setFormData({ ...formData, isPrivate: e.target.checked })}
-                    className="w-5 h-5 rounded"
+                    style={{ display: 'none' }}
                   />
-                  <span className="text-xs text-gray-600">非公開</span>
+                  <div
+                    style={{
+                      width: '50px',
+                      height: '20px',
+                      borderRadius: '50px',
+                      backgroundColor: formData.isPrivate ? '#FFD26A' : '#CDCDCD',
+                      transition: 'background-color 0.3s',
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      paddingTop: '8px',
+                      paddingRight: '3px',
+                      paddingBottom: '8px',
+                      paddingLeft: '3px',
+                      boxSizing: 'border-box',
+                      opacity: 1
+                    }}
+                  >
+                    <img
+                      src="/Frame 1321317495.svg"
+                      alt="toggle"
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '10px',
+                        opacity: 1,
+                        transition: 'all 0.3s',
+                        position: 'absolute',
+                        left: formData.isPrivate ? '31px' : '3px'
+                      }}
+                    />
+                  </div>
                 </label>
               </div>
             </div>
@@ -283,7 +345,7 @@ const SignupPage: React.FC = () => {
                   marginBottom: '10px'
                 }}
               >
-                パスワード <span className="text-xs text-gray-600">8文字以上・数字混合 必須</span>
+                パスワード <span style={{ fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '10px', lineHeight: '12px', letterSpacing: '0%', color: '#828282', marginLeft: '7px' }}>8文字以上・数字混合 必須</span>
               </label>
               <div className="relative" style={{ marginBottom: '14px' }}>
                 <input
@@ -333,13 +395,16 @@ const SignupPage: React.FC = () => {
                   marginBottom: '10px'
                 }}
               >
-                パスワード再入力 <span className="text-xs text-gray-600">8文字以上・英数字混合 必須</span>
+                パスワード再入力 <span style={{ fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '10px', lineHeight: '12px', letterSpacing: '0%', color: '#828282', marginLeft: '7px' }}>8文字以上・英数字混合 必須</span>
               </label>
-              <div className="relative" style={{ marginBottom: '14px' }}>
+              <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, confirmPassword: e.target.value });
+                    setPasswordErrors([]);
+                  }}
                   className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10"
                   placeholder=""
                   required
@@ -351,7 +416,8 @@ const SignupPage: React.FC = () => {
                     fontSize: '14px',
                     lineHeight: '130%',
                     letterSpacing: '0%',
-                    color: '#1A1A1A'
+                    color: '#1A1A1A',
+                    border: passwordErrors.length > 0 ? '1px solid #FF0000' : 'none'
                   }}
                 />
                 <button
@@ -367,13 +433,57 @@ const SignupPage: React.FC = () => {
                   )}
                 </button>
               </div>
+              {passwordErrors.length > 0 && (
+                <div style={{ marginTop: '2px' }}>
+                  {passwordErrors.map((err, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        fontFamily: 'Noto Sans JP',
+                        fontWeight: 700,
+                        fontSize: '10px',
+                        lineHeight: '12px',
+                        letterSpacing: '0%',
+                        color: '#FF383C',
+                        marginBottom: idx < passwordErrors.length - 1 ? '4px' : '0'
+                      }}
+                    >
+                      {err}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-yellow-300 hover:bg-yellow-400 disabled:bg-gray-300 text-gray-900 font-bold rounded-lg transition-colors mt-8"
+              disabled={!isFormValid || isLoading}
+              style={{
+                width: 'calc(100% - 161px)',
+                marginLeft: '80.5px',
+                marginRight: '80.5px',
+                gap: '8px',
+                opacity: 1,
+                borderRadius: '12px',
+                backgroundColor: isFormValid ? '#FFBA48' : '#F8E8AA',
+                border: 'none',
+                cursor: isFormValid ? 'pointer' : 'not-allowed',
+                transition: 'background-color 0.3s',
+                marginTop: '32px',
+                fontFamily: 'Inter',
+                fontWeight: 500,
+                fontSize: '16px',
+                lineHeight: '150%',
+                letterSpacing: '0%',
+                color: isFormValid ? '#FFFFFF' : '#FFFFFFB2',
+                verticalAlign: 'middle',
+                minHeight: '48px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: isFormValid ? 'none' : '0px 1px 2px 0px #0000000D'
+              }}
             >
               {isLoading ? '登録中...' : '登録'}
             </button>
