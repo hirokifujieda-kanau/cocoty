@@ -410,10 +410,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                   <input
                     type="text"
                     placeholder="ユーザー一覧"
-                    className="px-4 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className={`px-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${styles.searchInput}`}
                     style={{
-                      width: '150px',
-                      height: '20px',
                       fontSize: '10px',
                       fontFamily: 'Noto Sans JP',
                       fontWeight: 500,
@@ -455,7 +453,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
       <div className="mx-auto" style={{ maxWidth: '750px', width: '100%' }}>
         {/* Profile Section - 内部コンテンツ最大幅 626px（750px - 88px*2 - 18px*2） */}
-        <div className="py-6" style={{ paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
+        <div className={`py-6 ${styles.profileSection}`}>
           <div className="flex items-center gap-6 mb-6">
             {/* Avatar */}
             <div className="flex-shrink-0 relative">

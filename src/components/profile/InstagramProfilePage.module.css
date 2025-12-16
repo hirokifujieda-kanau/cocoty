@@ -10,3 +10,27 @@
   }
 }
 
+.searchInput {
+  width: 120px;
+  height: 20px;
+}
+
+@media (min-width: 750px) {
+  .searchInput {
+    width: 200px;
+    height: 20px;
+  }
+}
+
+.profileSection {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 750px) {
+  .profileSection {
+    padding-left: 106px;
+    padding-right: 106px;
+  }
+}
+
