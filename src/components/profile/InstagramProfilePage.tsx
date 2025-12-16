@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Settings, Grid, Bookmark, Sparkles, TrendingUp, Heart as HeartIcon, Users, Calendar, BookOpen, CheckCircle2, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { PH1, PH2, PH3 } from '@/lib/placeholders';
+import styles from './InstagramProfilePage.module.css';
 import DailyTarot from '@/components/fortune/DailyTarot';
 import SeasonalDiagnosisHub from '@/components/fortune/SeasonalDiagnosisHub';
 import MentalStatsAdmin from '@/components/fortune/MentalStatsAdmin';
@@ -477,27 +478,26 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                   />
                   <label
                     htmlFor="avatar-upload-icon"
-                    className="absolute bottom-0 right-0 hover:opacity-80 transition-all cursor-pointer flex items-center justify-center z-10"
-                    style={{ transform: 'translate(calc(25% - 4px), calc(25% - 4px))' }}
+                    className={`absolute hover:opacity-80 transition-all cursor-pointer flex items-center justify-center z-10 ${styles.avatarLabel}`}
                     title="プロフィール画像を変更"
                   >
                     {uploadingAvatar ? (
                       <div className="animate-spin rounded-full h-6 w-6 border-2 border-purple-600 border-t-transparent" />
                     ) : (
                       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Image src="/circle.svg" alt="プロフィール画像を変更" width={25} height={25} />
+                        <Image src="/circle.svg" alt="プロフィール画像を変更" width={25} height={25} style={{ width: 'clamp(25px, 8.33vw, 30px)', height: 'clamp(25px, 8.33vw, 30px)' }} />
                         <span
                           style={{
                             position: 'absolute',
                             fontFamily: 'Noto Sans JP',
                             fontWeight: 900,
-                            fontSize: '10px',
+                            fontSize: 'clamp(10px, 3.33vw, 20px)',
                             lineHeight: '100%',
                             letterSpacing: '0%',
                             color: '#5C5C5C',
                             top: '50%',
                             left: '50%',
-                            transform: 'translate(-50%, -60%)'
+                            transform: 'translate(-50%, -68%)'
                           }}
                         >
                           +
