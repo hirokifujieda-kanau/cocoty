@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Eye, EyeOff } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 
 const SignupPage: React.FC = () => {
   const router = useRouter();
@@ -71,20 +71,33 @@ const SignupPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
-        <div className="flex items-center gap-4">
+      <div className="sticky top-0 bg-white py-8 px-4">
+        <div className="flex items-center justify-center gap-4 relative">
           <button
             onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="absolute left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ChevronLeft className="h-6 w-6 text-gray-900" />
           </button>
-          <h1 className="text-xl font-bold text-gray-900">アカウント作成</h1>
+          <h1
+            style={{
+              fontFamily: 'Noto Sans JP',
+              fontWeight: 700,
+              fontSize: '20px',
+              lineHeight: '20px',
+              letterSpacing: '0%',
+              textAlign: 'center',
+              verticalAlign: 'middle',
+              color: '#1A1A1A'
+            }}
+          >
+            アカウント作成
+          </h1>
         </div>
       </div>
 
       {/* Form Container */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto" style={{ paddingLeft: '37.5px', paddingRight: '37.5px' }}>
         <div className="max-w-md mx-auto">
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
@@ -92,35 +105,78 @@ const SignupPage: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit}>
             {/* Name */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label
+                style={{
+                  display: 'block',
+                  fontFamily: 'Noto Sans JP',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  lineHeight: '12px',
+                  letterSpacing: '0%',
+                  color: '#1A1A1A',
+                  marginBottom: '10px'
+                }}
+              >
                 名前
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 placeholder=""
                 required
+                style={{
+                  height: '28px',
+                  marginBottom: '14px',
+                  paddingLeft: '8px',
+                  paddingRight: '8px',
+                  fontFamily: 'Inter',
+                  fontWeight: 500,
+                  fontSize: '14px',
+                  lineHeight: '130%',
+                  letterSpacing: '0%',
+                  color: '#1A1A1A'
+                }}
               />
             </div>
 
             {/* Birthday */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label
+                style={{
+                  display: 'block',
+                  fontFamily: 'Noto Sans JP',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  lineHeight: '12px',
+                  letterSpacing: '0%',
+                  color: '#1A1A1A',
+                  marginBottom: '10px'
+                }}
+              >
                 生年月日
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2" style={{ marginBottom: '14px' }}>
                 <input
                   type="number"
                   min="1900"
                   max="2024"
                   value={formData.year}
                   onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                  className="flex-1 px-3 py-2 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-center"
+                  className="flex-1 px-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-center"
+                  style={{
+                    height: '28px',
+                    fontFamily: 'Inter',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    lineHeight: '130%',
+                    letterSpacing: '0%',
+                    color: '#1A1A1A'
+                  }}
                 />
                 <span className="text-gray-600">年</span>
                 <input
@@ -129,7 +185,18 @@ const SignupPage: React.FC = () => {
                   max="12"
                   value={formData.month}
                   onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-                  className="w-16 px-3 py-2 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-center"
+                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  style={{
+                    height: '28px',
+                    paddingLeft: '8.5px',
+                    paddingRight: '8.5px',
+                    fontFamily: 'Inter',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    lineHeight: '130%',
+                    letterSpacing: '0%',
+                    color: '#1A1A1A'
+                  }}
                 />
                 <span className="text-gray-600">月</span>
                 <input
@@ -138,7 +205,18 @@ const SignupPage: React.FC = () => {
                   max="31"
                   value={formData.day}
                   onChange={(e) => setFormData({ ...formData, day: e.target.value })}
-                  className="w-16 px-3 py-2 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-center"
+                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  style={{
+                    height: '28px',
+                    paddingLeft: '8.5px',
+                    paddingRight: '8.5px',
+                    fontFamily: 'Inter',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    lineHeight: '130%',
+                    letterSpacing: '0%',
+                    color: '#1A1A1A'
+                  }}
                 />
                 <span className="text-gray-600">日</span>
                 <label className="flex items-center gap-2 ml-auto cursor-pointer">
@@ -155,42 +233,87 @@ const SignupPage: React.FC = () => {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label
+                style={{
+                  display: 'block',
+                  fontFamily: 'Noto Sans JP',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  lineHeight: '12px',
+                  letterSpacing: '0%',
+                  color: '#1A1A1A',
+                  marginBottom: '10px'
+                }}
+              >
                 メールアドレス
               </label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 placeholder=""
                 required
+                style={{
+                  height: '28px',
+                  marginBottom: '14px',
+                  paddingLeft: '8px',
+                  paddingRight: '8px',
+                  fontFamily: 'Inter',
+                  fontWeight: 500,
+                  fontSize: '14px',
+                  lineHeight: '130%',
+                  letterSpacing: '0%',
+                  color: '#1A1A1A'
+                }}
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label
+                style={{
+                  display: 'block',
+                  fontFamily: 'Noto Sans JP',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  lineHeight: '12px',
+                  letterSpacing: '0%',
+                  color: '#1A1A1A',
+                  marginBottom: '10px'
+                }}
+              >
                 パスワード <span className="text-xs text-gray-600">8文字以上・数字混合 必須</span>
               </label>
-              <div className="relative">
+              <div className="relative" style={{ marginBottom: '14px' }}>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10"
+                  className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10"
                   placeholder=""
                   required
+                  style={{
+                    height: '28px',
+                    paddingLeft: '8px',
+                    fontFamily: 'Inter',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    lineHeight: '130%',
+                    letterSpacing: '0%',
+                    color: '#1A1A1A'
+                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ width: '20px', height: '16.62px' }}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <img src="/open.svg" alt="Hide password" style={{ width: '100%', height: '100%' }} />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <img src="/close.svg" alt="Show password" style={{ width: '100%', height: '100%' }} />
                   )}
                 </button>
               </div>
@@ -198,27 +321,49 @@ const SignupPage: React.FC = () => {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label
+                style={{
+                  display: 'block',
+                  fontFamily: 'Noto Sans JP',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  lineHeight: '12px',
+                  letterSpacing: '0%',
+                  color: '#1A1A1A',
+                  marginBottom: '10px'
+                }}
+              >
                 パスワード再入力 <span className="text-xs text-gray-600">8文字以上・英数字混合 必須</span>
               </label>
-              <div className="relative">
+              <div className="relative" style={{ marginBottom: '14px' }}>
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10"
+                  className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10"
                   placeholder=""
                   required
+                  style={{
+                    height: '28px',
+                    paddingLeft: '8px',
+                    fontFamily: 'Inter',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    lineHeight: '130%',
+                    letterSpacing: '0%',
+                    color: '#1A1A1A'
+                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ width: '20px', height: '16.62px' }}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <img src="/open.svg" alt="Hide password" style={{ width: '100%', height: '100%' }} />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <img src="/close.svg" alt="Show password" style={{ width: '100%', height: '100%' }} />
                   )}
                 </button>
               </div>
