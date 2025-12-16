@@ -22,9 +22,9 @@ const SignupPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    year: '1999',
-    month: '1',
-    day: '1',
+    year: '',
+    month: '',
+    day: '',
     isPrivate: true,
     email: '',
     password: '',
