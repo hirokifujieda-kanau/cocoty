@@ -80,10 +80,10 @@ const MandalaGallery: React.FC<MandalaGalleryProps> = ({ userId, isOwner }) => {
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`w-[300px] h-[300px] border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+          className={`w-[343px] h-[231px] rounded-xl cursor-pointer transition-all ${
             isDragging
-              ? 'border-purple-500 bg-purple-100'
-              : 'border-purple-300 bg-purple-50/50 hover:bg-purple-50'
+              ? 'bg-purple-100'
+              : 'bg-gray-100'
           }`}
         >
           <input
@@ -107,15 +107,44 @@ const MandalaGallery: React.FC<MandalaGalleryProps> = ({ userId, isOwner }) => {
 
       {/* 画像表示 */}
       {images.length > 0 && (
-        <div className="relative w-[300px] h-[300px]">
+        <div className="relative" style={{ width: 'clamp(343px, 60vw, 472px)' }}>
+          <div 
+            className="w-full px-10 py-3 bg-yellow-400 rounded-t-lg text-center shadow-md"
+            style={{ 
+              height: '40px',
+              backgroundColor: '#FFBA48',
+              paddingTop: '12px',
+              paddingBottom: '12px',
+              paddingLeft: '40px',
+              paddingRight: '40px',
+              boxShadow: '0px 1px 1px 0px #F0AC3C',
+              fontFamily: 'Noto Sans JP',
+              fontWeight: 700,
+              fontSize: '16px',
+              lineHeight: '16px',
+              letterSpacing: '0%',
+              color: '#FFFFFF'
+            }}
+          >
+            マンダラチャート
+          </div>
           <div
-            className="relative w-full h-full group cursor-pointer rounded-xl overflow-hidden shadow-md"
+            className="relative flex items-center justify-center group cursor-pointer rounded-b-xl overflow-hidden shadow-md"
+            style={{ 
+              width: 'clamp(343px, 60vw, 472px)',
+              height: 'clamp(231px, 40vw, 243px)',
+              backgroundColor: '#F9F9F9'
+            }}
             onClick={() => setSelectedImage(images[0].url)}
           >
             <img
               src={images[0].url}
               alt="Mandala art"
-              className="w-full h-full object-cover"
+              style={{
+                width: '251px',
+                height: '187px',
+                objectFit: 'cover'
+              }}
             />
             {isOwner && (
               <button

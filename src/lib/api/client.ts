@@ -13,20 +13,20 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5
 async function getIdToken(): Promise<string | null> {
   const user = auth.currentUser;
   
-  console.log('🔐 Getting ID token...');
-  console.log('Firebase currentUser:', user?.email, user?.uid);
-  
   if (!user) {
-    console.warn('⚠️ No Firebase user found');
     return null;
   }
   
   try {
     const token = await user.getIdToken(true); // 強制的に最新のトークンを取得
-    console.log('✅ ID token obtained:', token ? `${token.substring(0, 20)}...` : 'null');
+    
+    // localStorage に保存（バックエンドの確認用）
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('firebaseIdToken', token);
+    }
+    
     return token;
-  } catch (error) {
-    console.error('❌ Failed to get ID token:', error);
+  } catch {
     return null;
   }
 }
@@ -41,13 +41,10 @@ async function getHeaders(requireAuth: boolean = false): Promise<HeadersInit> {
   
   if (requireAuth) {
     const token = await getIdToken();
-    console.log('🔑 Auth required, token:', token ? 'Present' : 'Missing');
     
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log('✅ Authorization header added');
     } else {
-      console.error('❌ Authorization required but token is null!');
       throw new Error('Firebase authentication required. Please log in again.');
     }
   }
@@ -67,9 +64,6 @@ async function apiRequest<T>(
   const headers = await getHeaders(requireAuth);
   const url = `${API_BASE_URL}${endpoint}`;
   
-  console.log(`🌐 API Request: ${fetchOptions.method || 'GET'} ${url}`);
-  console.log('Headers:', headers);
-  
   try {
     const response = await fetch(url, {
       ...fetchOptions,
@@ -79,11 +73,8 @@ async function apiRequest<T>(
       },
     });
     
-    console.log(`📡 API Response: ${response.status} ${response.statusText}`);
-    
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ API Error Response:', errorText);
       
       let errorMessage = 'API request failed';
       try {
@@ -97,11 +88,8 @@ async function apiRequest<T>(
     }
     
     const data = await response.json();
-    console.log('✅ API Response Data:', data);
     return data;
   } catch (error: any) {
-    console.error('❌ API Request Error:', error);
-    
     // ネットワークエラーの場合
     if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
       throw new Error(`Rails APIサーバーに接続できません。${url} が起動しているか確認してください。`);

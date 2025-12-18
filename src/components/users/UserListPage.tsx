@@ -27,14 +27,11 @@ export function UserListPage() {
       try {
         setLoading(true);
         setError(null);
-        console.log(`📡 Fetching profiles - Page ${currentPage}`);
         
         const response = await getProfiles(currentPage, 20);
-        console.log('✅ Profiles loaded:', response);
         
         setData(response);
       } catch (err) {
-        console.error('❌ Failed to load profiles:', err);
         setError(err instanceof Error ? err.message : 'プロフィールの取得に失敗しました');
       } finally {
         setLoading(false);

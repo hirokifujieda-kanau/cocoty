@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Settings, Grid, Bookmark, Sparkles, TrendingUp, Heart as HeartIcon, Users, Calendar, BookOpen, CheckCircle2, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { PH1, PH2, PH3 } from '@/lib/placeholders';
+import styles from './InstagramProfilePage.module.css';
 import DailyTarot from '@/components/fortune/DailyTarot';
 import SeasonalDiagnosisHub from '@/components/fortune/SeasonalDiagnosisHub';
 import MentalStatsAdmin from '@/components/fortune/MentalStatsAdmin';
@@ -14,7 +16,7 @@ import ShareProfileModal from '@/components/profile/ShareProfileModal';
 import MandalaGallery from '@/components/profile/MandalaGallery';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
-import { getCurrentUser, getProfile, Profile } from '@/lib/api/client';
+import { getCurrentUser, getProfile, updateProfile, type Profile } from '@/lib/api/client';
 
 const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdProp }) => {
   const { user, signOut } = useAuth();
@@ -34,18 +36,9 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   // URLパラメータがない場合は自分のプロフィール（オーナー）として扱う
   const isOwner = !userId;
   
-  console.log('=== InstagramProfilePage Debug ===');
-  console.log('Firebase user:', user?.email);
-  console.log('userId from props/URL:', userId);
-  console.log('isOwner:', isOwner);
-  console.log('===================================');
-  
   // プロフィールデータを再取得する関数
   const refetchProfile = async () => {
-    console.log('🔄 refetchProfile called!');
-    
     if (!user) {
-      console.log('⚠️ No Firebase user found, skipping profile fetch');
       setLoading(false);
       return;
     }
@@ -56,35 +49,19 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
       if (isOwner) {
         // 自分のプロフィールを取得
-        console.log('🔍 Refetching my profile...');
         const response = await getCurrentUser();
-        console.log('API response:', response);
         
         if (response.profile) {
           setDisplayUser(response.profile);
-          console.log('✅ My profile reloaded:', response.profile);
         } else {
-          console.warn('⚠️ Profile not found in response');
           setError('プロフィールが見つかりません。初回ログインの場合は、プロフィールを作成してください。');
         }
       } else if (userId) {
         // 他のユーザーのプロフィールを取得
-        console.log('🔍 Refetching profile for user:', userId);
         const profile = await getProfile(Number(userId));
         setDisplayUser(profile);
-        console.log('✅ Profile reloaded:', profile);
       }
     } catch (err: any) {
-      console.error('❌ Failed to fetch profile:', err);
-      
-      // エラーの詳細をログ出力
-      if (err.message) {
-        console.error('Error message:', err.message);
-      }
-      if (err.response) {
-        console.error('Error response:', err.response);
-      }
-      
       // ユーザーに分かりやすいエラーメッセージを表示
       if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
         setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
@@ -104,7 +81,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) {
-        console.log('⚠️ No Firebase user found, skipping profile fetch');
         setLoading(false);
         return;
       }
@@ -115,37 +91,19 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
         if (isOwner) {
           // 自分のプロフィールを取得
-          console.log('🔍 Fetching my profile...');
-          console.log('Firebase user:', user.email, user.uid);
-          
           const response = await getCurrentUser();
-          console.log('API response:', response);
           
           if (response.profile) {
             setDisplayUser(response.profile);
-            console.log('✅ My profile loaded:', response.profile);
           } else {
-            console.warn('⚠️ Profile not found in response');
             setError('プロフィールが見つかりません。初回ログインの場合は、プロフィールを作成してください。');
           }
         } else if (userId) {
           // 他のユーザーのプロフィールを取得
-          console.log('🔍 Fetching profile for user:', userId);
           const profile = await getProfile(Number(userId));
           setDisplayUser(profile);
-          console.log('✅ Profile loaded:', profile);
         }
       } catch (err: any) {
-        console.error('❌ Failed to fetch profile:', err);
-        
-        // エラーの詳細をログ出力
-        if (err.message) {
-          console.error('Error message:', err.message);
-        }
-        if (err.response) {
-          console.error('Error response:', err.response);
-        }
-        
         // ユーザーに分かりやすいエラーメッセージを表示
         if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
           setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
@@ -171,7 +129,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
     try {
       setUploadingAvatar(true);
-      console.log('📤 Uploading avatar...');
 
       // Cloudinaryにアップロード
       const formData = new FormData();
@@ -193,19 +150,15 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
       const cloudinaryData = await cloudinaryResponse.json();
       const avatarUrl = cloudinaryData.secure_url;
-      console.log('✅ Avatar uploaded to Cloudinary:', avatarUrl);
 
       // プロフィールを更新
-      const { updateProfile } = await import('@/lib/api/client');
       await updateProfile(displayUser.id, { avatar_url: avatarUrl });
-      console.log('✅ Avatar URL saved to profile');
 
       // プロフィールを再読み込み
       await refetchProfile();
 
       alert('プロフィール画像を更新しました！');
-    } catch (error) {
-      console.error('❌ Avatar upload failed:', error);
+    } catch {
       alert('画像のアップロードに失敗しました');
     } finally {
       setUploadingAvatar(false);
@@ -364,46 +317,75 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     );
   }
 
-  console.log('InstagramProfilePage:', {
-    userId,
-    displayUserId: displayUser.id,
-    displayUserName: displayUser.name,
-    isOwner
-  });
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.push('/')}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+      <div className="sticky top-0 bg-white border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
+        <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
+          <div className="flex items-center justify-between w-full">
+            <h1 
+              className="font-semibold text-base text-white"
+              style={{
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 500,
+                lineHeight: '100%',
+                letterSpacing: '0%',
+                verticalAlign: 'middle'
+              }}
             >
-              <ArrowLeft className="h-6 w-6" />
-            </button>
-            <h1 className="text-lg font-semibold">{displayUser.name}</h1>
+              ここてぃ
+            </h1>
             {isOwner && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
+                <div className="my-1 ml-[9px]">
+                <div className="relative flex items-center">
+                  <img 
+                    src="/人物アイコン　チーム 1.svg" 
+                    alt="search" 
+                    style={{ 
+                      position: 'absolute', 
+                      left: '8px',
+                      width: '20px',
+                      height: '20px',
+                      pointerEvents: 'none'
+                    }} 
+                  />
+                  <input
+                    type="text"
+                    placeholder="ユーザー一覧"
+                    className={`px-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${styles.searchInput}`}
+                    style={{
+                      fontSize: '10px',
+                      fontFamily: 'Noto Sans JP',
+                      fontWeight: 500,
+                      backgroundColor: '#FFFFFF',
+                      marginTop: '5px',
+                      marginBottom: '5px',
+                      paddingLeft: '32px',
+                      borderRadius: '8px',
+                      boxShadow: '0px 1px 2px 0px #0000000D',
+                      lineHeight: '100%',
+                      letterSpacing: '0%'
+                    }}
+                  />
+                  <style>{`
+                    input::placeholder {
+                      font-family: Noto Sans JP;
+                      font-weight: 500;
+                      font-size: 10px;
+                      line-height: 100%;
+                      letter-spacing: 0%;
+                      color: #5C5C5C;
+                    }
+                  `}</style>
+                </div>
+                </div>
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="hover:bg-gray-100 rounded-full transition-colors"
                   title="設定"
                 >
-                  <Settings className="h-6 w-6" />
-                </button>
-                <button
-                  onClick={async () => {
-                    if (confirm('ログアウトしますか？')) {
-                      await signOut();
-                      router.push('/login');
-                    }
-                  }}
-                  className="p-2 hover:bg-red-50 text-red-600 rounded-full transition-colors"
-                  title="ログアウト"
-                >
-                  <LogOut className="h-6 w-6" />
+                  <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
                 </button>
               </div>
             )}
@@ -412,71 +394,95 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto">
-        {/* Profile Section */}
-        <div className="px-4 py-6">
-          <div className="flex items-start gap-6 mb-6">
+      <div className="mx-auto w-full" style={{ maxWidth: '750px' }}>
+        {/* Profile Section - 内部コンテンツ最大幅 626px（750px - 88px*2 - 18px*2） */}
+        <div className={`py-6 ${styles.profileSection}`}>
+          <div className="flex items-center gap-6 mb-6">
             {/* Avatar */}
-            <div className="flex-shrink-0">
-              <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-gray-200">
+            <div className="flex-shrink-0 relative">
+              <div className="relative rounded-full overflow-hidden ring-2 ring-gray-200" style={{ width: 'clamp(65.66px, 22vw, 165px)', height: 'clamp(62.85px, 21vw, 157.96px)' }}>
                 <img
                   src={displayUser.avatar_url || PH1}
                   alt={displayUser.name}
                   className="w-full h-full object-cover"
                 />
-                {isOwner && (
-                  <>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                      id="avatar-upload-icon"
-                      disabled={uploadingAvatar}
-                    />
-                    <label
-                      htmlFor="avatar-upload-icon"
-                      className="absolute bottom-0 right-0 w-7 h-7 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors shadow-lg cursor-pointer flex items-center justify-center"
-                      title="プロフィール画像を変更"
-                    >
-                      {uploadingAvatar ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                      ) : (
-                        <span className="text-lg font-bold leading-none">+</span>
-                      )}
-                    </label>
-                  </>
-                )}
               </div>
+              {isOwner && (
+                <>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                    id="avatar-upload-icon"
+                    disabled={uploadingAvatar}
+                  />
+                  <label
+                    htmlFor="avatar-upload-icon"
+                    className={`absolute hover:opacity-80 transition-all cursor-pointer flex items-center justify-center z-10 ${styles.avatarLabel}`}
+                    title="プロフィール画像を変更"
+                  >
+                    {uploadingAvatar ? (
+                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-purple-600 border-t-transparent" />
+                    ) : (
+                      <div className="relative flex items-center justify-center">
+                        <Image src="/circle.svg" alt="プロフィール画像を変更" width={25} height={25} style={{ width: 'clamp(25px, 8.33vw, 30px)', height: 'clamp(25px, 8.33vw, 30px)' }} />
+                        <span
+                          className="absolute font-black text-white"
+                          style={{
+                            fontFamily: 'Noto Sans JP',
+                            fontSize: 'clamp(10px, 3.33vw, 20px)',
+                            lineHeight: '100%',
+                            letterSpacing: '0%',
+                            color: '#5C5C5C',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -68%)'
+                          }}
+                        >
+                          +
+                        </span>
+                      </div>
+                    )}
+                  </label>
+                </>
+              )}
             </div>
 
             {/* Stats */}
             <div className="flex-1">
-              <div className="flex items-center gap-6 mb-4">
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-semibold">{displayedPosts.length}</div>
-                  <div className="text-xs sm:text-sm text-gray-500">投稿</div>
+              {/* Stats削除 - 今後実装予定 */}
+
+              {/* ユーザー名 */}
+              <div className="flex items-center justify-between">
+                <div 
+                  style={{
+                    fontFamily: 'Noto Sans JP',
+                    fontWeight: 700,
+                    fontSize: 'clamp(16px, 2.67vw, 20px)',
+                    lineHeight: 1.3,
+                    letterSpacing: '0%',
+                    color: '#1A1A1A'
+                  }}
+                >
+                  {displayUser.name}
                 </div>
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-semibold">245</div>
-                  <div className="text-xs sm:text-sm text-gray-500">フォロワー</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-semibold">180</div>
-                  <div className="text-xs sm:text-sm text-gray-500">フォロー中</div>
-                </div>
+                {isOwner && (
+                  <button
+                    onClick={() => setShowEditProfile(true)}
+                    className="hover:opacity-80 transition-all"
+                    title="プロフィールを編集"
+                  >
+                    <Image src="/edit.svg" alt="プロフィールを編集" width={15} height={15} />
+                  </button>
+                )}
               </div>
 
               {/* Action Buttons */}
               <div className="flex gap-2">
                 {isOwner ? (
                   <>
-                    <button
-                      onClick={() => setShowEditProfile(true)}
-                      className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-sm transition-colors"
-                    >
-                      プロフィールを編集
-                    </button>
+                    {/* プロフィール編集ボタンはアイコンで上に移動 */}
                     {/* プロフィールをシェアは非表示 */}
                     {false && (
                     <button
@@ -511,132 +517,142 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             </div>
           </div>
 
-          {/* Bio */}
-          <div className="space-y-2">
-            <div className="font-semibold">{displayUser.name}</div>
-            <div className="text-sm">{displayUser.bio}</div>
-            {displayUser.diagnosis && (
-              <div className="text-sm text-purple-600">
-                診断: {displayUser.diagnosis}
-              </div>
-            )}
+          {/* Bio - 独立表示 */}
+          <div className="font-medium text-sm leading-[1.3] text-gray-500 mb-[26px]">{displayUser.bio}</div>
 
-            {/* 拡張プロフィール情報 */}
+          {/* 基本情報・趣味・好きな食べ物をまとめたセクション */}
+          <div className="space-y-4 mb-6">
+            {/* 基本情報 */}
             {(displayUser.birthday || displayUser.age || displayUser.birthplace || displayUser.blood_type || displayUser.mbti_type) && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {/* 年齢・生年月日 */}
-                {displayUser.age && (
-                  <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                    🎂 {displayUser.age}歳
-                  </span>
-                )}
-                
-                {/* 出身地 */}
-                {displayUser.birthplace && (
-                  <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                    📍 {displayUser.birthplace}
-                  </span>
-                )}
-                
-                {/* 血液型 */}
-                {displayUser.blood_type && (
-                  <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
-                    🩸 {displayUser.blood_type}型
-                  </span>
-                )}
-                
-                {/* MBTI */}
-                {displayUser.mbti_type && (
-                  <button
-                    onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.mbti_type!)}`)}
-                    className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full hover:bg-purple-200 hover:shadow-sm transition-all cursor-pointer"
-                  >
-                    🧠 {displayUser.mbti_type}
-                  </button>
-                )}
+              <div className="space-y-2">
+                <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">基本情報</div>
+                <div className="flex flex-wrap gap-2">
+                  {/* 年齢・生年月日 */}
+                  {displayUser.age && (
+                    <button
+                      onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.age! + '歳')}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white hover:opacity-80 transition-all cursor-pointer"
+                      style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}
+                    >
+                      🎂 {displayUser.age}歳
+                    </button>
+                  )}
+                  
+                  {/* 出身地 */}
+                  {displayUser.birthplace && (
+                    <button
+                      onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.birthplace!)}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white hover:opacity-80 transition-all cursor-pointer"
+                      style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}
+                    >
+                      📍 {displayUser.birthplace}
+                    </button>
+                  )}
+                  
+                  {/* 血液型 */}
+                  {displayUser.blood_type && (
+                    <button
+                      onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.blood_type! + '型')}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white hover:opacity-80 transition-all cursor-pointer"
+                      style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}
+                    >
+                      🩸 {displayUser.blood_type}型
+                    </button>
+                  )}
+                  
+                  {/* MBTI */}
+                  {displayUser.mbti_type && (
+                    <button
+                      onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.mbti_type!)}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white hover:opacity-80 transition-all cursor-pointer"
+                      style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}
+                    >
+                      🧠 {displayUser.mbti_type}
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* 趣味・好きな食べ物と曼荼羅アートを横並びに */}
-            <div className="flex gap-6 items-start mt-3">
-              {/* 左側：趣味・好きな食べ物 */}
-              <div className="flex-1 min-w-0 space-y-3">
-                {/* 趣味 */}
-                {(displayUser as any).hobbies && (displayUser as any).hobbies.length > 0 && (
-                  <div>
-                    <div className="text-xs font-semibold text-gray-500 mb-1">趣味</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(displayUser as any).hobbies.map((hobby: string, idx: number) => (
-                        <button
-                          key={idx}
-                          onClick={() => router.push(`/tags/${encodeURIComponent(hobby)}`)}
-                          className="inline-flex items-center px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded-md border border-orange-200 hover:bg-orange-100 hover:shadow-sm transition-all cursor-pointer"
-                        >
-                          {hobby}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 好きな食べ物 */}
-                {(displayUser as any).favoriteFood && (displayUser as any).favoriteFood.length > 0 && (
-                  <div>
-                    <div className="text-xs font-semibold text-gray-500 mb-1">好きな食べ物</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(displayUser as any).favoriteFood.map((food: string, idx: number) => (
-                        <button
-                          key={idx}
-                          onClick={() => router.push(`/tags/${encodeURIComponent(food)}`)}
-                          className="inline-flex items-center px-2 py-1 bg-pink-50 text-pink-700 text-xs rounded-md border border-pink-200 hover:bg-pink-100 hover:shadow-sm transition-all cursor-pointer"
-                        >
-                          🍽️ {food}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+            {/* 趣味 */}
+            {(displayUser as any).hobbies && (displayUser as any).hobbies.length > 0 && (
+              <div className="space-y-2">
+                <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">趣味</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {(displayUser as any).hobbies.map((hobby: string, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => router.push(`/tags/${encodeURIComponent(hobby)}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white cursor-pointer"
+                      style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #E891A2' }}
+                    >
+                      {hobby}
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
 
-              {/* 右側：曼荼羅アート */}
-              <div className="flex-shrink-0">
-                <MandalaGallery userId={displayUser.id.toString()} isOwner={isOwner} />
+            {/* 好きな食べ物 */}
+            {(displayUser as any).favoriteFood && (displayUser as any).favoriteFood.length > 0 && (
+              <div className="space-y-2">
+                <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">好きな食べ物</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {(displayUser as any).favoriteFood.map((food: string, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => router.push(`/tags/${encodeURIComponent(food)}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white cursor-pointer"
+                      style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #E891A2' }}
+                    >
+                      🍽️ {food}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* タロット・診断ボタン（最上部） */}
-          {isOwner && (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* タロット占い */}
-              <button
-                onClick={() => setShowDailyTarot(true)}
-                className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-              >
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">🔮</span>
-                  <div className="text-left">
-                    <h3 className="font-bold text-base">今日のタロット占い</h3>
-                    <p className="text-xs opacity-90">毎日の運勢をチェック</p>
-                  </div>
-                </div>
-              </button>
+          {/* 曼荼羅アートとタロット・診断ボタンを縦並びに */}
+          <div className="flex flex-col gap-6 items-start mt-6">
+            {isOwner && (
+              <div className="w-full flex flex-col items-center" style={{ gap: '56px' }}>
+                <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
+                  {/* タロット占い */}
+                  <button
+                    onClick={() => setShowDailyTarot(true)}
+                    className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden flex-shrink-0"
+                    style={{ 
+                      width: 'clamp(150px, 26vw, 200px)', 
+                      height: 'clamp(56px, 10vw, 75px)',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <img src="/タロット占い.svg" alt="今日のタロット占い" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
+                  </button>
 
-              {/* 季節診断 */}
-              <button
-                onClick={() => setShowSeasonalDiagnosis(true)}
-                className="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-              >
-                <div className="flex items-center space-x-3">
-                  <Sparkles className="h-6 w-6" />
-                  <div className="text-left">
-                    <h3 className="font-bold text-base">パーソナル診断</h3>
-                    <p className="text-xs opacity-90">あなたの季節タイプは？</p>
-                  </div>
+                  {/* 季節診断 */}
+                  <button
+                    onClick={() => setShowSeasonalDiagnosis(true)}
+                    className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
+                    style={{ 
+                      width: 'clamp(150px, 26vw, 200px)', 
+                      height: 'clamp(56px, 10vw, 75px)',
+                      flexShrink: 0,
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <img src="/診断.svg" alt="パーソナル診断" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
+                  </button>
                 </div>
-              </button>
-            </div>
-          )}
+
+                {/* 曼荼羅アート */}
+                <div className="w-full flex items-center justify-center">
+                  <MandalaGallery userId={displayUser.id.toString()} isOwner={isOwner} />
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* チームタスク進捗と個人課題進捗 - 今後実装予定のため非表示 */}
           {false && (
@@ -829,74 +845,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             );
           })()}
 
-          {/* Highlights */}
-          <div className="mt-6 flex gap-4 overflow-x-auto pb-2">
-            <button
-              onClick={() => setShowDailyTarot(true)}
-              className="flex flex-col items-center gap-2 flex-shrink-0"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <Sparkles className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">タロット</div>
-            </button>
-            <button
-              onClick={() => setShowSeasonalDiagnosis(true)}
-              className="flex flex-col items-center gap-2 flex-shrink-0"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-red-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-2xl">
-                  🌸
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">季節診断</div>
-            </button>
-            <button
-              onClick={() => setShowMentalStats(true)}
-              className="flex flex-col items-center gap-2 flex-shrink-0"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-blue-600" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">メンタル</div>
-            </button>
-            {/* 学習・イベント・チーム機能は今後実装予定のため非表示 */}
-            {false && (
-            <>
-            <button
-              onClick={() => router.push('/learning')}
-              className="flex flex-col items-center gap-2 flex-shrink-0"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <BookOpen className="h-6 w-6 text-orange-600" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">学習</div>
-            </button>
-            <div className="flex flex-col items-center gap-2 flex-shrink-0">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-emerald-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <Calendar className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">イベント</div>
-            </div>
-            <div className="flex flex-col items-center gap-2 flex-shrink-0">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-violet-400 p-0.5">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <Users className="h-6 w-6 text-indigo-600" />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600">写真部</div>
-            </div>
-            </>
-            )}
-          </div>
+          {/* Highlights - 占い機能は別タブで提供 */}
         </div>
 
         {/* Tabs - 投稿/保存済みタブは非表示 */}
@@ -1210,7 +1159,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           )}
         </div>
         )}
-      </div>
 
       {/* Fortune Modals */}
       {showDailyTarot && displayUser && (
@@ -1324,6 +1272,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };
