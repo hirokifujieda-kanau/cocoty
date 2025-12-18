@@ -4,16 +4,18 @@ import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import ChangePasswordModal from './ChangePasswordModal';
 
-interface SettingsPageProps {
+interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const SettingsPage: React.FC<SettingsPageProps> = ({ isOpen, onClose }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const { signOut } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   if (!isOpen) return null;
 
@@ -33,7 +35,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ isOpen, onClose }) => {
   const menuItems = [
     {
       label: 'パスワードの変更',
-      onClick: () => console.log('パスワード変更'),
+      onClick: () => setShowChangePassword(true),
       hasArrow: true,
       isDanger: false,
     },
@@ -102,8 +104,15 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ isOpen, onClose }) => {
           ))}
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={showChangePassword}
+        onClose={onClose}
+        onBack={() => setShowChangePassword(false)}
+      />
     </div>
   );
 };
 
-export default SettingsPage;
+export default SettingsModal;
