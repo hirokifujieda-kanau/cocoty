@@ -191,7 +191,7 @@ const SignupPage: React.FC = () => {
                     }}
                   >
                     <img
-                      src="/Frame 1321317495.svg"
+                      src="/circlecheck.svg"
                       alt="toggle"
                       style={{
                         width: '16px',
