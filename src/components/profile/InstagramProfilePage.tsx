@@ -54,7 +54,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         if (response.profile) {
           setDisplayUser(response.profile);
         } else {
-          console.warn('⚠️ Profile not found in response');
           setError('プロフィールが見つかりません。初回ログインの場合は、プロフィールを作成してください。');
         }
       } else if (userId) {
@@ -97,7 +96,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           if (response.profile) {
             setDisplayUser(response.profile);
           } else {
-            console.warn('⚠️ Profile not found in response');
             setError('プロフィールが見つかりません。初回ログインの場合は、プロフィールを作成してください。');
           }
         } else if (userId) {
