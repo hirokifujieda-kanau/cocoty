@@ -63,12 +63,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         setDisplayUser(profile);
       }
     } catch (err: any) {
-      // エラーの詳細をログ出力
-      if (err.message) {
-      }
-      if (err.response) {
-      }
-      
       // ユーザーに分かりやすいエラーメッセージを表示
       if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
         setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
@@ -112,12 +106,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           setDisplayUser(profile);
         }
       } catch (err: any) {
-        // エラーの詳細をログ出力
-        if (err.message) {
-        }
-        if (err.response) {
-        }
-        
         // ユーザーに分かりやすいエラーメッセージを表示
         if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
           setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
