@@ -10,7 +10,7 @@ import styles from './InstagramProfilePage.module.css';
 import DailyTarot from '@/components/fortune/DailyTarot';
 import SeasonalDiagnosisHub from '@/components/fortune/SeasonalDiagnosisHub';
 import MentalStatsAdmin from '@/components/fortune/MentalStatsAdmin';
-import ProfileSettings from '@/components/profile/ProfileSettings';
+import SettingsPage from '@/components/profile/SettingsPage';
 import ProfileEditModal from '@/components/profile/ProfileEditModal';
 import ShareProfileModal from '@/components/profile/ShareProfileModal';
 import MandalaGallery from '@/components/profile/MandalaGallery';
@@ -1187,7 +1187,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       )}
       
       {/* Profile Modals */}
-      <ProfileSettings
+      <SettingsPage
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
       />
