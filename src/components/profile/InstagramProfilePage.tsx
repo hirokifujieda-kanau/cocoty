@@ -616,41 +616,42 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           {/* 曼荼羅アートとタロット・診断ボタンを縦並びに */}
           <div className="flex flex-col gap-6 items-start mt-6">
             {isOwner && (
-              <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
-                {/* タロット占い */}
-                <button
-                  onClick={() => setShowDailyTarot(true)}
-                  className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden flex-shrink-0"
-                  style={{ 
-                    width: 'clamp(150px, 26vw, 200px)', 
-                    height: 'clamp(56px, 10vw, 75px)',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  <img src="/タロット占い.svg" alt="今日のタロット占い" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
-                </button>
+              <div className="w-full flex flex-col items-center" style={{ gap: '56px' }}>
+                <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
+                  {/* タロット占い */}
+                  <button
+                    onClick={() => setShowDailyTarot(true)}
+                    className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden flex-shrink-0"
+                    style={{ 
+                      width: 'clamp(150px, 26vw, 200px)', 
+                      height: 'clamp(56px, 10vw, 75px)',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <img src="/タロット占い.svg" alt="今日のタロット占い" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
+                  </button>
 
-                {/* 季節診断 */}
-                <button
-                  onClick={() => setShowSeasonalDiagnosis(true)}
-                  className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
-                  style={{ 
-                    width: 'clamp(150px, 26vw, 200px)', 
-                    height: 'clamp(56px, 10vw, 75px)',
-                    flexShrink: 0,
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  <img src="/診断.svg" alt="パーソナル診断" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
-                </button>
+                  {/* 季節診断 */}
+                  <button
+                    onClick={() => setShowSeasonalDiagnosis(true)}
+                    className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
+                    style={{ 
+                      width: 'clamp(150px, 26vw, 200px)', 
+                      height: 'clamp(56px, 10vw, 75px)',
+                      flexShrink: 0,
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <img src="/診断.svg" alt="パーソナル診断" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
+                  </button>
                 </div>
-              )}
 
-              {/* 曼荼羅アート */}
-              <div className="w-full flex items-center justify-center">
-                <MandalaGallery userId={displayUser.id.toString()} isOwner={isOwner} />
+                {/* 曼荼羅アート */}
+                <div className="w-full flex items-center justify-center">
+                  <MandalaGallery userId={displayUser.id.toString()} isOwner={isOwner} />
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* チームタスク進捗と個人課題進捗 - 今後実装予定のため非表示 */}
@@ -1271,6 +1272,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };
