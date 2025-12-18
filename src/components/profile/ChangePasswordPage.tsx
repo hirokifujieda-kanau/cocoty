@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 
-interface ChangePasswordModalProps {
+interface ChangePasswordPageProps {
   isOpen: boolean;
   onClose: () => void;
   onBack: () => void;
 }
 
-const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose, onBack }) => {
+const ChangePasswordPage: React.FC<ChangePasswordPageProps> = ({ isOpen, onClose, onBack }) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -101,7 +101,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
     <div className="fixed inset-0 bg-black/40 z-50 flex flex-col h-screen max-h-screen overflow-hidden">
       {/* Top Header */}
       <div className="sticky top-0 border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
-        <div className="mx-auto h-[30px] flex items-center max-w-[750px] px-[clamp(26px,8vw,106px)]">
+        <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
           <div className="flex items-center justify-between w-full">
             <h1 className="font-semibold text-base text-white" style={{ fontFamily: '"Noto Sans JP"' }}>ここてぃ</h1>
             <div className="flex gap-2 items-center">
@@ -120,7 +120,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
       </div>
 
       {/* Page Header */}
-      <div className="flex items-center justify-between px-4 bg-white shrink-0 py-[26px]">
+      <div className="flex items-center justify-between px-4 bg-white shrink-0" style={{ paddingTop: '26px', paddingBottom: '26px' }}>
         <button
           onClick={onBack}
           className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -128,15 +128,13 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
         >
           <ChevronLeft className="h-6 w-6 text-gray-800" />
         </button>
-        <h1 className="flex-1 text-center font-bold" style={{ fontFamily: '"Noto Sans JP"', fontSize: '20px', lineHeight: '20px', color: '#1A1A1A' }}>パスワードの変更</h1>
+        <h1 className="flex-1 text-center font-bold text-xl" style={{ fontFamily: '"Noto Sans JP"', fontSize: '20px', lineHeight: '20px', color: '#1A1A1A' }}>パスワードの変更</h1>
         <div className="w-8" />
       </div>
 
-      {/* Content Wrapper with white background */}
-      <div className="flex-1 bg-white overflow-y-auto">
-        {/* Content */}
-        <div className="mx-auto py-6 px-[37.5px] max-w-[448px] w-full">
-          <div className="space-y-6">
+      {/* Content */}
+      <div className="flex-1 bg-white overflow-y-auto py-6" style={{ paddingLeft: '37.5px', paddingRight: '37.5px' }}>
+        <div className="space-y-6">
           {/* Current Password Field */}
           <div>
             <div className="flex items-center gap-2.5 mb-[10px]">
@@ -248,22 +246,15 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
           )}
 
           {/* Save Button */}
-          <div className="flex justify-center pt-4" style={{ marginLeft: '80px', marginRight: '80px' }}>
+          <div className="flex justify-center pt-4">
             <button
-              type="submit"
               onClick={handleSave}
-              disabled={loading || !currentPassword || !newPassword || !confirmPassword || Object.keys(fieldErrors).length > 0}
-              className="w-full gap-2 rounded-[12px] border-none font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300"
-              style={{
-                backgroundColor: currentPassword && newPassword && confirmPassword && Object.keys(fieldErrors).length === 0 ? '#FFBA48' : '#FFD26A',
-                cursor: loading || !currentPassword || !newPassword || !confirmPassword || Object.keys(fieldErrors).length > 0 ? 'not-allowed' : 'pointer',
-                color: currentPassword && newPassword && confirmPassword && Object.keys(fieldErrors).length === 0 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.698)',
-                boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px',
-              }}
+              disabled={loading}
+              className="px-12 py-3 rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ backgroundColor: '#FFD26A', color: '#FFFFFF', fontFamily: 'Inter', fontSize: '14px', fontWeight: 500 }}
             >
               {loading ? '保存中...' : '保存'}
             </button>
-          </div>
           </div>
         </div>
       </div>
@@ -271,4 +262,4 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
   );
 };
 
-export default ChangePasswordModal;
+export default ChangePasswordPage;

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  X, User, Lock, Bell, Shield, Globe, Moon, 
+  ChevronLeft, User, Lock, Bell, Shield, Globe, Moon, 
   ChevronRight, LogOut, Camera, Mail, Phone,
   Eye, EyeOff, Check
 } from 'lucide-react';
