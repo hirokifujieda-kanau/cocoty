@@ -36,18 +36,9 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   // URLパラメータがない場合は自分のプロフィール（オーナー）として扱う
   const isOwner = !userId;
   
-  console.log('=== InstagramProfilePage Debug ===');
-  console.log('Firebase user:', user?.email);
-  console.log('userId from props/URL:', userId);
-  console.log('isOwner:', isOwner);
-  console.log('===================================');
-  
   // プロフィールデータを再取得する関数
   const refetchProfile = async () => {
-    console.log('🔄 refetchProfile called!');
-    
     if (!user) {
-      console.log('⚠️ No Firebase user found, skipping profile fetch');
       setLoading(false);
       return;
     }
@@ -58,33 +49,24 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
       if (isOwner) {
         // 自分のプロフィールを取得
-        console.log('🔍 Refetching my profile...');
         const response = await getCurrentUser();
-        console.log('API response:', response);
         
         if (response.profile) {
           setDisplayUser(response.profile);
-          console.log('✅ My profile reloaded:', response.profile);
         } else {
           console.warn('⚠️ Profile not found in response');
           setError('プロフィールが見つかりません。初回ログインの場合は、プロフィールを作成してください。');
         }
       } else if (userId) {
         // 他のユーザーのプロフィールを取得
-        console.log('🔍 Refetching profile for user:', userId);
         const profile = await getProfile(Number(userId));
         setDisplayUser(profile);
-        console.log('✅ Profile reloaded:', profile);
       }
     } catch (err: any) {
-      console.error('❌ Failed to fetch profile:', err);
-      
       // エラーの詳細をログ出力
       if (err.message) {
-        console.error('Error message:', err.message);
       }
       if (err.response) {
-        console.error('Error response:', err.response);
       }
       
       // ユーザーに分かりやすいエラーメッセージを表示
@@ -106,7 +88,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) {
-        console.log('⚠️ No Firebase user found, skipping profile fetch');
         setLoading(false);
         return;
       }
@@ -117,35 +98,24 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
         if (isOwner) {
           // 自分のプロフィールを取得
-          console.log('🔍 Fetching my profile...');
-          console.log('Firebase user:', user.email, user.uid);
-          
           const response = await getCurrentUser();
-          console.log('API response:', response);
           
           if (response.profile) {
             setDisplayUser(response.profile);
-            console.log('✅ My profile loaded:', response.profile);
           } else {
             console.warn('⚠️ Profile not found in response');
             setError('プロフィールが見つかりません。初回ログインの場合は、プロフィールを作成してください。');
           }
         } else if (userId) {
           // 他のユーザーのプロフィールを取得
-          console.log('🔍 Fetching profile for user:', userId);
           const profile = await getProfile(Number(userId));
           setDisplayUser(profile);
-          console.log('✅ Profile loaded:', profile);
         }
       } catch (err: any) {
-        console.error('❌ Failed to fetch profile:', err);
-        
         // エラーの詳細をログ出力
         if (err.message) {
-          console.error('Error message:', err.message);
         }
         if (err.response) {
-          console.error('Error response:', err.response);
         }
         
         // ユーザーに分かりやすいエラーメッセージを表示
@@ -173,7 +143,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
     try {
       setUploadingAvatar(true);
-      console.log('📤 Uploading avatar...');
 
       // Cloudinaryにアップロード
       const formData = new FormData();
@@ -195,18 +164,15 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
       const cloudinaryData = await cloudinaryResponse.json();
       const avatarUrl = cloudinaryData.secure_url;
-      console.log('✅ Avatar uploaded to Cloudinary:', avatarUrl);
 
       // プロフィールを更新
       await updateProfile(displayUser.id, { avatar_url: avatarUrl });
-      console.log('✅ Avatar URL saved to profile');
 
       // プロフィールを再読み込み
       await refetchProfile();
 
       alert('プロフィール画像を更新しました！');
-    } catch (error) {
-      console.error('❌ Avatar upload failed:', error);
+    } catch {
       alert('画像のアップロードに失敗しました');
     } finally {
       setUploadingAvatar(false);
@@ -365,13 +331,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     );
   }
 
-  console.log('InstagramProfilePage:', {
-    userId,
-    displayUserId: displayUser.id,
-    displayUserName: displayUser.name,
-    isOwner
-  });
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -379,14 +338,12 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
           <div className="flex items-center justify-between w-full">
             <h1 
-              className="font-semibold"
+              className="font-semibold text-base text-white"
               style={{
                 fontFamily: 'Noto Sans JP',
                 fontWeight: 500,
-                fontSize: '16px',
                 lineHeight: '100%',
                 letterSpacing: '0%',
-                color: '#FFFFFF',
                 verticalAlign: 'middle'
               }}
             >
@@ -394,8 +351,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             </h1>
             {isOwner && (
               <div className="flex gap-2 items-center">
-                <div style={{ marginLeft: '9px', marginTop: '5px', marginBottom: '5px' }}>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <div className="my-1 ml-[9px]">
+                <div className="relative flex items-center">
                   <img 
                     src="/search.svg" 
                     alt="search" 
@@ -451,7 +408,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         </div>
       </div>
 
-      <div className="mx-auto" style={{ maxWidth: '750px', width: '100%' }}>
+      <div className="mx-auto w-full" style={{ maxWidth: '750px' }}>
         {/* Profile Section - 内部コンテンツ最大幅 626px（750px - 88px*2 - 18px*2） */}
         <div className={`py-6 ${styles.profileSection}`}>
           <div className="flex items-center gap-6 mb-6">
@@ -482,13 +439,12 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     {uploadingAvatar ? (
                       <div className="animate-spin rounded-full h-6 w-6 border-2 border-purple-600 border-t-transparent" />
                     ) : (
-                      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div className="relative flex items-center justify-center">
                         <Image src="/circle.svg" alt="プロフィール画像を変更" width={25} height={25} style={{ width: 'clamp(25px, 8.33vw, 30px)', height: 'clamp(25px, 8.33vw, 30px)' }} />
                         <span
+                          className="absolute font-black text-white"
                           style={{
-                            position: 'absolute',
                             fontFamily: 'Noto Sans JP',
-                            fontWeight: 900,
                             fontSize: 'clamp(10px, 3.33vw, 20px)',
                             lineHeight: '100%',
                             letterSpacing: '0%',
@@ -587,21 +543,21 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                 <div className="flex flex-wrap gap-2">
                   {/* 年齢・生年月日 */}
                   {displayUser.age && (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
+                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
                       🎂 {displayUser.age}歳
                     </span>
                   )}
                   
                   {/* 出身地 */}
                   {displayUser.birthplace && (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
+                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
                       📍 {displayUser.birthplace}
                     </span>
                   )}
                   
                   {/* 血液型 */}
                   {displayUser.blood_type && (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
+                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
                       🩸 {displayUser.blood_type}型
                     </span>
                   )}
@@ -610,8 +566,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                   {displayUser.mbti_type && (
                     <button
                       onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.mbti_type!)}`)}
-                      className="inline-flex items-center px-2 py-1 text-xs rounded-full hover:opacity-80 transition-all cursor-pointer"
-                      style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #F0AC3C' }}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white hover:opacity-80 transition-all cursor-pointer"
+                      style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}
                     >
                       🧠 {displayUser.mbti_type}
                     </button>
@@ -629,8 +585,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     <button
                       key={idx}
                       onClick={() => router.push(`/tags/${encodeURIComponent(hobby)}`)}
-                      className="inline-flex items-center px-2 py-1 text-xs rounded-full cursor-pointer"
-                      style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #E891A2' }}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white cursor-pointer"
+                      style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #E891A2' }}
                     >
                       {hobby}
                     </button>
@@ -648,8 +604,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     <button
                       key={idx}
                       onClick={() => router.push(`/tags/${encodeURIComponent(food)}`)}
-                      className="inline-flex items-center px-2 py-1 text-xs rounded-full cursor-pointer"
-                      style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', fontWeight: 700, fontSize: '12px', lineHeight: '100%', letterSpacing: '0%', color: '#FFFFFF', boxShadow: '0px 1px 1px 0px #E891A2' }}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white cursor-pointer"
+                      style={{ backgroundColor: '#FFAFBD', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #E891A2' }}
                     >
                       🍽️ {food}
                     </button>
@@ -666,11 +622,10 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                 {/* タロット占い */}
                 <button
                   onClick={() => setShowDailyTarot(true)}
-                  className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
+                  className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden flex-shrink-0"
                   style={{ 
                     width: 'clamp(150px, 26vw, 200px)', 
                     height: 'clamp(56px, 10vw, 75px)',
-                    flexShrink: 0,
                     boxSizing: 'border-box'
                   }}
                 >
