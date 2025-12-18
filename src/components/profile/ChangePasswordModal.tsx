@@ -100,7 +100,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex flex-col h-screen max-h-screen overflow-hidden">
       {/* Top Header */}
-      <div className="sticky top-0 border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
+      <div className="sticky top-0 border-b border-gray-200 z-50 bg-[#FFD26A]">
         <div className="mx-auto h-[30px] flex items-center max-w-[750px] px-[clamp(26px,8vw,106px)]">
           <div className="flex items-center justify-between w-full">
             <h1 className="font-semibold text-base text-white" style={{ fontFamily: '"Noto Sans JP"' }}>ここてぃ</h1>
@@ -108,7 +108,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
               <div className="my-1 ml-[9px]">
                 <div className="relative flex items-center">
                   <img alt="search" src="/人物アイコン　チーム 1.svg" className="absolute left-2 w-5 h-5 pointer-events-none" />
-                  <input placeholder="ユーザー一覧" className="px-4 py-1 text-xs rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400" type="text" style={{ fontFamily: '"Noto Sans JP"', fontSize: '10px', paddingLeft: '32px' }} />
+                  <input placeholder="ユーザー一覧" className="px-4 py-1 text-xs rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 text-[10px]" type="text" style={{ fontFamily: '"Noto Sans JP"', paddingLeft: '32px' }} />
                 </div>
               </div>
               <button className="p-1 hover:bg-gray-100 rounded-full transition-colors" title="設定">
@@ -128,7 +128,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
         >
           <ChevronLeft className="h-6 w-6 text-gray-800" />
         </button>
-        <h1 className="flex-1 text-center font-bold" style={{ fontFamily: '"Noto Sans JP"', fontSize: '20px', lineHeight: '20px', color: '#1A1A1A' }}>パスワードの変更</h1>
+        <h1 className="flex-1 text-center font-bold text-[20px] leading-[20px] text-[#1A1A1A]" style={{ fontFamily: '"Noto Sans JP"' }}>パスワードの変更</h1>
         <div className="w-8" />
       </div>
 
@@ -140,10 +140,10 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
           {/* Current Password Field */}
           <div>
             <div className="flex items-center gap-2.5 mb-[10px]">
-              <label className="block font-bold text-[12px] leading-[20px]" style={{ fontFamily: '"Noto Sans JP"', color: '#1A1A1A' }}>
+              <label className="block font-bold text-[12px] leading-[20px] text-[#1A1A1A]" style={{ fontFamily: '"Noto Sans JP"' }}>
                 現在のパスワード
               </label>
-              <span className="font-bold text-[10px] leading-[12px]" style={{ fontFamily: '"Noto Sans JP"', color: '#828282' }}>
+              <span className="font-bold text-[10px] leading-[12px] text-[#828282]" style={{ fontFamily: '"Noto Sans JP"' }}>
                 8文字以上・英数字混合 必須
               </span>
             </div>
@@ -163,16 +163,16 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
                 <img src={showCurrentPassword ? '/open.svg' : '/close.svg'} alt={showCurrentPassword ? 'Hide password' : 'Show password'} style={{ width: '100%', height: '100%' }} />
               </button>
             </div>
-            <p className="font-bold text-[10px] leading-[12px] mt-2" style={{ fontFamily: '"Noto Sans JP"', color: '#5C5C5C' }}>パスワードを忘れた方</p>
+            <p className="font-bold text-[10px] leading-[12px] mt-2 text-[#5C5C5C]" style={{ fontFamily: '"Noto Sans JP"' }}>パスワードを忘れた方</p>
           </div>
 
           {/* New Password Field */}
           <div>
             <div className="flex items-center gap-2.5 mb-[10px]">
-              <label className="block font-bold text-[12px] leading-[20px]" style={{ fontFamily: '"Noto Sans JP"', color: '#1A1A1A' }}>
+              <label className="block font-bold text-[12px] leading-[20px] text-[#1A1A1A]" style={{ fontFamily: '"Noto Sans JP"' }}>
                 新しいパスワード
               </label>
-              <span className="font-bold text-[10px] leading-[12px]" style={{ fontFamily: '"Noto Sans JP"', color: '#828282' }}>
+              <span className="font-bold text-[10px] leading-[12px] text-[#828282]" style={{ fontFamily: '"Noto Sans JP"' }}>
                 8文字以上・英数字混合 必須
               </span>
             </div>
@@ -195,7 +195,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
             {fieldErrors['newPassword'] && (
               <div className="mt-[2px]">
                 {fieldErrors['newPassword'].map((err, idx) => (
-                  <div key={idx} className="font-bold text-[10px] leading-[12px]" style={{ fontFamily: '"Noto Sans JP"', color: '#FF383C', marginBottom: idx === fieldErrors['newPassword'].length - 1 ? '0px' : '4px' }}>
+                  <div key={idx} className="font-bold text-[10px] leading-[12px] text-[#FF383C]" style={{ fontFamily: '"Noto Sans JP"', marginBottom: idx === fieldErrors['newPassword'].length - 1 ? '0px' : '4px' }}>
                     {err}
                   </div>
                 ))}
@@ -206,10 +206,10 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
           {/* Confirm Password Field */}
           <div>
             <div className="flex items-center gap-2.5 mb-[10px]">
-              <label className="block font-bold text-[12px] leading-[20px]" style={{ fontFamily: '"Noto Sans JP"', color: '#1A1A1A' }}>
+              <label className="block font-bold text-[12px] leading-[20px] text-[#1A1A1A]" style={{ fontFamily: '"Noto Sans JP"' }}>
                 パスワード再入力
               </label>
-              <span className="font-bold text-[10px] leading-[12px]" style={{ fontFamily: '"Noto Sans JP"', color: '#828282' }}>
+              <span className="font-bold text-[10px] leading-[12px] text-[#828282]" style={{ fontFamily: '"Noto Sans JP"' }}>
                 8文字以上・英数字混合 必須
               </span>
             </div>
@@ -232,7 +232,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
             {fieldErrors['confirmPassword'] && (
               <div className="mt-[2px]">
                 {fieldErrors['confirmPassword'].map((err, idx) => (
-                  <div key={idx} className="font-bold text-[10px] leading-[12px]" style={{ fontFamily: '"Noto Sans JP"', color: '#FF383C', marginBottom: idx === fieldErrors['confirmPassword'].length - 1 ? '0px' : '4px' }}>
+                  <div key={idx} className="font-bold text-[10px] leading-[12px] text-[#FF383C]" style={{ fontFamily: '"Noto Sans JP"', marginBottom: idx === fieldErrors['confirmPassword'].length - 1 ? '0px' : '4px' }}>
                     {err}
                   </div>
                 ))}
@@ -243,12 +243,12 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
           {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p style={{ color: '#dc2626', fontFamily: 'Inter', fontSize: '14px' }}>{error}</p>
+              <p className="text-[#dc2626] text-sm" style={{ fontFamily: 'Inter', fontSize: '14px' }}>{error}</p>
             </div>
           )}
 
           {/* Save Button */}
-          <div className="flex justify-center pt-4" style={{ marginLeft: '80px', marginRight: '80px' }}>
+          <div className="flex justify-center pt-4 ml-20 mr-20">
             <button
               type="submit"
               onClick={handleSave}
