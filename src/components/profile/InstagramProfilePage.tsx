@@ -342,13 +342,13 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                 <div className="my-1 ml-[9px]">
                 <div className="relative flex items-center">
                   <img 
-                    src="/search.svg" 
+                    src="/人物アイコン　チーム 1.svg" 
                     alt="search" 
                     style={{ 
                       position: 'absolute', 
-                      left: '12px',
-                      width: '10px',
-                      height: '10px',
+                      left: '8px',
+                      width: '20px',
+                      height: '20px',
                       pointerEvents: 'none'
                     }} 
                   />
@@ -531,23 +531,35 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                 <div className="flex flex-wrap gap-2">
                   {/* 年齢・生年月日 */}
                   {displayUser.age && (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
+                    <button
+                      onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.age! + '歳')}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white hover:opacity-80 transition-all cursor-pointer"
+                      style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}
+                    >
                       🎂 {displayUser.age}歳
-                    </span>
+                    </button>
                   )}
                   
                   {/* 出身地 */}
                   {displayUser.birthplace && (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
+                    <button
+                      onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.birthplace!)}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white hover:opacity-80 transition-all cursor-pointer"
+                      style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}
+                    >
                       📍 {displayUser.birthplace}
-                    </span>
+                    </button>
                   )}
                   
                   {/* 血液型 */}
                   {displayUser.blood_type && (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white" style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}>
+                    <button
+                      onClick={() => router.push(`/tags/${encodeURIComponent(displayUser.blood_type! + '型')}`)}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold text-white hover:opacity-80 transition-all cursor-pointer"
+                      style={{ backgroundColor: '#FFBA48', fontFamily: 'Noto Sans JP', boxShadow: '0px 1px 1px 0px #F0AC3C' }}
+                    >
                       🩸 {displayUser.blood_type}型
-                    </span>
+                    </button>
                   )}
                   
                   {/* MBTI */}
