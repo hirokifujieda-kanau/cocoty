@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import styles from './InstagramProfilePage.module.css';
-import PasswordResetPage from './PasswordResetPage';
+import { PasswordResetPage } from './index';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
