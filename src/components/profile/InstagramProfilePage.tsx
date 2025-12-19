@@ -353,7 +353,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                   <input
                     type="text"
                     placeholder="ユーザー一覧"
-                    className={`px-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${styles.searchInput}`}
+                    onClick={() => router.push('/users')}
+                    className={`px-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer ${styles.searchInput}`}
                     style={{
                       fontSize: '10px',
                       fontFamily: 'Noto Sans JP',
@@ -367,6 +368,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                       lineHeight: '100%',
                       letterSpacing: '0%'
                     }}
+                    readOnly
                   />
                   <style>{`
                     input::placeholder {
