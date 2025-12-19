@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import styles from './InstagramProfilePage.module.css';
+import PasswordResetPage from './PasswordResetPage';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string[] }>({});
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
 
   if (!isOpen) return null;
 
@@ -174,7 +176,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
                 <img src={showCurrentPassword ? '/open.svg' : '/close.svg'} alt={showCurrentPassword ? 'Hide password' : 'Show password'} className="w-full h-full" />
               </button>
             </div>
-            <p className="font-bold text-[10px] leading-[12px] mt-2 text-[#5C5C5C]" style={{ fontFamily: '"Noto Sans JP"' }}>パスワードを忘れた方</p>
+            <p className="font-bold text-[10px] leading-[12px] mt-2 text-[#5C5C5C] cursor-pointer hover:underline" style={{ fontFamily: '"Noto Sans JP"' }} onClick={() => setShowPasswordReset(true)}>パスワードを忘れた方</p>
           </div>
 
           {/* New Password Field */}
@@ -278,6 +280,13 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
           </div>
         </div>
       </div>
+
+      {/* Password Reset Page */}
+      <PasswordResetPage
+        isOpen={showPasswordReset}
+        onClose={onClose}
+        onBack={() => setShowPasswordReset(false)}
+      />
     </div>
   );
 };
