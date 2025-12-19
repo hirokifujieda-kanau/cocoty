@@ -265,82 +265,43 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
-        <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
-          <div className="flex items-center justify-between w-full">
-            <h1 
-              className="font-semibold text-base text-white"
-              style={{
-                fontFamily: 'Noto Sans JP',
-                fontWeight: 500,
-                lineHeight: '100%',
-                letterSpacing: '0%',
-                verticalAlign: 'middle'
-              }}
-            >
-              ここてぃ
-            </h1>
-            <div className="flex gap-2 items-center">
-              <div className="my-1 ml-[9px]">
-              <div className="relative flex items-center">
-                <img 
-                  src="/人物アイコン　チーム 1.svg" 
-                  alt="search" 
-                  style={{ 
-                    position: 'absolute', 
-                    left: '8px',
-                    width: '20px',
-                    height: '20px',
-                    pointerEvents: 'none'
-                  }} 
-                />
-                <input
-                  type="text"
-                  placeholder="ユーザー一覧"
-                  onClick={() => router.push('/users')}
-                  className={`px-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer ${styles.searchInput}`}
-                  style={{
-                    fontSize: '10px',
-                    fontFamily: 'Noto Sans JP',
-                    fontWeight: 500,
-                    backgroundColor: '#FFFFFF',
-                    marginTop: '5px',
-                    marginBottom: '5px',
-                    paddingLeft: '32px',
-                    borderRadius: '8px',
-                    boxShadow: '0px 1px 2px 0px #0000000D',
-                    lineHeight: '100%',
-                    letterSpacing: '0%'
-                  }}
-                  readOnly
-                />
-                <style>{`
-                  input::placeholder {
-                    font-family: Noto Sans JP;
-                    font-weight: 500;
-                    font-size: 10px;
-                    line-height: 100%;
-                    letter-spacing: 0%;
-                    color: #5C5C5C;
-                  }
-                `}</style>
-              </div>
-              </div>
-              <button
-                onClick={() => setShowSettings(true)}
-                className="hover:bg-gray-100 rounded-full transition-colors"
-                title="設定"
-              >
-                <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
-              </button>
+      <div className="sticky top-0 z-50 h-[30px] bg-[#FFD26A] flex items-center">
+        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,106px)]" style={{ maxWidth: '750px' }}>
+          {/* Logo */}
+          <h1 className="font-noto text-base font-medium text-white leading-none">
+            ここてぃ
+          </h1>
+          
+          {/* Search & Settings */}
+          <div className="flex gap-2 items-center">
+            <div className="relative flex items-center my-1 ml-[9px]">
+              <img 
+                src="/人物アイコン　チーム 1.svg" 
+                alt="search" 
+                className="absolute left-2 w-5 h-5 pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="ユーザー一覧"
+                onClick={() => router.push('/users')}
+                className="w-[clamp(120px,30vw,200px)] h-5 pl-8 pr-3 text-[10px] font-noto font-medium bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer shadow-sm placeholder:text-[#5C5C5C] placeholder:font-medium placeholder:text-[10px]"
+                readOnly
+              />
             </div>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              title="設定"
+            >
+              <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>
 
       <div className="mx-auto w-full" style={{ maxWidth: '750px' }}>
         {/* Profile Section - 内部コンテンツ最大幅 626px（750px - 88px*2 - 18px*2） */}
-        <div className={`py-6 ${styles.profileSection}`}>
+        <div className={`py-6 px-4 ${styles.profileSection}`}>
           <div className="flex items-center gap-6 mb-6">
             {/* Avatar */}
             <div className="flex-shrink-0 relative">
@@ -540,7 +501,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
           {/* 曼荼羅アート */}
           {displayUser && (
-            <div className="w-full flex items-center justify-center mt-6">
+            <div className="mt-6 flex w-full items-center justify-center">
               <MandalaGallery userId={displayUser.id.toString()} isOwner={isOwner} />
             </div>
           )}
