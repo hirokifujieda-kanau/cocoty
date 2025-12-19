@@ -86,15 +86,6 @@ export function UserListPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <style>{`
-        input::placeholder {
-          font-family: 'Noto Sans JP', sans-serif;
-          font-weight: 500;
-          font-size: 10px;
-          line-height: 100%;
-          color: #5C5C5C;
-        }
-      `}</style>
       {/* Header */}
       <div className="sticky top-0 bg-[#FFD26A] h-[30px] z-50 flex items-center">
         <div className="mx-auto flex items-center justify-between w-full max-w-[750px] px-[clamp(26px,8vw,106px)]">
@@ -111,7 +102,7 @@ export function UserListPage() {
               <input
                 type="text"
                 placeholder="ユーザー一覧"
-                className="w-[clamp(120px,30vw,200px)] h-5 pl-8 pr-3 text-[10px] font-noto font-medium bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer shadow-sm"
+                className="w-[clamp(120px,30vw,200px)] h-5 pl-8 pr-3 text-[10px] font-noto font-medium bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer shadow-sm placeholder:text-[#5C5C5C] placeholder:font-medium placeholder:text-[10px]"
                 readOnly
               />
             </div>
