@@ -5,6 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChangePasswordModal from './ChangePasswordModal';
+import styles from './InstagramProfilePage.module.css';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -50,18 +51,28 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex flex-col h-screen max-h-screen overflow-hidden">
       {/* Top Header - プロフィール画面と同じヘッダー */}
-      <div className="sticky top-0 border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
+      <div className="sticky top-0 border-b border-gray-200 z-50 bg-[#FFD26A]">
         <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
           <div className="flex items-center justify-between w-full">
-            <h1 className="font-semibold text-base text-white" style={{ fontFamily: '"Noto Sans JP"' }}>ここてぃ</h1>
+            <h1 className="text-white text-[16px] leading-[100%] align-middle" style={{ fontFamily: '"Noto Sans JP"', fontWeight: 500, lineHeight: '100%', verticalAlign: 'middle' }}>ここてぃ</h1>
             <div className="flex gap-2 items-center">
               <div className="my-1 ml-[9px]">
                 <div className="relative flex items-center">
-                  <img alt="search" src="/人物アイコン　チーム 1.svg" className="absolute left-2 w-5 h-5 pointer-events-none" />
-                  <input placeholder="ユーザー一覧" className="px-4 py-1 text-xs rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400" type="text" style={{ fontFamily: '"Noto Sans JP"', fontSize: '10px', paddingLeft: '32px' }} />
+                  <img alt="search" src="/人物アイコン　チーム 1.svg" style={{ position: 'absolute', left: '8px', width: '20px', height: '20px', pointerEvents: 'none' }} />
+                  <input placeholder="ユーザー一覧" type="text" style={{ fontSize: '10px', fontFamily: '"Noto Sans JP"', fontWeight: 500, marginTop: '5px', marginBottom: '5px', paddingLeft: '32px', boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px', lineHeight: '100%' }} className={`px-4 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 ${styles.searchInput}`} />
+                  <style>{`
+                    input::placeholder {
+                      font-family: Noto Sans JP;
+                      font-weight: 500;
+                      font-size: 10px;
+                      line-height: 100%;
+                      letter-spacing: 0%;
+                      color: #5C5C5C;
+                    }
+                  `}</style>
                 </div>
               </div>
-              <button className="p-1 hover:bg-gray-100 rounded-full transition-colors" title="設定">
+              <button className="hover:bg-gray-100 rounded-full transition-colors" title="設定">
                 <img alt="設定" className="w-5 h-5" src="/歯車.svg" />
               </button>
             </div>

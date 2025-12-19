@@ -353,17 +353,15 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                   <input
                     type="text"
                     placeholder="ユーザー一覧"
-                    className={`px-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${styles.searchInput}`}
+                    className={`px-4 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 ${styles.searchInput}`}
                     style={{
                       fontSize: '10px',
-                      fontFamily: 'Noto Sans JP',
+                      fontFamily: '"Noto Sans JP"',
                       fontWeight: 500,
-                      backgroundColor: '#FFFFFF',
                       marginTop: '5px',
                       marginBottom: '5px',
                       paddingLeft: '32px',
-                      borderRadius: '8px',
-                      boxShadow: '0px 1px 2px 0px #0000000D',
+                      boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px',
                       lineHeight: '100%',
                       letterSpacing: '0%'
                     }}
