@@ -108,7 +108,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
               <div className="my-1 ml-[9px]">
                 <div className="relative flex items-center">
                   <img alt="search" src="/人物アイコン　チーム 1.svg" className="absolute left-2 w-5 h-5 pointer-events-none" />
-                  <input placeholder="ユーザー一覧" className="px-4 py-1 text-xs rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 text-[10px]" type="text" style={{ fontFamily: '"Noto Sans JP"', paddingLeft: '32px' }} />
+                  <input placeholder="ユーザー一覧" className="px-4 py-1 text-xs rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 text-[10px] pl-8" type="text" style={{ fontFamily: '"Noto Sans JP"' }} />
                 </div>
               </div>
               <button className="p-1 hover:bg-gray-100 rounded-full transition-colors" title="設定">
@@ -160,7 +160,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-[20px] h-[20px]"
               >
-                <img src={showCurrentPassword ? '/open.svg' : '/close.svg'} alt={showCurrentPassword ? 'Hide password' : 'Show password'} style={{ width: '100%', height: '100%' }} />
+                <img src={showCurrentPassword ? '/open.svg' : '/close.svg'} alt={showCurrentPassword ? 'Hide password' : 'Show password'} className="w-full h-full" />
               </button>
             </div>
             <p className="font-bold text-[10px] leading-[12px] mt-2 text-[#5C5C5C]" style={{ fontFamily: '"Noto Sans JP"' }}>パスワードを忘れた方</p>
@@ -189,13 +189,13 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
                 onClick={() => setShowNewPassword(!showNewPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-[20px] h-[20px]"
               >
-                <img src={showNewPassword ? '/open.svg' : '/close.svg'} alt={showNewPassword ? 'Hide password' : 'Show password'} style={{ width: '100%', height: '100%' }} />
+                <img src={showNewPassword ? '/open.svg' : '/close.svg'} alt={showNewPassword ? 'Hide password' : 'Show password'} className="w-full h-full" />
               </button>
             </div>
             {fieldErrors['newPassword'] && (
               <div className="mt-[2px]">
                 {fieldErrors['newPassword'].map((err, idx) => (
-                  <div key={idx} className="font-bold text-[10px] leading-[12px] text-[#FF383C]" style={{ fontFamily: '"Noto Sans JP"', marginBottom: idx === fieldErrors['newPassword'].length - 1 ? '0px' : '4px' }}>
+                  <div key={idx} className="font-bold text-[10px] leading-[12px] text-[#FF383C]" style={{ fontFamily: '"Noto Sans JP"' }}>
                     {err}
                   </div>
                 ))}
@@ -226,13 +226,13 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-[20px] h-[20px]"
               >
-                <img src={showConfirmPassword ? '/open.svg' : '/close.svg'} alt={showConfirmPassword ? 'Hide password' : 'Show password'} style={{ width: '100%', height: '100%' }} />
+                <img src={showConfirmPassword ? '/open.svg' : '/close.svg'} alt={showConfirmPassword ? 'Hide password' : 'Show password'} className="w-full h-full" />
               </button>
             </div>
             {fieldErrors['confirmPassword'] && (
               <div className="mt-[2px]">
                 {fieldErrors['confirmPassword'].map((err, idx) => (
-                  <div key={idx} className="font-bold text-[10px] leading-[12px] text-[#FF383C]" style={{ fontFamily: '"Noto Sans JP"', marginBottom: idx === fieldErrors['confirmPassword'].length - 1 ? '0px' : '4px' }}>
+                  <div key={idx} className="font-bold text-[10px] leading-[12px] text-[#FF383C]" style={{ fontFamily: '"Noto Sans JP"' }}>
                     {err}
                   </div>
                 ))}
@@ -243,7 +243,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
           {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-[#dc2626] text-sm" style={{ fontFamily: 'Inter', fontSize: '14px' }}>{error}</p>
+              <p className="text-[#dc2626] text-sm" style={{ fontFamily: 'Inter' }}>{error}</p>
             </div>
           )}
 
@@ -252,13 +252,13 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
             <button
               type="submit"
               onClick={handleSave}
-              disabled={loading || !currentPassword || !newPassword || !confirmPassword || Object.keys(fieldErrors).length > 0}
+              disabled={loading || currentPassword.length < 8 || newPassword.length < 8 || confirmPassword.length < 8}
               className="w-full gap-2 rounded-[12px] border-none font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300"
               style={{
-                backgroundColor: currentPassword && newPassword && confirmPassword && Object.keys(fieldErrors).length === 0 ? '#FFBA48' : '#FFD26A',
-                cursor: loading || !currentPassword || !newPassword || !confirmPassword || Object.keys(fieldErrors).length > 0 ? 'not-allowed' : 'pointer',
-                color: currentPassword && newPassword && confirmPassword && Object.keys(fieldErrors).length === 0 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.698)',
-                boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px',
+                backgroundColor: currentPassword.length >= 8 && newPassword.length >= 8 && confirmPassword.length >= 8 ? '#FFBA48' : '#F8E8AA',
+                cursor: loading || currentPassword.length < 8 || newPassword.length < 8 || confirmPassword.length < 8 ? 'not-allowed' : 'pointer',
+                color: currentPassword.length >= 8 && newPassword.length >= 8 && confirmPassword.length >= 8 ? '#FFFFFF' : '#FFFFFFB2',
+                boxShadow: '0px 1px 2px 0px #0000000D',
               }}
             >
               {loading ? '保存中...' : '保存'}
