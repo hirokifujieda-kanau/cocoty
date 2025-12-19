@@ -52,24 +52,14 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ isOpen, onClose, 
     <div className="fixed inset-0 bg-black/40 z-50 flex flex-col h-screen max-h-screen overflow-hidden">
       {/* Top Header */}
       <div className="sticky top-0 border-b border-gray-200 z-50 bg-[#FFD26A]">
-        <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
+        <div className="mx-auto h-[30px] flex items-center px-[clamp(26px,8vw,106px)]" style={{ maxWidth: '750px' }}>
           <div className="flex items-center justify-between w-full">
-            <h1 className="text-white text-[16px] leading-[100%] align-middle" style={{ fontFamily: '"Noto Sans JP"', fontWeight: 500, lineHeight: '100%', verticalAlign: 'middle' }}>ここてぃ</h1>
+            <h1 className="text-white text-[16px] leading-[100%] align-middle font-medium" style={{ fontFamily: '"Noto Sans JP"' }}>ここてぃ</h1>
             <div className="flex gap-2 items-center">
               <div className="my-1 ml-[9px]">
                 <div className="relative flex items-center">
-                  <img alt="search" src="/人物アイコン　チーム 1.svg" style={{ position: 'absolute', left: '8px', width: '20px', height: '20px', pointerEvents: 'none' }} />
-                  <input placeholder="ユーザー一覧" type="text" style={{ fontSize: '10px', fontFamily: '"Noto Sans JP"', fontWeight: 500, marginTop: '5px', marginBottom: '5px', paddingLeft: '32px', boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px', lineHeight: '100%' }} className={`px-4 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 ${styles.searchInput}`} />
-                  <style>{`
-                    input::placeholder {
-                      font-family: Noto Sans JP;
-                      font-weight: 500;
-                      font-size: 10px;
-                      line-height: 100%;
-                      letter-spacing: 0%;
-                      color: #5C5C5C;
-                    }
-                  `}</style>
+                  <img alt="search" src="/人物アイコン　チーム 1.svg" className="absolute left-2 w-5 h-5 pointer-events-none" />
+                  <input placeholder="ユーザー一覧" type="text" className={`px-4 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 text-[10px] font-medium font-['Noto_Sans_JP'] my-[5px] pl-8 shadow-sm ${styles.searchInput}`} />
                 </div>
               </div>
               <button className="hover:bg-gray-100 rounded-full transition-colors" title="設定">
@@ -101,10 +91,10 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ isOpen, onClose, 
             {!success ? (
               <>
                 <div>
-                  <p style={{ fontFamily: '"Noto Sans JP"', fontWeight: 700, fontSize: '12px', lineHeight: '20px', letterSpacing: '0%', color: '#1A1A1A' }}>
+                  <p className="font-bold text-[12px] leading-[20px] text-[#1A1A1A]" style={{ fontFamily: '"Noto Sans JP"', letterSpacing: '0%' }}>
                     パスワードの再設定リンクをお送りします。
                   </p>
-                  <p className="mb-6" style={{ fontFamily: '"Noto Sans JP"', fontWeight: 700, fontSize: '12px', lineHeight: '20px', letterSpacing: '0%', color: '#1A1A1A' }}>
+                  <p className="mb-6 font-bold text-[12px] leading-[20px] text-[#1A1A1A]" style={{ fontFamily: '"Noto Sans JP"', letterSpacing: '0%' }}>
                     登録されているメールアドレスを入力してください。
                   </p>
                 </div>
@@ -126,7 +116,7 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ isOpen, onClose, 
                 {/* Error Message */}
                 {error && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-[#dc2626] text-sm" style={{ fontFamily: 'Inter' }}>{error}</p>
+                    <p className="text-[#dc2626] text-sm font-['Inter']">{error}</p>
                   </div>
                 )}
 
@@ -136,11 +126,12 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ isOpen, onClose, 
                     type="submit"
                     onClick={handleSendReset}
                     disabled={loading || !email}
-                    className="w-full gap-2 rounded-[12px] border-none font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300"
+                    className={`w-full gap-2 rounded-[12px] border-none font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300 ${
+                      email
+                        ? 'bg-[#FFBA48] text-white cursor-pointer'
+                        : 'bg-[#F8E8AA] text-[#FFFFFFB2] cursor-not-allowed'
+                    }`}
                     style={{
-                      backgroundColor: email ? '#FFBA48' : '#F8E8AA',
-                      cursor: loading || !email ? 'not-allowed' : 'pointer',
-                      color: email ? '#FFFFFF' : '#FFFFFFB2',
                       boxShadow: '0px 1px 2px 0px #0000000D',
                     }}
                   >
