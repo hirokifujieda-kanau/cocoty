@@ -138,6 +138,7 @@ export function UserListPage() {
           {data.profiles.map((profile) => (
             <div
               key={profile.id}
+              onClick={() => router.push(`/profile/${profile.id}`)}
               className="flex items-start gap-2 px-4 py-[19px] border-b border-gray-200 hover:bg-gray-100 transition cursor-pointer"
               style={{ gap: '8px' }}
             >
