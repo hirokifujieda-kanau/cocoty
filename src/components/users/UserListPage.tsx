@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 import { getProfiles } from '@/lib/api/client';
 import type { Profile } from '@/lib/api/client';
-import { UserCard } from './UserCard';
 import { Pagination } from './Pagination';
 
 interface ProfilesResponse {
@@ -17,6 +18,7 @@ interface ProfilesResponse {
 }
 
 export function UserListPage() {
+  const router = useRouter();
   const [data, setData] = useState<ProfilesResponse | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -83,22 +85,142 @@ export function UserListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* ヘッダー */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            メンバー一覧 👥
-          </h1>
-          <p className="text-gray-600">
-            全 {data.pagination.total_count} 人のメンバー
-          </p>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <div className="sticky top-0 bg-white border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
+        <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
+          <div className="flex items-center justify-between w-full">
+            <h1 
+              className="font-semibold text-base text-white"
+              style={{
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 500,
+                lineHeight: '100%',
+                letterSpacing: '0%',
+                verticalAlign: 'middle'
+              }}
+            >
+              ここてぃ
+            </h1>
+            <div className="flex gap-2 items-center">
+              <div className="my-1 ml-[9px]">
+              <div className="relative flex items-center">
+                <img 
+                  src="/人物アイコン　チーム 1.svg" 
+                  alt="search" 
+                  style={{ 
+                    position: 'absolute', 
+                    left: '8px',
+                    width: '20px',
+                    height: '20px',
+                    pointerEvents: 'none'
+                  }} 
+                />
+                <input
+                  type="text"
+                  placeholder="ユーザー一覧"
+                  className="px-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer"
+                  style={{
+                    width: 'clamp(120px, 30vw, 200px)',
+                    height: '20px',
+                    fontSize: '10px',
+                    fontFamily: 'Noto Sans JP',
+                    fontWeight: 500,
+                    backgroundColor: '#FFFFFF',
+                    marginTop: '5px',
+                    marginBottom: '5px',
+                    paddingLeft: '32px',
+                    borderRadius: '8px',
+                    boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px',
+                    lineHeight: '100%'
+                  }}
+                  readOnly
+                />
+                <style>{`
+                  input::placeholder {
+                    font-family: Noto Sans JP;
+                    font-weight: 500;
+                    font-size: 10px;
+                    line-height: 100%;
+                    letter-spacing: 0%;
+                    color: #5C5C5C;
+                  }
+                `}</style>
+              </div>
+              </div>
+              <button
+                className="hover:bg-gray-100 rounded-full transition-colors"
+                title="設定"
+              >
+                <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
 
+      {/* Page Title Header */}
+      <div className="sticky top-[30px] bg-white py-8 px-4 border-b border-gray-200">
+        <div className="flex items-center justify-center gap-4 relative">
+          <button
+            onClick={() => router.back()}
+            className="absolute left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <ChevronLeft className="h-6 w-6 text-gray-900" />
+          </button>
+          <h1
+            className="font-['Noto_Sans_JP'] font-bold text-[20px] leading-[20px] text-center align-middle text-[#1A1A1A]"
+          >
+            ユーザー一覧
+          </h1>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div>
         {/* ユーザーカードグリッド */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+        <div>
           {data.profiles.map((profile) => (
-            <UserCard key={profile.id} profile={profile} />
+            <div key={profile.id} className="flex items-start hover:bg-gray-100 transition cursor-pointer border-b border-gray-200 px-4" style={{ gap: '8px', paddingBottom: '19px', paddingTop: '19px' }}>
+              {/* アバター */}
+              <div className="flex-shrink-0">
+                <img
+                  src={profile.avatar_url || 'https://via.placeholder.com/48'}
+                  alt={profile.name}
+                  className="rounded-full object-cover"
+                  style={{ width: '65.66px', height: '62.85px' }}
+                />
+              </div>
+              {/* ユーザー情報 */}
+              <div className="flex-grow">
+                <h3
+                  style={{
+                    fontFamily: 'Inter',
+                    fontWeight: 500,
+                    fontSize: '16px',
+                    lineHeight: '130%',
+                    letterSpacing: '0%',
+                    color: '#1A1A1A',
+                    marginBottom: '3px'
+                  }}
+                >
+                  {profile.name || profile.nickname || 'Unknown User'}
+                </h3>
+                <p
+                  style={{
+                    fontFamily: 'Noto Sans JP',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    lineHeight: '130%',
+                    letterSpacing: '0%',
+                    verticalAlign: 'middle',
+                    color: '#828282'
+                  }}
+                >
+                  {profile.bio || '説明なし'}
+                </p>
+              </div>
+            </div>
           ))}
         </div>
 
