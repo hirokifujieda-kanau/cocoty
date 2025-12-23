@@ -58,9 +58,29 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
             mbtiType: response.profile.mbti_type || '',
             bloodType: response.profile.blood_type || ''
           });
+        } else {
+          // プロフィールが存在しない初回ユーザー
+          setProfile(null);
+          setFormData({
+            name: '',
+            bio: '',
+            email: user.email || '',
+            phone: '090-1234-5678',
+            website: '',
+            location: '東京都',
+            birthday: '',
+            birthplace: '',
+            age: '',
+            hobbies: '',
+            favoriteFood: '',
+            mbtiType: '',
+            bloodType: ''
+          });
         }
       } catch (error) {
         console.error('Failed to fetch profile:', error);
+        // エラーの場合も初回ユーザーとして扱う
+        setProfile(null);
       } finally {
         setLoading(false);
       }
@@ -82,7 +102,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
     );
   }
 
-  if (!profile) return null;
+  // 初回ユーザーの場合もモーダルを表示する（profile === null でもOK）
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -114,9 +134,13 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
       const avatarUrl = cloudinaryData.secure_url;
       console.log('✅ Avatar uploaded to Cloudinary:', avatarUrl);
 
-      // プロフィールを更新
-      await updateProfile(profile.id, { avatar_url: avatarUrl });
-      console.log('✅ Avatar URL saved to profile');
+      // プロフィールを更新（profileが存在する場合のみ）
+      if (profile) {
+        await updateProfile(profile.id, { avatar_url: avatarUrl });
+        console.log('✅ Avatar URL saved to profile');
+      } else {
+        console.warn('⚠️ Profile not created yet, avatar URL will be set on first save');
+      }
 
       // プロフィールを再読み込み
       if (onSave) {
@@ -144,6 +168,13 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
         birthday: formData.birthday,
         birthplace: formData.birthplace,
       };
+
+      if (!profile) {
+        // 初回ユーザー: setup_profileを呼ぶ必要があるが、既に登録時に呼ばれているはず
+        // ここでは通常のupdateProfileを試みる
+        alert('プロフィールが見つかりません。ページを再読み込みしてください。');
+        return;
+      }
 
       await updateProfile(profile.id, params); 
       console.log('✅ Profile updated successfully');
@@ -186,8 +217,8 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
           <div className="flex items-center gap-6">
             <div className="relative">
               <img
-                src={profile.avatar_url || 'https://via.placeholder.com/150'}
-                alt={profile.name}
+                src={profile?.avatar_url || 'https://via.placeholder.com/150'}
+                alt={profile?.name || 'プロフィール画像'}
                 className="w-24 h-24 rounded-full object-cover"
               />
               <input
@@ -210,7 +241,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
               </label>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-1">{profile.name}</h3>
+              <h3 className="font-semibold text-gray-900 mb-1">{profile?.name || formData.name || 'ユーザー名未設定'}</h3>
               <label
                 htmlFor="avatar-upload"
                 className="text-sm text-purple-600 font-semibold hover:text-purple-700 cursor-pointer"

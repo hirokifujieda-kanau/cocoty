@@ -28,6 +28,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   
   // propsからuserIdを取得、なければURLパラメータを確認
   const userIdFromUrl = searchParams.get('userId');
@@ -53,8 +54,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         
         if (response.profile) {
           setDisplayUser(response.profile);
+          setIsFirstTimeUser(false);
         } else {
-          setError('プロフィールが見つかりません。初回ログインの場合は、プロフィールを作成してください。');
+          // プロフィールがない場合、初回ユーザーとして扱う
+          setIsFirstTimeUser(true);
+          setError(null);
         }
       } else if (userId) {
         // 他のユーザーのプロフィールを取得
@@ -95,8 +99,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           
           if (response.profile) {
             setDisplayUser(response.profile);
+            setIsFirstTimeUser(false);
           } else {
-            setError('プロフィールが見つかりません。初回ログインの場合は、プロフィールを作成してください。');
+            // プロフィールがない場合、初回ユーザーとして扱う
+            setIsFirstTimeUser(true);
+            setError(null);
           }
         } else if (userId) {
           // 他のユーザーのプロフィールを取得
@@ -177,6 +184,18 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showShareProfile, setShowShareProfile] = useState(false);
   
+  // 初回ユーザーの場合、自動的にプロフィール編集モーダルを開く
+  useEffect(() => {
+    if (isFirstTimeUser && isOwner) {
+      setShowEditProfile(true);
+    }
+  }, [isFirstTimeUser, isOwner]);
+  
+  // フォロー状態とメッセージ機能
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageText, setMessageText] = useState('');
+  
   // アクティビティカレンダー用の状態
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [activityData, setActivityData] = useState<{ [key: string]: any[] }>({});
@@ -245,8 +264,109 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     );
   }
 
-  // エラー状態
-  if (error || !displayUser) {
+  // エラー状態（初回ユーザーではない場合のみ）
+  if (error && !isFirstTimeUser) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={() => router.back()}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            戻る
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 初回ユーザー（プロフィール未作成）の場合
+  if (isFirstTimeUser && isOwner) {
+    return (
+      <div className="min-h-screen bg-white">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
+          <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
+            <div className="flex items-center justify-between w-full">
+              <h1 
+                className="font-semibold text-base text-white"
+                style={{
+                  fontFamily: 'Noto Sans JP',
+                  fontWeight: 500,
+                  fontSize: '16px',
+                  lineHeight: '23.17px',
+                  letterSpacing: '0.01em'
+                }}
+              >
+                プロフィール
+              </h1>
+              <button
+                onClick={() => signOut()}
+                className="p-1 hover:bg-yellow-500/20 rounded-full transition-colors"
+              >
+                <LogOut className="h-5 w-5 text-white" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ウェルカムメッセージ */}
+        <div className="flex items-center justify-center min-h-[calc(100vh-30px)] px-4">
+          <div className="text-center max-w-md">
+            <div className="mb-6">
+              <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <Users className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                ようこそ！
+              </h2>
+              <p className="text-gray-600 mb-6">
+                アカウント登録が完了しました。<br />
+                プロフィール情報を入力して、コミュニティに参加しましょう！
+              </p>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+              <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                プロフィール編集で設定できること
+              </h3>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• プロフィール画像</li>
+                <li>• ニックネーム</li>
+                <li>• 自己紹介</li>
+                <li>• 趣味・特技</li>
+                <li>• その他の詳細情報</li>
+              </ul>
+            </div>
+
+            <p className="text-sm text-gray-500 mb-4">
+              ※ プロフィール編集画面が自動的に開きます
+            </p>
+          </div>
+        </div>
+
+        {/* プロフィール編集モーダル（自動的に開く） */}
+        <ProfileEditModal
+          isOpen={showEditProfile}
+          onClose={() => {
+            setShowEditProfile(false);
+            // モーダルを閉じたら再度プロフィールを取得
+            refetchProfile();
+          }}
+          onSave={async () => {
+            // 保存後、プロフィールを再読み込み
+            await refetchProfile();
+            setShowEditProfile(false);
+          }}
+        />
+      </div>
+    );
+  }
+
+  // displayUserがnullの場合（他のユーザーのプロフィールが見つからない場合）
+  if (!displayUser) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -642,8 +762,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
           {/* 個人実績（エアコース）- 今後実装予定のため非表示 */}
           {false && isOwner && displayUser && (() => {
-            const stats = getTaskStats(displayUser.id.toString());
-            const courseProgress = getUserCourseProgress(displayUser.id.toString());
+            const stats = getTaskStats(displayUser!.id.toString());
+            const courseProgress = getUserCourseProgress(displayUser!.id.toString());
             
             return (
               <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 via-pink-50 to-orange-50 rounded-2xl border border-purple-100">
@@ -953,8 +1073,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                   </div>
                   
                   {displayUser && (() => {
-                    const tasks = getUserTasks(displayUser.id.toString());
-                    const stats = getTaskStats(displayUser.id.toString());
+                    const tasks = getUserTasks(displayUser!.id.toString());
+                    const stats = getTaskStats(displayUser!.id.toString());
                     const recentTasks = tasks.slice(0, 3);
                     
                     return (

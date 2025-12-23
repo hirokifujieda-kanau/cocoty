@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiRequest } from '@/lib/api/client';
+import styles from './SignupPage.module.css';
 
 // 生年月日のバリデーション関数
 const validateBirthday = (year: string, month: string, day: string): { isValid: boolean; errorMessage?: string } => {
@@ -60,6 +63,7 @@ const getMaxDayInMonth = (year: string, month: string): number => {
 
 const SignupPage: React.FC = () => {
   const router = useRouter();
+  const { signup } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -77,7 +81,11 @@ const SignupPage: React.FC = () => {
   const [birthdayError, setBirthdayError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const isFormValid = formData.name.trim() && formData.email.trim() && formData.password.length >= 8 && formData.confirmPassword.length >= 8;
+  const isFormValid = formData.name.trim() && 
+                      formData.year && formData.month && formData.day && 
+                      formData.email.trim() && 
+                      formData.password.length >= 8 && 
+                      formData.confirmPassword.length >= 8;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,15 +136,64 @@ const SignupPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // TODO: 実際のサインアップ処理
-      console.log('Signing up:', formData);
+      // 1️⃣ Firebase認証で新規登録
+      console.log('🔐 Firebaseで新規登録中:', formData.email);
+      await signup(formData.email, formData.password);
+      console.log('✅ Firebase認証成功！');
       
-      // デモ用: 登録後にログイン画面へ
-      setTimeout(() => {
-        router.push('/login');
-      }, 1000);
-    } catch {
-      setError('登録エラーが発生しました');
+      // 2️⃣ すぐにプロフィール作成APIを呼ぶ（必須）
+      console.log('� プロフィール作成中...');
+      
+      // 生年月日を YYYY-MM-DD 形式に変換
+      let birthday = '';
+      if (formData.year && formData.month && formData.day) {
+        const month = formData.month.padStart(2, '0');
+        const day = formData.day.padStart(2, '0');
+        birthday = `${formData.year}-${month}-${day}`;
+      }
+      
+      await apiRequest('/auth/setup_profile', {
+        method: 'POST',
+        requireAuth: true,
+        body: JSON.stringify({
+          profile: {
+            name: formData.name.trim(),
+            nickname: formData.name.trim(), // 任意（省略時はnameの最初の単語）
+            birthday: birthday
+          }
+        })
+      });
+      
+      console.log('✅ プロフィール作成成功！');
+      
+      // 3️⃣ プロフィールページにリダイレクト
+      router.push('/profile');
+    } catch (err: any) {
+      console.error('❌ 新規登録エラー:', err);
+      
+      // エラーメッセージを日本語に変換
+      let errorMessage = '登録エラーが発生しました';
+      
+      // Firebaseエラー
+      if (err.code === 'auth/email-already-in-use') {
+        errorMessage = 'このメールアドレスは既に使用されています';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'メールアドレスの形式が正しくありません';
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = 'パスワードは6文字以上で設定してください';
+      } else if (err.code === 'auth/operation-not-allowed') {
+        errorMessage = 'この操作は許可されていません';
+      } 
+      // APIエラー（既にプロフィールがある場合）
+      else if (err.message && err.message.includes('422')) {
+        errorMessage = '既にプロフィールが作成されています。ログインしてください。';
+      } 
+      // その他のエラー
+      else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

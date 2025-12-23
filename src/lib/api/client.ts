@@ -55,7 +55,7 @@ async function getHeaders(requireAuth: boolean = false): Promise<HeadersInit> {
 /**
  * APIリクエストのラッパー
  */
-async function apiRequest<T>(
+export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit & { requireAuth?: boolean } = {}
 ): Promise<T> {
