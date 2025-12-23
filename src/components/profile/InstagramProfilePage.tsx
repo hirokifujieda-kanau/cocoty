@@ -177,64 +177,9 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showShareProfile, setShowShareProfile] = useState(false);
   
-  // フォロー状態とメッセージ機能
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [messageText, setMessageText] = useState('');
-  
   // アクティビティカレンダー用の状態
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [activityData, setActivityData] = useState<{ [key: string]: any[] }>({});
-
-  // フォロー状態を読み込み
-  useEffect(() => {
-    if (!isOwner && user && displayUser) {
-      const followKey = `follow_${user.uid}_${displayUser.id}`;
-      const following = localStorage.getItem(followKey) === 'true';
-      setIsFollowing(following);
-    }
-  }, [isOwner, user, displayUser]);
-
-  // フォロー/フォロー解除
-  const handleFollowToggle = () => {
-    if (!user || !displayUser) return;
-    
-    const followKey = `follow_${user.uid}_${displayUser.id}`;
-    const newFollowState = !isFollowing;
-    
-    localStorage.setItem(followKey, newFollowState.toString());
-    setIsFollowing(newFollowState);
-    
-    // トースト通知（オプション）
-    alert(newFollowState ? `${displayUser.name}をフォローしました` : `${displayUser.name}のフォローを解除しました`);
-  };
-
-  // メッセージ送信
-  const handleSendMessage = () => {
-    if (!messageText.trim()) {
-      alert('メッセージを入力してください');
-      return;
-    }
-    
-    // メッセージをlocalStorageに保存（実際のアプリではAPIに送信）
-    const messageKey = `messages_${user?.uid}_${displayUser?.id}`;
-    const existingMessages = JSON.parse(localStorage.getItem(messageKey) || '[]');
-    
-    const newMessage = {
-      id: Date.now(),
-      from: user?.uid,
-      to: displayUser?.id,
-      text: messageText,
-      timestamp: new Date().toISOString()
-    };
-    
-    existingMessages.push(newMessage);
-    localStorage.setItem(messageKey, JSON.stringify(existingMessages));
-    
-    setMessageText('');
-    setShowMessageModal(false);
-    alert(`${displayUser?.name}にメッセージを送信しました`);
-  };
 
   // 過去28日間のアクティビティデータを生成
   useEffect(() => {
@@ -320,83 +265,43 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
-        <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
-          <div className="flex items-center justify-between w-full">
-            <h1 
-              className="font-semibold text-base text-white"
-              style={{
-                fontFamily: 'Noto Sans JP',
-                fontWeight: 500,
-                lineHeight: '100%',
-                letterSpacing: '0%',
-                verticalAlign: 'middle'
-              }}
+      <div className="sticky top-0 z-50 h-[30px] bg-[#FFD26A] flex items-center">
+        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,106px)]" style={{ maxWidth: '750px' }}>
+          {/* Logo */}
+          <h1 className="font-noto text-base font-medium text-white leading-none">
+            ここてぃ
+          </h1>
+          
+          {/* Search & Settings */}
+          <div className="flex gap-2 items-center">
+            <div className="relative flex items-center my-1 ml-[9px]">
+              <img 
+                src="/人物アイコン　チーム 1.svg" 
+                alt="search" 
+                className="absolute left-2 w-5 h-5 pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="ユーザー一覧"
+                onClick={() => router.push('/users')}
+                className="w-[clamp(120px,30vw,200px)] h-5 pl-8 pr-3 text-[10px] font-noto font-medium bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer shadow-sm placeholder:text-[#5C5C5C] placeholder:font-medium placeholder:text-[10px]"
+                readOnly
+              />
+            </div>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              title="設定"
             >
-              ここてぃ
-            </h1>
-            {isOwner && (
-              <div className="flex gap-2 items-center">
-                <div className="my-1 ml-[9px]">
-                <div className="relative flex items-center">
-                  <img 
-                    src="/人物アイコン　チーム 1.svg" 
-                    alt="search" 
-                    style={{ 
-                      position: 'absolute', 
-                      left: '8px',
-                      width: '20px',
-                      height: '20px',
-                      pointerEvents: 'none'
-                    }} 
-                  />
-                  <input
-                    type="text"
-                    placeholder="ユーザー一覧"
-                    className={`px-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${styles.searchInput}`}
-                    style={{
-                      fontSize: '10px',
-                      fontFamily: 'Noto Sans JP',
-                      fontWeight: 500,
-                      backgroundColor: '#FFFFFF',
-                      marginTop: '5px',
-                      marginBottom: '5px',
-                      paddingLeft: '32px',
-                      borderRadius: '8px',
-                      boxShadow: '0px 1px 2px 0px #0000000D',
-                      lineHeight: '100%',
-                      letterSpacing: '0%'
-                    }}
-                  />
-                  <style>{`
-                    input::placeholder {
-                      font-family: Noto Sans JP;
-                      font-weight: 500;
-                      font-size: 10px;
-                      line-height: 100%;
-                      letter-spacing: 0%;
-                      color: #5C5C5C;
-                    }
-                  `}</style>
-                </div>
-                </div>
-                <button
-                  onClick={() => setShowSettings(true)}
-                  className="hover:bg-gray-100 rounded-full transition-colors"
-                  title="設定"
-                >
-                  <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
-                </button>
-              </div>
-            )}
-            {!isOwner && <div className="w-10" />}
+              <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>
 
       <div className="mx-auto w-full" style={{ maxWidth: '750px' }}>
         {/* Profile Section - 内部コンテンツ最大幅 626px（750px - 88px*2 - 18px*2） */}
-        <div className={`py-6 ${styles.profileSection}`}>
+        <div className={`py-6 px-4 ${styles.profileSection}`}>
           <div className="flex items-center gap-6 mb-6">
             {/* Avatar */}
             <div className="flex-shrink-0 relative">
@@ -493,26 +398,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     </button>
                     )}
                   </>
-                ) : (
-                  <>
-                    <button
-                      onClick={handleFollowToggle}
-                      className={`flex-1 px-4 py-2 rounded-lg font-semibold text-sm transition-colors ${
-                        isFollowing
-                          ? 'bg-gray-100 hover:bg-gray-200 text-gray-900'
-                          : 'bg-blue-500 hover:bg-blue-600 text-white'
-                      }`}
-                    >
-                      {isFollowing ? 'フォロー中' : 'フォロー'}
-                    </button>
-                    <button
-                      onClick={() => setShowMessageModal(true)}
-                      className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold text-sm transition-colors"
-                    >
-                      メッセージ
-                    </button>
-                  </>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
@@ -613,46 +499,12 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             )}
           </div>
 
-          {/* 曼荼羅アートとタロット・診断ボタンを縦並びに */}
-          <div className="flex flex-col gap-6 items-start mt-6">
-            {isOwner && (
-              <div className="w-full flex flex-col items-center" style={{ gap: '56px' }}>
-                <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
-                  {/* タロット占い */}
-                  <button
-                    onClick={() => setShowDailyTarot(true)}
-                    className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden flex-shrink-0"
-                    style={{ 
-                      width: 'clamp(150px, 26vw, 200px)', 
-                      height: 'clamp(56px, 10vw, 75px)',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <img src="/タロット占い.svg" alt="今日のタロット占い" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
-                  </button>
-
-                  {/* 季節診断 */}
-                  <button
-                    onClick={() => setShowSeasonalDiagnosis(true)}
-                    className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
-                    style={{ 
-                      width: 'clamp(150px, 26vw, 200px)', 
-                      height: 'clamp(56px, 10vw, 75px)',
-                      flexShrink: 0,
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <img src="/診断.svg" alt="パーソナル診断" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
-                  </button>
-                </div>
-
-                {/* 曼荼羅アート */}
-                <div className="w-full flex items-center justify-center">
-                  <MandalaGallery userId={displayUser.id.toString()} isOwner={isOwner} />
-                </div>
-              </div>
-            )}
-          </div>
+          {/* 曼荼羅アート */}
+          {displayUser && (
+            <div className="mt-6 flex w-full items-center justify-center">
+              <MandalaGallery userId={displayUser.id.toString()} isOwner={isOwner} />
+            </div>
+          )}
 
           {/* チームタスク進捗と個人課題進捗 - 今後実装予定のため非表示 */}
           {false && (
@@ -1203,75 +1055,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         isOpen={showShareProfile}
         onClose={() => setShowShareProfile(false)}
       />
-
-      {/* メッセージモーダル */}
-      {showMessageModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">
-                {displayUser?.name}にメッセージ
-              </h2>
-              <button
-                onClick={() => {
-                  setShowMessageModal(false);
-                  setMessageText('');
-                }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="mb-4">
-              <div className="flex items-center space-x-3 mb-4 p-3 bg-gray-50 rounded-lg">
-                <img
-                  src={displayUser?.avatar_url || PH1}
-                  alt={displayUser?.name}
-                  className="w-12 h-12 rounded-full"
-                />
-                <div>
-                  <p className="font-medium text-gray-900">{displayUser?.name}</p>
-                  <p className="text-sm text-gray-500">{displayUser?.bio?.slice(0, 50)}...</p>
-                </div>
-              </div>
-
-              <textarea
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder="メッセージを入力..."
-                className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                rows={4}
-                maxLength={500}
-              />
-              <div className="text-right text-xs text-gray-400 mt-1">
-                {messageText.length} / 500
-              </div>
-            </div>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={() => {
-                  setShowMessageModal(false);
-                  setMessageText('');
-                }}
-                className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold transition-colors"
-              >
-                キャンセル
-              </button>
-              <button
-                onClick={handleSendMessage}
-                disabled={!messageText.trim()}
-                className="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                送信
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
     </div>
   );

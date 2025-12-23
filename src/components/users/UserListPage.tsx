@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 import { getProfiles } from '@/lib/api/client';
 import type { Profile } from '@/lib/api/client';
-import { UserCard } from './UserCard';
 import { Pagination } from './Pagination';
 
 interface ProfilesResponse {
@@ -17,6 +18,7 @@ interface ProfilesResponse {
 }
 
 export function UserListPage() {
+  const router = useRouter();
   const [data, setData] = useState<ProfilesResponse | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -83,22 +85,82 @@ export function UserListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* ヘッダー */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            メンバー一覧 👥
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <div className="sticky top-0 bg-[#FFD26A] h-[30px] z-50 flex items-center">
+        <div className="mx-auto flex items-center justify-between w-full max-w-[750px] px-[clamp(26px,8vw,106px)]">
+          <h1 className="font-noto text-base font-medium text-white leading-none">
+            ここてぃ
           </h1>
-          <p className="text-gray-600">
-            全 {data.pagination.total_count} 人のメンバー
-          </p>
+          <div className="flex gap-2 items-center">
+            <div className="relative flex items-center">
+              <img 
+                src="/人物アイコン　チーム 1.svg" 
+                alt="search" 
+                className="absolute left-2 w-5 h-5 pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="ユーザー一覧"
+                className="w-[clamp(120px,30vw,200px)] h-5 pl-8 pr-3 text-[10px] font-noto font-medium bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer shadow-sm placeholder:text-[#5C5C5C] placeholder:font-medium placeholder:text-[10px]"
+                readOnly
+              />
+            </div>
+            <button
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              title="設定"
+            >
+              <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* ユーザーカードグリッド */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+      {/* Page Title Header */}
+      <div className="sticky top-[30px] bg-white py-8 px-4 border-b border-gray-200">
+        <div className="flex items-center justify-center gap-4 relative">
+          <button
+            onClick={() => router.back()}
+            className="absolute left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <ChevronLeft className="h-6 w-6 text-gray-900" />
+          </button>
+          <h1 className="font-noto font-bold text-[20px] leading-5 text-center text-[#1A1A1A]">
+            ユーザー一覧
+          </h1>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div>
+        {/* User List */}
+        <div>
           {data.profiles.map((profile) => (
-            <UserCard key={profile.id} profile={profile} />
+            <div
+              key={profile.id}
+              onClick={() => router.push(`/profile/${profile.id}`)}
+              className="flex items-start gap-2 px-4 py-[19px] border-b border-gray-200 hover:bg-gray-100 transition cursor-pointer"
+              style={{ gap: '8px' }}
+            >
+              {/* Avatar */}
+              <div className="flex-shrink-0">
+                <img
+                  src={profile.avatar_url || 'https://via.placeholder.com/48'}
+                  alt={profile.name}
+                  className="rounded-full object-cover"
+                  style={{ width: '65.66px', height: '62.85px' }}
+                />
+              </div>
+              {/* User Info */}
+              <div className="flex-grow">
+                <h3 className="font-inter font-medium text-base leading-[130%] text-[#1A1A1A] mb-[3px]">
+                  {profile.name || profile.nickname || 'Unknown User'}
+                </h3>
+                <p className="font-noto font-medium text-sm leading-[130%] text-[#828282]">
+                  {profile.bio || '説明なし'}
+                </p>
+              </div>
+            </div>
           ))}
         </div>
 
