@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
-import styles from './SignupPage.module.css';
 
 // 生年月日のバリデーション関数
 const validateBirthday = (year: string, month: string, day: string): { isValid: boolean; errorMessage?: string } => {
@@ -223,7 +222,7 @@ const SignupPage: React.FC = () => {
                       }
                     }
                   }}
-                  className={`bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${styles.birthdayInput}`}
+                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
                   placeholder="1"
                 />
                 <span className="font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#5C5C5C]">月</span>
@@ -233,7 +232,7 @@ const SignupPage: React.FC = () => {
                   max={getMaxDayInMonth(formData.year, formData.month)}
                   value={formData.day}
                   onChange={(e) => setFormData({ ...formData, day: e.target.value })}
-                  className={`bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${styles.birthdayInput}`}
+                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
                   placeholder="1"
                 />
                 <span className="font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#5C5C5C]">日</span>
