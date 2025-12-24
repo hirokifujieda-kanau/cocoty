@@ -244,38 +244,19 @@ const SignupPage: React.FC = () => {
                     type="checkbox"
                     checked={formData.isPrivate}
                     onChange={(e) => setFormData({ ...formData, isPrivate: e.target.checked })}
-                    style={{ display: 'none' }}
+                    className="hidden"
                   />
                   <div
-                    style={{
-                      width: '50px',
-                      height: '20px',
-                      borderRadius: '50px',
-                      backgroundColor: formData.isPrivate ? '#FFD26A' : '#CDCDCD',
-                      transition: 'background-color 0.3s',
-                      position: 'relative',
-                      display: 'flex',
-                      alignItems: 'center',
-                      paddingTop: '8px',
-                      paddingRight: '3px',
-                      paddingBottom: '8px',
-                      paddingLeft: '3px',
-                      boxSizing: 'border-box',
-                      opacity: 1
-                    }}
+                    className={`w-12 h-5 rounded-full transition-colors duration-300 flex items-center relative px-1 py-2 ${
+                      formData.isPrivate ? 'bg-yellow-400' : 'bg-gray-300'
+                    }`}
                   >
                     <img
                       src="/circlecheck.svg"
                       alt="toggle"
-                      style={{
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '10px',
-                        opacity: 1,
-                        transition: 'all 0.3s',
-                        position: 'absolute',
-                        left: formData.isPrivate ? '31px' : '3px'
-                      }}
+                      className={`w-4 h-4 rounded-full transition-all duration-300 absolute ${
+                        formData.isPrivate ? 'right-1' : 'left-1'
+                      }`}
                     />
                   </div>
                 </label>
@@ -386,7 +367,7 @@ const SignupPage: React.FC = () => {
             <button
               type="submit"
               disabled={!isFormValid || isLoading}
-              className="w-[calc(100%-161px)] ml-[80.5px] mr-[80.5px] gap-2 rounded-[12px] border-none mt-[32px] font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300"
+              className={`w-[calc(100%-161px)] ml-[80.5px] mr-[80.5px] gap-2 rounded-[12px] border-none mt-[32px] font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300`}
               style={{
                 backgroundColor: isFormValid ? '#FFBA48' : '#F8E8AA',
                 cursor: isFormValid ? 'pointer' : 'not-allowed',
