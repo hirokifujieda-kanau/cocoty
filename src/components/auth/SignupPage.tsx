@@ -5,6 +5,60 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import styles from './SignupPage.module.css';
 
+// 生年月日のバリデーション関数
+const validateBirthday = (year: string, month: string, day: string): { isValid: boolean; errorMessage?: string } => {
+  // 入力値をチェック
+  if (!year || !month || !day) {
+    return { isValid: true }; // 空の場合はバリデーション対象外
+  }
+
+  const y = parseInt(year, 10);
+  const m = parseInt(month, 10);
+  const d = parseInt(day, 10);
+
+  // 年月日が数値として有効か確認
+  if (isNaN(y) || isNaN(m) || isNaN(d)) {
+    return { isValid: false, errorMessage: '生年月日を正しく入力してください' };
+  }
+
+  // 月が1-12の範囲か確認
+  if (m < 1 || m > 12) {
+    return { isValid: false, errorMessage: '月は1〜12で入力してください' };
+  }
+
+  // その月の最大日数を取得
+  const maxDaysInMonth = new Date(y, m, 0).getDate();
+
+  // 日が有効な範囲か確認
+  if (d < 1 || d > maxDaysInMonth) {
+    return { isValid: false, errorMessage: `${m}月は1〜${maxDaysInMonth}日で入力してください` };
+  }
+
+  // 実際の日付として有効か確認（負の日付など）
+  const date = new Date(y, m - 1, d);
+  if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) {
+    return { isValid: false, errorMessage: '生年月日を正しく入力してください' };
+  }
+
+  return { isValid: true };
+};
+
+// 月の最大日数を取得する関数
+const getMaxDayInMonth = (year: string, month: string): number => {
+  if (!year || !month) {
+    return 31;
+  }
+
+  const y = parseInt(year, 10);
+  const m = parseInt(month, 10);
+
+  if (isNaN(y) || isNaN(m) || m < 1 || m > 12) {
+    return 31;
+  }
+
+  return new Date(y, m, 0).getDate();
+};
+
 const SignupPage: React.FC = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -21,6 +75,7 @@ const SignupPage: React.FC = () => {
   });
   const [error, setError] = useState('');
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [birthdayError, setBirthdayError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const isFormValid = formData.name.trim() && formData.email.trim() && formData.password.length >= 8 && formData.confirmPassword.length >= 8;
@@ -29,11 +84,21 @@ const SignupPage: React.FC = () => {
     e.preventDefault();
     setError('');
     setPasswordErrors([]);
+    setBirthdayError('');
 
     // Validation
     if (!formData.name.trim()) {
       setError('名前を入力してください');
       return;
+    }
+
+    // 生年月日のバリデーション
+    if (formData.year || formData.month || formData.day) {
+      const birthdayValidation = validateBirthday(formData.year, formData.month, formData.day);
+      if (!birthdayValidation.isValid) {
+        setBirthdayError(birthdayValidation.errorMessage || '生年月日を正しく入力してください');
+        return;
+      }
     }
 
     if (!formData.email.trim()) {
@@ -147,7 +212,17 @@ const SignupPage: React.FC = () => {
                   min="1"
                   max="12"
                   value={formData.month}
-                  onChange={(e) => setFormData({ ...formData, month: e.target.value })}
+                  onChange={(e) => {
+                    const newMonth = e.target.value;
+                    setFormData({ ...formData, month: newMonth });
+                    // 月が変わった時に日を検証
+                    if (newMonth && formData.year && formData.day) {
+                      const maxDay = getMaxDayInMonth(formData.year, newMonth);
+                      if (parseInt(formData.day, 10) > maxDay) {
+                        setFormData(prev => ({ ...prev, month: newMonth, day: '' }));
+                      }
+                    }
+                  }}
                   className={`bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${styles.birthdayInput}`}
                   placeholder="1"
                 />
@@ -155,7 +230,7 @@ const SignupPage: React.FC = () => {
                 <input
                   type="number"
                   min="1"
-                  max="31"
+                  max={getMaxDayInMonth(formData.year, formData.month)}
                   value={formData.day}
                   onChange={(e) => setFormData({ ...formData, day: e.target.value })}
                   className={`bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${styles.birthdayInput}`}
@@ -206,6 +281,11 @@ const SignupPage: React.FC = () => {
                   </div>
                 </label>
               </div>
+              {birthdayError && (
+                <p className="text-red-600 text-[12px] font-['Noto_Sans_JP'] mb-[14px]">
+                  {birthdayError}
+                </p>
+              )}
             </div>
 
             {/* Email */}
