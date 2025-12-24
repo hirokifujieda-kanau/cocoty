@@ -142,7 +142,7 @@ const SignupPage: React.FC = () => {
       console.log('✅ Firebase認証成功！');
       
       // 2️⃣ すぐにプロフィール作成APIを呼ぶ（必須）
-      console.log('� プロフィール作成中...');
+      console.log('📝 プロフィール作成中...');
       
       // 生年月日を YYYY-MM-DD 形式に変換
       let birthday = '';
@@ -152,24 +152,31 @@ const SignupPage: React.FC = () => {
         birthday = `${formData.year}-${month}-${day}`;
       }
       
-      await apiRequest('/auth/setup_profile', {
+      const profilePayload = {
+        profile: {
+          name: formData.name.trim(),
+          nickname: formData.name.trim(),
+          birthday: birthday
+        }
+      };
+      
+      console.log('📤 送信するプロフィールデータ:', JSON.stringify(profilePayload, null, 2));
+      
+      const setupProfileResponse = await apiRequest('/auth/setup_profile', {
         method: 'POST',
         requireAuth: true,
-        body: JSON.stringify({
-          profile: {
-            name: formData.name.trim(),
-            nickname: formData.name.trim(), // 任意（省略時はnameの最初の単語）
-            birthday: birthday
-          }
-        })
+        body: JSON.stringify(profilePayload)
       });
       
-      console.log('✅ プロフィール作成成功！');
+      console.log('✅ プロフィール作成レスポンス:', setupProfileResponse);
       
       // 3️⃣ プロフィールページにリダイレクト
       router.push('/profile');
     } catch (err: any) {
       console.error('❌ 新規登録エラー:', err);
+      console.error('❌ エラー詳細:', JSON.stringify(err, null, 2));
+      console.error('❌ エラーメッセージ:', err.message);
+      console.error('❌ エラーコード:', err.code);
       
       // エラーメッセージを日本語に変換
       let errorMessage = '登録エラーが発生しました';
@@ -187,7 +194,11 @@ const SignupPage: React.FC = () => {
       // APIエラー（既にプロフィールがある場合）
       else if (err.message && err.message.includes('422')) {
         errorMessage = '既にプロフィールが作成されています。ログインしてください。';
-      } 
+      }
+      // プロフィール作成エラー
+      else if (err.message && err.message.includes('Profile')) {
+        errorMessage = `プロフィール作成エラー: ${err.message}`;
+      }
       // その他のエラー
       else if (err.message) {
         errorMessage = err.message;
@@ -435,6 +446,17 @@ const SignupPage: React.FC = () => {
               {isLoading ? '登録中...' : '登録'}
             </button>
           </form>
+
+          {/* Login Link */}
+          <div className="mt-6 text-center">
+            <span className="font-['Noto_Sans_JP'] text-[14px] text-gray-600">アカウントをお持ちの方は</span>{' '}
+            <button
+              onClick={() => router.push('/login')}
+              className="font-['Noto_Sans_JP'] font-semibold text-[14px] text-purple-600 hover:text-purple-700 transition-colors"
+            >
+              ログイン
+            </button>
+          </div>
         </div>
       </div>
     </div>

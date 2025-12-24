@@ -56,8 +56,34 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           setDisplayUser(response.profile);
           setIsFirstTimeUser(false);
         } else {
-          // プロフィールがない場合、初回ユーザーとして扱う
+          // プロフィールがない場合、初回ユーザーとして扱い、ダミープロフィールを作成
           setIsFirstTimeUser(true);
+          setDisplayUser({
+            id: 0,
+            user_id: 0,
+            firebase_uid: user.uid,
+            name: user.email?.split('@')[0] || 'ユーザー',
+            nickname: '',
+            bio: '',
+            avatar_url: undefined,
+            cover_url: undefined,
+            hobbies: [],
+            favorite_food: [],
+            mbti_type: undefined,
+            blood_type: undefined,
+            birthday: undefined,
+            birthplace: undefined,
+            age: undefined,
+            goal: undefined,
+            goal_progress: undefined,
+            skills: undefined,
+            social_link: undefined,
+            posts_count: 0,
+            albums_count: 0,
+            friends_count: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
           setError(null);
         }
       } else if (userId) {
@@ -66,6 +92,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         setDisplayUser(profile);
       }
     } catch (err: any) {
+      // デバッグ用：エラーの詳細をコンソールに出力
+      console.error('❌ プロフィール取得エラー:', err);
+      console.error('❌ エラーメッセージ:', err.message);
+      console.error('❌ エラー全体:', JSON.stringify(err, null, 2));
+      
       // ユーザーに分かりやすいエラーメッセージを表示
       if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
         setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
@@ -95,13 +126,25 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
         if (isOwner) {
           // 自分のプロフィールを取得
+          console.log('🔍 プロフィール取得開始...');
+          console.log('🔍 user:', user);
+          console.log('🔍 user.uid:', user?.uid);
+          console.log('🔍 user.email:', user?.email);
+          
           const response = await getCurrentUser();
+          
+          console.log('✅ getCurrentUser() レスポンス:', response);
+          console.log('✅ response.user:', response.user);
+          console.log('✅ response.profile:', response.profile);
+          console.log('✅ レスポンス全体 (JSON):', JSON.stringify(response, null, 2));
           
           if (response.profile) {
             setDisplayUser(response.profile);
             setIsFirstTimeUser(false);
+            console.log('✅ プロフィール設定完了');
           } else {
             // プロフィールがない場合、初回ユーザーとして扱う
+            console.log('⚠️ プロフィールが見つかりません。初回ユーザーとして扱います。');
             setIsFirstTimeUser(true);
             setError(null);
           }
@@ -111,6 +154,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           setDisplayUser(profile);
         }
       } catch (err: any) {
+        // デバッグ用：エラーの詳細をコンソールに出力
+        console.error('❌ プロフィール取得エラー (useEffect):', err);
+        console.error('❌ エラーメッセージ:', err.message);
+        console.error('❌ エラー全体:', JSON.stringify(err, null, 2));
+        
         // ユーザーに分かりやすいエラーメッセージを表示
         if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
           setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
@@ -183,6 +231,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [showSettings, setShowSettings] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showShareProfile, setShowShareProfile] = useState(false);
+  
+  // デバッグ用: showSettingsの変更を監視
+  useEffect(() => {
+    console.log('🔍 showSettings が変更されました:', showSettings);
+  }, [showSettings]);
   
   // 初回ユーザーの場合、自動的にプロフィール編集モーダルを開く
   useEffect(() => {
@@ -264,8 +317,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     );
   }
 
-  // エラー状態（初回ユーザーではない場合のみ）
-  if (error && !isFirstTimeUser) {
+  // エラー状態（初回ユーザー以外）
+  if (error && !isFirstTimeUser && !displayUser) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -281,96 +334,12 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     );
   }
 
-  // 初回ユーザー（プロフィール未作成）の場合
-  if (isFirstTimeUser && isOwner) {
-    return (
-      <div className="min-h-screen bg-white">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 z-50" style={{ backgroundColor: '#FFD26A' }}>
-          <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
-            <div className="flex items-center justify-between w-full">
-              <h1 
-                className="font-semibold text-base text-white"
-                style={{
-                  fontFamily: 'Noto Sans JP',
-                  fontWeight: 500,
-                  fontSize: '16px',
-                  lineHeight: '23.17px',
-                  letterSpacing: '0.01em'
-                }}
-              >
-                プロフィール
-              </h1>
-              <button
-                onClick={() => signOut()}
-                className="p-1 hover:bg-yellow-500/20 rounded-full transition-colors"
-              >
-                <LogOut className="h-5 w-5 text-white" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* ウェルカムメッセージ */}
-        <div className="flex items-center justify-center min-h-[calc(100vh-30px)] px-4">
-          <div className="text-center max-w-md">
-            <div className="mb-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <Users className="w-12 h-12 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                ようこそ！
-              </h2>
-              <p className="text-gray-600 mb-6">
-                アカウント登録が完了しました。<br />
-                プロフィール情報を入力して、コミュニティに参加しましょう！
-              </p>
-            </div>
-            
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
-              <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" />
-                プロフィール編集で設定できること
-              </h3>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• プロフィール画像</li>
-                <li>• ニックネーム</li>
-                <li>• 自己紹介</li>
-                <li>• 趣味・特技</li>
-                <li>• その他の詳細情報</li>
-              </ul>
-            </div>
-
-            <p className="text-sm text-gray-500 mb-4">
-              ※ プロフィール編集画面が自動的に開きます
-            </p>
-          </div>
-        </div>
-
-        {/* プロフィール編集モーダル（自動的に開く） */}
-        <ProfileEditModal
-          isOpen={showEditProfile}
-          onClose={() => {
-            setShowEditProfile(false);
-            // モーダルを閉じたら再度プロフィールを取得
-            refetchProfile();
-          }}
-          onSave={async () => {
-            // 保存後、プロフィールを再読み込み
-            await refetchProfile();
-            setShowEditProfile(false);
-          }}
-        />
-      </div>
-    );
-  }
-
-  // displayUserがnullの場合（他のユーザーのプロフィールが見つからない場合）
+  // displayUserがnullの場合（通常ありえないが念のため）
   if (!displayUser) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error || 'プロフィールが見つかりません'}</p>
+          <p className="text-red-600 mb-4">プロフィールデータの読み込みに失敗しました</p>
           <button
             onClick={() => router.back()}
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
@@ -381,6 +350,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       </div>
     );
   }
+
+  // ここから先は displayUser が必ず存在する
 
   return (
     <div className="min-h-screen bg-white">

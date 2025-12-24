@@ -7,11 +7,10 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignup, setIsSignup] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login, signup } = useAuth();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,15 +18,9 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      if (isSignup) {
-        console.log('🔐 新規登録中...', email);
-        await signup(email, password);
-        console.log('✅ 新規登録成功！');
-      } else {
-        console.log('🔐 ログイン中...', email);
-        await login(email, password);
-        console.log('✅ ログイン成功！');
-      }
+      console.log('🔐 ログイン中...', email);
+      await login(email, password);
+      console.log('✅ ログイン成功！');
       router.push('/profile');
     } catch (err: any) {
       console.error('❌ 認証エラー:', err);
@@ -37,19 +30,13 @@ export default function LoginPage() {
       let errorMessage = '認証に失敗しました';
       
       if (err.code === 'auth/invalid-credential') {
-        errorMessage = isSignup 
-          ? 'このアカウントは既に存在するか、パスワードが間違っています'
-          : 'メールアドレスまたはパスワードが間違っています。まだ登録していない場合は「アカウントを作成する」をクリックしてください。';
-      } else if (err.code === 'auth/email-already-in-use') {
-        errorMessage = 'このメールアドレスは既に使用されています。ログインしてください。';
-      } else if (err.code === 'auth/weak-password') {
-        errorMessage = 'パスワードは6文字以上にしてください';
+        errorMessage = 'メールアドレスまたはパスワードが間違っています';
       } else if (err.code === 'auth/invalid-email') {
         errorMessage = 'メールアドレスの形式が正しくありません';
       } else if (err.code === 'auth/user-not-found') {
-        errorMessage = 'このメールアドレスは登録されていません。「アカウントを作成する」から新規登録してください。';
+        errorMessage = 'このメールアドレスは登録されていません';
       } else {
-        errorMessage = `${err.message || '認証に失敗しました'} (エラーコード: ${err.code})`;
+        errorMessage = `${err.message || '認証に失敗しました'}`;
       }
       
       setError(errorMessage);
@@ -63,7 +50,7 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            {isSignup ? '新規登録' : 'ログイン'}
+            ログイン
           </h1>
           <p className="text-gray-600">Cocotyへようこそ</p>
         </div>
@@ -104,9 +91,6 @@ export default function LoginPage() {
               placeholder="••••••••"
               minLength={6}
             />
-            {isSignup && (
-              <p className="text-xs text-gray-500 mt-1">6文字以上で入力してください</p>
-            )}
           </div>
 
           <button
@@ -114,19 +98,17 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? '処理中...' : isSignup ? '登録する' : 'ログイン'}
+            {loading ? '処理中...' : 'ログイン'}
           </button>
         </form>
 
         <div className="mt-6 text-center">
+          <span className="text-gray-600 text-sm">アカウントをお持ちでない方は</span>{' '}
           <button
-            onClick={() => {
-              setIsSignup(!isSignup);
-              setError('');
-            }}
-            className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+            onClick={() => router.push('/signup')}
+            className="text-purple-600 hover:text-purple-700 font-semibold text-sm transition-colors"
           >
-            {isSignup ? '既にアカウントをお持ちの方はこちら' : 'アカウントを作成する'}
+            アカウント作成
           </button>
         </div>
       </div>

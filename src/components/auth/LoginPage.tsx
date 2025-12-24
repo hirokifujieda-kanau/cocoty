@@ -184,7 +184,7 @@ const LoginPage: React.FC = () => {
               onClick={() => router.push('/signup')}
               className="text-purple-600 hover:text-purple-700 font-semibold"
             >
-              新規登録
+              アカウント作成
             </button>
           </div>
         </div>

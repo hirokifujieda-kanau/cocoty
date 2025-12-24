@@ -11,10 +11,10 @@ interface AuthGuardProps {
 
 /**
  * 認証ガードコンポーネント
- * - requireAuth=true: ログインしていない場合は /login にリダイレクト
- * - requireAuth=false: ログイン不要（デフォルト）
+ * - requireAuth=true: ログインしていない場合は /login にリダイレクト（デフォルト）
+ * - requireAuth=false: ログイン不要
  */
-export default function AuthGuard({ children, requireAuth = false }: AuthGuardProps) {
+export default function AuthGuard({ children, requireAuth = true }: AuthGuardProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
