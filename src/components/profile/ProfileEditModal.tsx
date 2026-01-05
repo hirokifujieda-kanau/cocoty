@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Camera, Upload } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { updateProfile, UpdateProfileParams, getCurrentUser, Profile } from '@/lib/api/client';
+import MandalaUpload from './MandalaUpload';
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -89,6 +90,35 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
     fetchProfile();
   }, [isOpen, user]);
 
+  // プロフィールを再取得する関数
+  const refetchProfile = async () => {
+    try {
+      const response = await getCurrentUser();
+      if (response.profile) {
+        setProfile(response.profile);
+        
+        // フォームデータも更新
+        setFormData({
+          name: response.profile.name || '',
+          bio: response.profile.bio || '',
+          email: user?.email || '',
+          phone: '090-1234-5678',
+          website: '',
+          location: '東京都',
+          birthday: response.profile.birthday || '',
+          birthplace: response.profile.birthplace || '',
+          age: response.profile.age?.toString() || '',
+          hobbies: response.profile.hobbies?.join(', ') || '',
+          favoriteFood: response.profile.favorite_food?.join(', ') || '',
+          mbtiType: response.profile.mbti_type || '',
+          bloodType: response.profile.blood_type || ''
+        });
+      }
+    } catch (error) {
+      console.error('❌ Failed to refetch profile:', error);
+    }
+  };
+
   if (!isOpen) return null;
 
   if (loading) {
@@ -167,6 +197,9 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
         blood_type: formData.bloodType as 'A' | 'B' | 'O' | 'AB',
         birthday: formData.birthday,
         birthplace: formData.birthplace,
+        // 曼荼羅URLを保持（既存の値を上書きしないように）
+        mandala_thumbnail_url: profile?.mandala_thumbnail_url,
+        mandala_detail_url: profile?.mandala_detail_url,
       };
 
       if (!profile) {
@@ -427,6 +460,26 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
               placeholder="例: パスタ, タピオカ, パンケーキ"
             />
           </div>
+
+          {/* Mandala Image Section */}
+          {profile && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
+                曼荼羅画像
+              </h3>
+              <MandalaUpload
+                userId={profile.id}
+                currentThumbnail={profile.mandala_thumbnail_url}
+                currentDetail={profile.mandala_detail_url}
+                onUploadComplete={async () => {
+                  await refetchProfile();
+                  if (onSave) {
+                    await onSave();
+                  }
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Footer */}

@@ -23,7 +23,7 @@ export async function uploadToCloudinary(
   file: File,
   options: UploadOptions = {}
 ): Promise<CloudinaryUploadResponse> {
-  const { publicId } = options;
+  const { folder = 'avatars', transformation, publicId } = options;
 
   if (!CLOUDINARY_CONFIG.cloudName) {
     throw new Error('Cloudinary cloud name is missing');
@@ -38,15 +38,22 @@ export async function uploadToCloudinary(
     formData.append('public_id', publicId);
   }
   
-  // フォルダーを指定
-  formData.append('folder', 'avatars');
+  // フォルダーを指定（optionsから取得）
+  const folderPath = UPLOAD_FOLDERS[folder];
+  formData.append('folder', folderPath);
+
+  // 注意: 署名なしアップロード（upload_preset使用）では、
+  // transformationパラメータは使用できません。
+  // 変換が必要な場合は、アップロード後にURLで適用するか、
+  // upload_presetに事前定義する必要があります。
 
   // デバッグ用ログ
   console.log('Cloudinary upload config:', {
     cloudName: CLOUDINARY_CONFIG.cloudName,
     hasApiKey: !!CLOUDINARY_CONFIG.apiKey,
     uploadPreset: 'ml_default',
-    folder: 'avatars'
+    folder: folderPath,
+    transformation: transformation || 'none'
   });
 
   try {

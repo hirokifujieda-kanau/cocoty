@@ -11,6 +11,8 @@ export const UPLOAD_FOLDERS = {
   avatars: 'community-platform/avatars',
   covers: 'community-platform/covers',
   posts: 'community-platform/posts',
+  mandala_thumbnails: 'community-platform/mandala/thumbnails',
+  mandala_details: 'community-platform/mandala/details',
 } as const;
 
 // 画像変換設定
@@ -27,6 +29,20 @@ export const TRANSFORMATIONS = {
     width: 1200,
     height: 400,
     crop: 'fill',
+    quality: 'auto',
+    format: 'auto',
+  },
+  mandala_thumbnail: {
+    width: 400,
+    height: 400,
+    crop: 'fill',
+    quality: 'auto',
+    format: 'auto',
+  },
+  mandala_detail: {
+    width: 1200,
+    height: 1200,
+    crop: 'limit',
     quality: 'auto',
     format: 'auto',
   },

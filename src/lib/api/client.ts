@@ -148,7 +148,8 @@ export interface Profile {
   posts_count: number;
   albums_count: number;
   friends_count: number;
-  mandala_image_url?: string;
+  mandala_thumbnail_url?: string;  // 曼荼羅サムネイル画像URL
+  mandala_detail_url?: string;     // 曼荼羅詳細画像URL
   mandala_uploaded_at?: string;
   diagnosis?: string;
   tarot_last_drawn?: string;
@@ -220,6 +221,8 @@ export interface UpdateProfileParams {
   goal_progress?: number;
   skills?: string;
   social_link?: string;
+  mandala_thumbnail_url?: string;
+  mandala_detail_url?: string;
 }
 
 export interface UpdateProfileResponse {

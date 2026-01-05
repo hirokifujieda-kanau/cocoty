@@ -13,7 +13,7 @@ import MentalStatsAdmin from '@/components/fortune/MentalStatsAdmin';
 import { SettingsModal } from '@/components/profile';
 import ProfileEditModal from '@/components/profile/ProfileEditModal';
 import ShareProfileModal from '@/components/profile/ShareProfileModal';
-import MandalaGallery from '@/components/profile/MandalaGallery';
+import MandalaDisplay from '@/components/profile/MandalaDisplay';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getCurrentUser, getProfile, updateProfile, type Profile } from '@/lib/api/client';
@@ -45,6 +45,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     }
 
     try {
+      console.log('🔄 [InstagramProfilePage] refetchProfile called');
       setLoading(true);
       setError(null);
 
@@ -111,6 +112,17 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       setLoading(false);
     }
   };
+  
+  // displayUserの変更を監視してログ出力
+  useEffect(() => {
+    if (displayUser) {
+      console.log('🎨 [InstagramProfilePage] displayUser updated:', {
+        name: displayUser.name,
+        mandala_thumbnail_url: displayUser.mandala_thumbnail_url,
+        mandala_detail_url: displayUser.mandala_detail_url,
+      });
+    }
+  }, [displayUser]);
   
   // プロフィールデータ取得
   useEffect(() => {
@@ -220,7 +232,12 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     }
   };
   
-  const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'fortune'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'fortune'>('fortune');
+  
+  // activeTab変更を監視
+  useEffect(() => {
+    console.log('🎯 [InstagramProfilePage] activeTab changed:', activeTab);
+  }, [activeTab]);
   
   // Fortune機能の状態
   const [showDailyTarot, setShowDailyTarot] = useState(false);
@@ -593,7 +610,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           {/* 曼荼羅アート */}
           {displayUser && (
             <div className="mt-6 flex w-full items-center justify-center">
-              <MandalaGallery userId={displayUser.id.toString()} isOwner={isOwner} />
+              <MandalaDisplay
+                thumbnailUrl={displayUser.mandala_thumbnail_url}
+                detailUrl={displayUser.mandala_detail_url}
+                userName={displayUser.name}
+              />
             </div>
           )}
 
@@ -792,33 +813,13 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         </div>
 
         {/* Tabs - 投稿/保存済みタブは非表示 */}
-        {false && (
         <div className="border-t border-gray-200">
           <div className="flex">
             <button
-              onClick={() => setActiveTab('posts')}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 border-t-2 transition-colors ${
-                activeTab === 'posts'
-                  ? 'border-black text-black'
-                  : 'border-transparent text-gray-400 hover:text-gray-600'
-              }`}
-            >
-              <Grid className="h-5 w-5" />
-              <span className="text-xs font-semibold uppercase hidden sm:inline">投稿</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('saved')}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 border-t-2 transition-colors ${
-                activeTab === 'saved'
-                  ? 'border-black text-black'
-                  : 'border-transparent text-gray-400 hover:text-gray-600'
-              }`}
-            >
-              <Bookmark className="h-5 w-5" />
-              <span className="text-xs font-semibold uppercase hidden sm:inline">保存済み</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('fortune')}
+              onClick={() => {
+                console.log('🔘 [InstagramProfilePage] 占い・診断タブクリック');
+                setActiveTab('fortune');
+              }}
               className={`flex-1 flex items-center justify-center gap-2 py-3 border-t-2 transition-colors ${
                 activeTab === 'fortune'
                   ? 'border-black text-black'
@@ -826,11 +827,10 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
               }`}
             >
               <Sparkles className="h-5 w-5" />
-              <span className="text-xs font-semibold uppercase hidden sm:inline">占い</span>
+              <span className="text-xs font-semibold uppercase">占い・診断</span>
             </button>
           </div>
         </div>
-        )}
 
         {/* Content Grid - 投稿/保存済み/活動カレンダーは非表示 */}
         {false && (
