@@ -5,6 +5,8 @@ import { X, Camera, Upload } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { updateProfile, UpdateProfileParams, getCurrentUser, Profile } from '@/lib/api/client';
 import MandalaUpload from './MandalaUpload';
+import { validateImageFile, AVATAR_VALIDATION_OPTIONS } from '@/lib/utils/imageValidation';
+import { ValidationErrorModal } from '@/components/common/ValidationErrorModal';
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     bio: '',
@@ -139,6 +142,18 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
     if (!file || !user) return;
 
     try {
+      // 画像バリデーション
+      console.log('🔍 Validating image...');
+      const validation = await validateImageFile(file, AVATAR_VALIDATION_OPTIONS);
+      
+      if (!validation.isValid) {
+        setValidationError(validation.error || '画像のアップロードに失敗しました');
+        e.target.value = ''; // inputをリセット
+        return;
+      }
+
+      console.log(`✅ Validation passed: ${validation.width}x${validation.height}px, ${(validation.size! / 1024 / 1024).toFixed(2)}MB`);
+
       setUploading(true);
       console.log('📤 Uploading avatar...');
 
@@ -231,8 +246,15 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+    <>
+      <ValidationErrorModal
+        isOpen={!!validationError}
+        error={validationError || ''}
+        onClose={() => setValidationError(null)}
+      />
+
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">プロフィール編集</h2>
@@ -281,21 +303,6 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
               >
                 {uploading ? 'アップロード中...' : 'プロフィール写真を変更'}
               </label>
-            </div>
-          </div>
-
-          {/* Cover Image */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              カバー画像
-            </label>
-            <div className="relative h-32 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl overflow-hidden">
-              <button className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition-colors">
-                <div className="text-center">
-                  <Upload className="h-8 w-8 text-white mx-auto mb-2" />
-                  <span className="text-white text-sm font-semibold">カバー画像をアップロード</span>
-                </div>
-              </button>
             </div>
           </div>
 
@@ -499,6 +506,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
         </div>
       </div>
     </div>
+    </>
   );
 };
 

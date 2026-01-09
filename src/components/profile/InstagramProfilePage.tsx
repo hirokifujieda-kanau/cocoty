@@ -607,16 +607,52 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             )}
           </div>
 
-          {/* 曼荼羅アート */}
-          {displayUser && (
-            <div className="mt-6 flex w-full items-center justify-center">
-              <MandalaDisplay
-                thumbnailUrl={displayUser.mandala_thumbnail_url}
-                detailUrl={displayUser.mandala_detail_url}
-                userName={displayUser.name}
-              />
-            </div>
-          )}
+          {/* 曼荼羅アートとタロット・診断ボタンを縦並びに */}
+          <div className="flex flex-col gap-6 items-start mt-6">
+            {isOwner && (
+              <div className="w-full flex flex-col items-center" style={{ gap: '56px' }}>
+                <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
+                  {/* タロット占い */}
+                  <button
+                    onClick={() => setShowDailyTarot(true)}
+                    className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden flex-shrink-0"
+                    style={{ 
+                      width: 'clamp(150px, 26vw, 200px)', 
+                      height: 'clamp(56px, 10vw, 75px)',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <img src="/タロット占い.svg" alt="今日のタロット占い" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
+                  </button>
+
+                  {/* 季節診断 */}
+                  <button
+                    onClick={() => setShowSeasonalDiagnosis(true)}
+                    className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
+                    style={{ 
+                      width: 'clamp(150px, 26vw, 200px)', 
+                      height: 'clamp(56px, 10vw, 75px)',
+                      flexShrink: 0,
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <img src="/診断.svg" alt="パーソナル診断" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
+                  </button>
+                </div>
+
+                {/* 曼荼羅アート */}
+                {displayUser && (
+                  <div className="w-full flex items-center justify-center">
+                    <MandalaDisplay
+                      thumbnailUrl={displayUser.mandala_thumbnail_url}
+                      detailUrl={displayUser.mandala_detail_url}
+                      userName={displayUser.name}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* チームタスク進捗と個人課題進捗 - 今後実装予定のため非表示 */}
           {false && (
@@ -812,7 +848,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           {/* Highlights - 占い機能は別タブで提供 */}
         </div>
 
-        {/* Tabs - 投稿/保存済みタブは非表示 */}
+        {/* Tabs - 投稿/保存済み/占い・診断タブは非表示 */}
+        {false && (
         <div className="border-t border-gray-200">
           <div className="flex">
             <button
@@ -831,6 +868,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             </button>
           </div>
         </div>
+        )}
 
         {/* Content Grid - 投稿/保存済み/活動カレンダーは非表示 */}
         {false && (

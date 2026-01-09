@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { uploadToCloudinary } from '@/lib/cloudinary/upload';
 import { apiRequest } from '@/lib/api/client';
+import { validateImageFile, MANDALA_VALIDATION_OPTIONS } from '@/lib/utils/imageValidation';
+import { ValidationErrorModal } from '@/components/common/ValidationErrorModal';
 
 interface MandalaUploadProps {
   userId: number;
@@ -29,25 +31,25 @@ export default function MandalaUpload({
     detail: number;
   }>({ thumbnail: 0, detail: 0 });
   const [error, setError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
-  const handleFileChange = (
+  const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     type: 'thumbnail' | 'detail'
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // ファイルサイズチェック（10MB以下）
-    if (file.size > 10 * 1024 * 1024) {
-      setError('ファイルサイズは10MB以下にしてください');
+    // 画像バリデーション
+    const validation = await validateImageFile(file, MANDALA_VALIDATION_OPTIONS);
+    
+    if (!validation.isValid) {
+      setValidationError(validation.error || '画像のバリデーションに失敗しました');
+      e.target.value = ''; // inputをリセット
       return;
     }
 
-    // 画像形式チェック
-    if (!file.type.startsWith('image/')) {
-      setError('画像ファイルを選択してください');
-      return;
-    }
+    console.log(`✅ Mandala validation passed: ${validation.width}x${validation.height}px, ${(validation.size! / 1024 / 1024).toFixed(2)}MB`);
 
     setError(null);
 
@@ -134,18 +136,25 @@ export default function MandalaUpload({
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-4">曼荼羅画像アップロード</h3>
-        <p className="text-sm text-gray-600 mb-4">
-          サムネイル画像（一覧表示用）と詳細画像（クリック時表示用）をアップロードできます
-        </p>
-      </div>
+    <>
+      <ValidationErrorModal
+        isOpen={!!validationError}
+        error={validationError || ''}
+        onClose={() => setValidationError(null)}
+      />
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold mb-4">曼荼羅画像アップロード</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            サムネイル画像（一覧表示用）と詳細画像（クリック時表示用）をアップロードできます
+          </p>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -295,5 +304,6 @@ export default function MandalaUpload({
         </button>
       </div>
     </div>
+    </>
   );
 }
