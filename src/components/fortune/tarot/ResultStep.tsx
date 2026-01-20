@@ -17,7 +17,22 @@ export const ResultStep: React.FC<ResultStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <div className="inline-block p-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl shadow-2xl mb-6">
+        {/* カード画像 */}
+        <div className="mb-6">
+          <img
+            src={drawnCard.card.image_url}
+            alt={drawnCard.card.name}
+            className="w-64 h-auto mx-auto rounded-2xl shadow-2xl"
+            onError={(e) => {
+              // 画像読み込みエラー時のフォールバック
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+        </div>
+
+        {/* カード名 */}
+        <div className="inline-block px-6 py-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl shadow-2xl mb-6">
           <div className="text-6xl mb-4">{drawnCard.isReversed ? '🔄' : '✨'}</div>
           <h3 className="text-3xl font-bold text-white">{drawnCard.card.name}</h3>
           <p className="text-sm text-yellow-100 mt-2">{drawnCard.card.name_en}</p>

@@ -78,6 +78,7 @@ export async function getTarotCards(): Promise<TarotCard[]> {
 
 /**
  * 今日タロット占いができるかチェック（認証必要）
+ * Local環境では常にtrueを返す
  * 
  * @returns can_read: true（占える）/ false（今日はもう占った）
  * @example
@@ -87,6 +88,14 @@ export async function getTarotCards(): Promise<TarotCard[]> {
  * }
  */
 export async function canReadTarotToday(): Promise<CanReadTodayResponse> {
+  // Local環境では制約なし
+  if (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_ENV === 'local') {
+    return {
+      can_read: true,
+      last_reading_date: null
+    };
+  }
+  
   return apiRequest<CanReadTodayResponse>('/tarot/can_read_today', {
     requireAuth: true
   });

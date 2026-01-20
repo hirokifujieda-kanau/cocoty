@@ -14,6 +14,7 @@ import { SettingsModal } from '@/components/profile';
 import ProfileEditModal from '@/components/profile/ProfileEditModal';
 import ShareProfileModal from '@/components/profile/ShareProfileModal';
 import MandalaDisplay from '@/components/profile/MandalaDisplay';
+import { RpgDiagnosisModal } from '@/components/rpg/RpgDiagnosisModal';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getCurrentUser, getProfile, updateProfile, type Profile } from '@/lib/api/client';
@@ -248,6 +249,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [showSettings, setShowSettings] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showShareProfile, setShowShareProfile] = useState(false);
+  const [showRpgDiagnosis, setShowRpgDiagnosis] = useState(false);
   
   // デバッグ用: showSettingsの変更を監視
   useEffect(() => {
@@ -625,9 +627,9 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     <img src="/タロット占い.svg" alt="今日のタロット占い" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
                   </button>
 
-                  {/* 季節診断 */}
+                  {/* 季節診断 → RPG診断 */}
                   <button
-                    onClick={() => setShowSeasonalDiagnosis(true)}
+                    onClick={() => setShowRpgDiagnosis(true)}
                     className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
                     style={{ 
                       width: 'clamp(150px, 26vw, 200px)', 
@@ -636,7 +638,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                       boxSizing: 'border-box'
                     }}
                   >
-                    <img src="/診断.svg" alt="パーソナル診断" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
+                    <img src="/診断.svg" alt="RPG診断" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
                   </button>
                 </div>
 
@@ -1183,6 +1185,12 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       <ShareProfileModal
         isOpen={showShareProfile}
         onClose={() => setShowShareProfile(false)}
+      />
+
+      {/* RPG診断モーダル */}
+      <RpgDiagnosisModal
+        isOpen={showRpgDiagnosis}
+        onClose={() => setShowRpgDiagnosis(false)}
       />
     </div>
     </div>

@@ -1,10 +1,11 @@
 import React from 'react';
+import { History } from 'lucide-react';
 
 interface AlreadyDrawnStepProps {
-  onExportCSV: () => void;
+  onViewHistory: () => void;
 }
 
-export const AlreadyDrawnStep: React.FC<AlreadyDrawnStepProps> = ({ onExportCSV }) => {
+export const AlreadyDrawnStep: React.FC<AlreadyDrawnStepProps> = ({ onViewHistory }) => {
   return (
     <div className="text-center py-12">
       <div className="text-6xl mb-6">🔮</div>
@@ -14,10 +15,11 @@ export const AlreadyDrawnStep: React.FC<AlreadyDrawnStepProps> = ({ onExportCSV 
         明日また新しい運勢を占いましょう。
       </p>
       <button
-        onClick={onExportCSV}
-        className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-colors"
+        onClick={onViewHistory}
+        className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-colors"
       >
-        過去の占い結果をダウンロード
+        <History className="h-5 w-5" />
+        過去の占い結果を見る
       </button>
     </div>
   );

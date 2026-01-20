@@ -152,7 +152,18 @@ export interface Profile {
   mandala_detail_url?: string;     // 曼荼羅詳細画像URL
   mandala_uploaded_at?: string;
   diagnosis?: string;
+  gender?: '男性' | '女性' | 'その他';  // 性別
+  // タロット占い
   tarot_last_drawn?: string;
+  tarot_last_drawn_at?: string;  // タロット最終実施日時
+  // RPG診断結果
+  rpg_fencer?: number;    // 狩猟本能
+  rpg_shielder?: number;  // 警戒本能
+  rpg_gunner?: number;    // 職人魂
+  rpg_healer?: number;    // 共感本能
+  rpg_schemer?: number;   // 飛躍本能
+  rpg_diagnosed_at?: string;
+  rpg_diagnosis_completed_at?: string;  // RPG診断完了日時
   mental_stats?: {
     happiness: number;
     stress: number;
@@ -362,6 +373,56 @@ export async function deleteDiagnosis(profileId: number): Promise<{ message: str
   return apiRequest<{ message: string }>(`/diagnoses/${profileId}`, {
     method: 'DELETE',
     requireAuth: true,
+  });
+}
+
+// ========================================
+// RPG Diagnosis API
+// ========================================
+
+export interface RpgQuestion {
+  id: number;
+  text: string;
+  factor: 'fencer' | 'shielder' | 'gunner' | 'healer' | 'schemer';
+  is_reversed: boolean;
+  order: number;
+}
+
+export interface RpgQuestionsResponse {
+  questions: RpgQuestion[];
+}
+
+/**
+ * RPG診断の質問一覧を取得
+ */
+export async function getRpgQuestions(): Promise<RpgQuestionsResponse> {
+  return apiRequest<RpgQuestionsResponse>('/rpg_questions', {
+    requireAuth: false,
+  });
+}
+
+export interface RpgDiagnosisData {
+  fencer: number;    // 狩猟本能
+  shielder: number;  // 警戒本能
+  gunner: number;    // 職人魂
+  healer: number;    // 共感本能
+  schemer: number;   // 飛躍本能
+}
+
+export interface RpgDiagnosisResponse {
+  rpg_diagnosis: RpgDiagnosisData;
+  message: string;
+}
+
+/**
+ * RPG診断結果を保存
+ * 認証されたユーザーのプロフィールに自動的に保存されます
+ */
+export async function saveRpgDiagnosis(diagnosisData: RpgDiagnosisData): Promise<RpgDiagnosisResponse> {
+  return apiRequest<RpgDiagnosisResponse>('/rpg_diagnoses', {
+    method: 'POST',
+    requireAuth: true,
+    body: JSON.stringify({ rpg_diagnosis: diagnosisData }),
   });
 }
 

@@ -8,9 +8,10 @@ import {
   createTarotReading,
   drawRandomCard,
   generateInterpretation,
-  exportReadingsToCSV,
-  type TarotCard
+  type TarotCard,
+  type TarotReading
 } from '@/lib/api/tarot';
+import { shouldEnforceTarotDailyLimit } from '@/lib/utils/environment';
 import {
   AlreadyDrawnStep,
   TargetSelectStep,
@@ -20,6 +21,8 @@ import {
   RevealStep,
   ResultStep,
   CommentStep,
+  TarotHistoryList,
+  TarotHistoryDetail,
   type Step,
   type Target,
   type MentalState,
@@ -49,6 +52,9 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   const [tarotCards, setTarotCards] = useState<TarotCard[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedReading, setSelectedReading] = useState<TarotReading | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showHistoryDetail, setShowHistoryDetail] = useState(false);
 
   // 初期化：タロットカードマスタデータを取得 & 今日占いができるかチェック
   useEffect(() => {
@@ -61,6 +67,13 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           // タロットカードマスタを取得（認証不要）
           const cards = await getTarotCards();
           setTarotCards(cards);
+
+          // Local環境では制限なし
+          if (!shouldEnforceTarotDailyLimit()) {
+            console.log('🔓 Local環境: タロット占いの制限なし');
+            setStep('target');
+            return;
+          }
 
           // 今日占えるかチェック（認証必要）
           const { can_read } = await canReadTarotToday();
@@ -157,53 +170,82 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
       });
 
       console.log('✅ Tarot reading saved to backend');
-      setStep('comment');
+      
+      // 成功通知
+      if (userComment.trim()) {
+        alert('✅ 感想を保存しました！\n\nあなたの記録が残りました。\n履歴からいつでも振り返ることができます。');
+      } else {
+        alert('✅ 占い結果を保存しました！\n\n履歴から確認できます。');
+      }
+      
+      // モーダルを閉じる
+      handleClose();
     } catch (err) {
       console.error('Failed to save tarot reading:', err);
       setError('占い結果の保存に失敗しました');
-      // エラーでも次のステップへ進む（UX優先）
-      setStep('comment');
+      
+      // 失敗通知
+      const errorMessage = err instanceof Error ? err.message : '不明なエラーが発生しました';
+      alert(
+        '❌ 感想の保存に失敗しました\n\n' +
+        'エラー内容: ' + errorMessage + '\n\n' +
+        '再度お試しいただくか、時間をおいてから試してください。'
+      );
     } finally {
       setLoading(false);
     }
-    
-    handleClose();
   };
 
-  // CSVエクスポート（履歴取得が必要）
-  const handleExportCSV = async () => {
-    try {
-      const { getTarotReadings } = await import('@/lib/api/tarot');
-      const { readings } = await getTarotReadings(1, 1000); // 全件取得
-      const csv = exportReadingsToCSV(readings);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `tarot_readings_${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-    } catch (err) {
-      console.error('Failed to export CSV:', err);
-      setError('CSVエクスポートに失敗しました');
-    }
+  // 履歴表示
+  const handleViewHistory = () => {
+    setShowHistory(true);
+  };
+
+  // 履歴詳細表示
+  const handleViewHistoryDetail = (reading: TarotReading) => {
+    setSelectedReading(reading);
+    setShowHistory(false);
+    setShowHistoryDetail(true);
+  };
+
+  // 履歴詳細を閉じる
+  const handleCloseHistoryDetail = () => {
+    setShowHistoryDetail(false);
+    setSelectedReading(null);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 rounded-2xl shadow-2xl">
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
+        <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 rounded-2xl shadow-2xl">
         {/* ヘッダー */}
         <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-gradient-to-r from-purple-800 to-indigo-800 border-b border-purple-600">
           <div className="flex items-center gap-3">
             <Sparkles className="h-6 w-6 text-yellow-300" />
             <h2 className="text-2xl font-bold text-white">今日のタロット占い</h2>
           </div>
-          <button
-            onClick={handleClose}
-            className="text-white hover:text-gray-300 transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
+          <div className="flex items-center gap-3">
+            {/* 履歴ボタン */}
+            <button
+              onClick={handleViewHistory}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all flex items-center gap-2"
+              title="過去の占い結果を見る"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="hidden sm:inline">履歴</span>
+            </button>
+            {/* 閉じるボタン */}
+            <button
+              onClick={handleClose}
+              className="text-white hover:text-gray-300 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
         </div>
 
         {/* コンテンツ */}
@@ -222,7 +264,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           )}
 
           {step === 'alreadyDrawn' && (
-            <AlreadyDrawnStep onExportCSV={handleExportCSV} />
+            <AlreadyDrawnStep onViewHistory={handleViewHistory} />
           )}
 
           {step === 'target' && (
@@ -260,11 +302,27 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
               onChange={setUserComment}
               onSave={handleSaveComment}
               onBack={() => setStep('result')}
+              isLoading={loading}
             />
           )}
         </div>
       </div>
     </div>
+
+    {/* 履歴表示モーダル */}
+    <TarotHistoryList
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        onSelectReading={handleViewHistoryDetail}
+      />
+
+      {/* 履歴詳細表示モーダル */}
+      <TarotHistoryDetail
+        isOpen={showHistoryDetail}
+        onClose={handleCloseHistoryDetail}
+        reading={selectedReading}
+      />
+    </>
   );
 };
 
