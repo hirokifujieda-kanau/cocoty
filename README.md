@@ -28,12 +28,75 @@
 npm install
 ```
 
-2. 開発サーバーを起動:
+2. 環境変数を設定:
+```bash
+cp .env.local.example .env.local
+# .env.local を編集して、Firebase・Cloudinary・API URLなどを設定
+```
+
+3. 開発サーバーを起動:
 ```bash
 npm run dev
 ```
 
-3. ブラウザで http://localhost:3000 を開いてアプリケーションを確認
+4. ブラウザで http://localhost:3000 を開いてアプリケーションを確認
+
+## 🚢 Vercelデプロイ
+
+### 環境変数設定
+
+Vercelダッシュボード > Settings > Environment Variables で以下を設定：
+
+#### Firebase設定（必須）
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+```
+
+#### Cloudinary設定（必須）
+```
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
+CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+```
+
+#### バックエンドAPI URL（必須）
+```
+NEXT_PUBLIC_API_BASE_URL=https://your-backend-api.com/api/v1
+```
+
+#### Basic認証設定（Staging/Production）
+```
+BASIC_AUTH_ENABLED=true
+BASIC_AUTH_USER=your_username
+BASIC_AUTH_PASSWORD=your_secure_password
+```
+
+**注意**: 
+- **Development環境**: `BASIC_AUTH_ENABLED=false` に設定
+- **Preview/Staging環境**: `BASIC_AUTH_ENABLED=true` に設定
+- **Production環境**: `BASIC_AUTH_ENABLED=true` に設定（必要に応じて）
+
+### デプロイコマンド
+
+```bash
+# 変更をコミット
+git add .
+git commit -m "feat: セキュリティ脆弱性修正 + Basic認証実装"
+
+# リモートリポジトリにプッシュ（Vercelの自動デプロイがトリガーされます）
+git push origin main
+```
+
+### セキュリティチェック済み
+
+✅ Next.js 15.5.11 - CVE脆弱性修正済み  
+✅ Firebase設定 - 環境変数化済み  
+✅ Basic認証 - Staging/Production対応済み
 
 ## 📁 プロジェクト構造
 
