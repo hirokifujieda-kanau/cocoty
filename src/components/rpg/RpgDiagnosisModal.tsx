@@ -2,19 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles } from 'lucide-react';
-import { calculateRpgDiagnosis, type RpgAnswer } from '@/lib/rpg/calculator';
-import { getRpgQuestions, type RpgQuestion } from '@/lib/api/client';
+import { calculateRpgDiagnosis, type RpgAnswer, type InstinctLevels } from '@/lib/rpg/calculator';
+import { getRpgQuestions, type RpgQuestion, type Profile } from '@/lib/api/client';
 import { QuestionStep } from './QuestionStep';
 import { ResultStep } from './ResultStep';
 
 interface RpgDiagnosisModalProps {
   isOpen: boolean;
   onClose: () => void;
+  profile?: Profile | null;  // プロフィール情報を受け取る
 }
 
 export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   isOpen,
   onClose,
+  profile,
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<RpgAnswer[]>([]);
@@ -23,12 +25,59 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 診断完了済みかチェック
+  const isCompleted = !!profile?.rpg_diagnosis_completed_at;
+
+  // 完了済みの結果を取得
+  const completedResult: InstinctLevels | null = isCompleted && profile ? {
+    狩猟本能: profile.rpg_fencer || 1,
+    共感本能: profile.rpg_healer || 1,
+    飛躍本能: profile.rpg_schemer || 1,
+    職人魂: profile.rpg_gunner || 1,
+    警戒本能: profile.rpg_shielder || 1,
+  } : null;
+
+  // デバッグログ
+  useEffect(() => {
+    console.log('🔍 RpgDiagnosisModal - Profile:', {
+      profile,
+      isCompleted,
+      rpg_diagnosis_completed_at: profile?.rpg_diagnosis_completed_at,
+      completedResult,
+    });
+  }, [profile, isCompleted, completedResult]);
+
   // 質問データをAPIから取得
   useEffect(() => {
-    if (isOpen) {
+    console.log('🔍 RpgDiagnosisModal - useEffect:', { 
+      isOpen, 
+      isCompleted, 
+      showResult,
+      hasCompletedResult: !!completedResult,
+      completedResult 
+    });
+    if (isOpen && !isCompleted) {
+      // 未完了の場合は質問を読み込む
+      console.log('📝 未完了 → 質問を読み込みます');
       loadQuestions();
+      setShowResult(false);
+      setCurrentQuestionIndex(0);
+      setAnswers([]);
+    } else if (isOpen && isCompleted) {
+      // 完了済みの場合は結果表示モードに
+      console.log('✅ 完了済み → 結果を表示します', { completedResult });
+      setShowResult(true);
+      setIsLoading(false);
+    } else if (!isOpen) {
+      // モーダルが閉じられたときは、完了済みでない場合のみリセット
+      if (!isCompleted) {
+        setShowResult(false);
+        setCurrentQuestionIndex(0);
+        setAnswers([]);
+        setQuestions([]);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isCompleted]);
 
   const loadQuestions = async () => {
     setIsLoading(true);
@@ -104,8 +153,9 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     }
   };
 
-  // やり直し
+  // やり直し（完了済みの場合は不可）
   const handleRetry = () => {
+    if (isCompleted) return; // 完了済みはやり直し不可
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setShowResult(false);
@@ -113,7 +163,10 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
 
   // モーダルを閉じる
   const handleClose = () => {
-    handleRetry();
+    // 完了済みの場合はリセットしない
+    if (!isCompleted) {
+      handleRetry();
+    }
     onClose();
   };
 
@@ -153,9 +206,10 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
               canGoNext={currentAnswer !== null}
               canGoBack={currentQuestionIndex > 0}
             />
-          ) : result ? (
+          ) : showResult ? (
+            // 結果表示: 完了済みの場合と新規診断の場合を統一
             <ResultStep
-              instinctLevels={result.instinctLevels}
+              instinctLevels={completedResult || result?.instinctLevels || { 狩猟本能: 1, 共感本能: 1, 飛躍本能: 1, 職人魂: 1, 警戒本能: 1 }}
               onClose={handleClose}
               onRetry={handleRetry}
               onSave={(saved) => {
@@ -163,6 +217,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                   console.log('RPG診断結果が保存されました');
                 }
               }}
+              isCompleted={isCompleted}  // 完了済みフラグで判定
             />
           ) : null}
         </div>

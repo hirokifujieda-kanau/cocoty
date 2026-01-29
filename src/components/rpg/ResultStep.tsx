@@ -110,6 +110,7 @@ interface ResultStepProps {
   onClose: () => void;
   onRetry: () => void;
   onSave?: (saved: boolean) => void;
+  isCompleted?: boolean;  // 診断完了済みフラグ
 }
 
 export const ResultStep: React.FC<ResultStepProps> = ({
@@ -117,12 +118,35 @@ export const ResultStep: React.FC<ResultStepProps> = ({
   onClose,
   onRetry,
   onSave,
+  isCompleted = false,
 }) => {
   const [isSaving, setIsSaving] = React.useState(false);
-  const [isSaved, setIsSaved] = React.useState(false);
+  const [isSaved, setIsSaved] = React.useState(isCompleted); // 完了済みなら既に保存済み
+  const hasAttemptedSave = React.useRef(false); // 保存試行フラグ
+
+  // 自動保存: 未完了の場合のみ、結果表示時に1回だけ自動保存
+  React.useEffect(() => {
+    // 既に保存を試行済み、または完了済み、または既に保存済みならスキップ
+    if (hasAttemptedSave.current || isCompleted || isSaved) {
+      if (isCompleted) {
+        console.log('✅ 診断は既に完了済みです。保存処理はスキップします。');
+      }
+      return;
+    }
+
+    console.log('🔄 自動保存を実行します...');
+    hasAttemptedSave.current = true;
+    handleSave();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 診断結果を保存
   const handleSave = async () => {
+    // 完了済みの場合は保存処理をスキップ
+    if (isCompleted) {
+      console.log('✅ 診断は既に完了しています。保存処理をスキップします。');
+      return;
+    }
+
     setIsSaving(true);
     try {
       // 診断結果をAPI形式に変換
@@ -139,15 +163,11 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       
       setIsSaved(true);
       onSave?.(true);
-      alert('診断結果を保存しました！');
+      console.log('✅ 診断結果を自動保存しました');
     } catch (error) {
-      console.error('Failed to save RPG diagnosis:', error);
+      console.error('❌ RPG診断の保存に失敗:', error);
       onSave?.(false);
-      
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : '保存に失敗しました。もう一度お試しください。';
-      alert(errorMessage);
+      // アラートは表示しない（コンソールログのみ）
     } finally {
       setIsSaving(false);
     }
@@ -276,29 +296,24 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       {/* アクションボタン */}
       <div className="flex gap-3">
         <button
-          onClick={onRetry}
-          className="flex-1 px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all"
-        >
-          もう一度診断する
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={isSaving || isSaved}
-          className={`flex-1 px-6 py-3 font-semibold rounded-xl transition-all ${
-            isSaved
-              ? 'bg-green-600 text-white cursor-not-allowed'
-              : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white'
-          }`}
-        >
-          {isSaving ? '保存中...' : isSaved ? '✓ 保存済み' : '結果を保存'}
-        </button>
-        <button
           onClick={onClose}
           className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all"
         >
           閉じる
         </button>
       </div>
+      
+      {isCompleted && (
+        <p className="text-center text-purple-200 text-sm mt-4">
+          この診断は完了済みです。診断は1回のみ実施可能です。
+        </p>
+      )}
+      
+      {!isCompleted && (
+        <p className="text-center text-purple-200 text-sm mt-4">
+          結果は自動的に保存されました
+        </p>
+      )}
     </div>
   );
 };

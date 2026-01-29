@@ -11,7 +11,7 @@ import {
   type TarotCard,
   type TarotReading
 } from '@/lib/api/tarot';
-import { shouldEnforceTarotDailyLimit } from '@/lib/utils/environment';
+import type { Profile } from '@/lib/api/client';
 import {
   AlreadyDrawnStep,
   TargetSelectStep,
@@ -34,13 +34,15 @@ interface DailyTarotProps {
   onClose: () => void;
   userId: string;
   userName: string;
+  profile?: Profile | null;
 }
 
 const DailyTarot: React.FC<DailyTarotProps> = ({
   isOpen,
   onClose,
   userId,
-  userName
+  userName,
+  profile
 }) => {
   const [step, setStep] = useState<Step>('check');
   const [target, setTarget] = useState<Target | null>(null);
@@ -56,9 +58,15 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   const [showHistory, setShowHistory] = useState(false);
   const [showHistoryDetail, setShowHistoryDetail] = useState(false);
 
+  // stepの変更をログ出力
+  useEffect(() => {
+    console.log('🎴 [DailyTarot] step changed:', step);
+  }, [step]);
+
   // 初期化：タロットカードマスタデータを取得 & 今日占いができるかチェック
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && step === 'check') {
+      console.log('🔄 [DailyTarot] 初期化開始');
       const initialize = async () => {
         try {
           setLoading(true);
@@ -68,19 +76,15 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           const cards = await getTarotCards();
           setTarotCards(cards);
 
-          // Local環境では制限なし
-          if (!shouldEnforceTarotDailyLimit()) {
-            console.log('🔓 Local環境: タロット占いの制限なし');
-            setStep('target');
-            return;
-          }
-
           // 今日占えるかチェック（認証必要）
+          // ※ローカル環境でも制限を適用（バックエンドと整合性を取るため）
           const { can_read } = await canReadTarotToday();
           
           if (!can_read) {
+            console.log('🚫 今日はすでにタロット占いを実行済みです');
             setStep('alreadyDrawn');
           } else {
+            console.log('✅ タロット占い実行可能');
             setStep('target');
           }
         } catch (err) {
@@ -94,11 +98,11 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
 
       initialize();
     }
-  }, [isOpen]);
+  }, [isOpen, step]);
 
   // モーダルを閉じる
   const handleClose = () => {
-    // リセット
+    // リセット（stepはcheckに戻す - 次回開いたときに再初期化される）
     setStep('check');
     setTarget(null);
     setMentalState(null);
@@ -106,6 +110,8 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
     setDrawnCard(null);
     setInterpretation('');
     setUserComment('');
+    setShowHistory(false);
+    setShowHistoryDetail(false);
     onClose();
   };
 
@@ -264,7 +270,10 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           )}
 
           {step === 'alreadyDrawn' && (
-            <AlreadyDrawnStep onViewHistory={handleViewHistory} />
+            <AlreadyDrawnStep 
+              onViewHistory={handleViewHistory}
+              lastDrawnCard={profile?.tarot_last_drawn ? JSON.parse(profile.tarot_last_drawn) : null}
+            />
           )}
 
           {step === 'target' && (

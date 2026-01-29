@@ -79,6 +79,8 @@ export async function apiRequest<T>(
   const headers = await getHeaders(requireAuth);
   const url = `${API_BASE_URL}${endpoint}`;
   
+  console.log(`🌐 [API] ${fetchOptions.method || 'GET'} ${url}`);
+  
   try {
     const response = await fetch(url, {
       ...fetchOptions,
@@ -89,27 +91,22 @@ export async function apiRequest<T>(
     });
     
     if (!response.ok) {
-      const errorText = await response.text();
-      
-      let errorMessage = 'API request failed';
-      try {
-        const errorJson = JSON.parse(errorText);
-        errorMessage = errorJson.error || errorJson.errors?.join(', ') || errorMessage;
-      } catch {
-        errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
-      }
-      
-      throw new Error(errorMessage);
+      const errorData = await response.json().catch(() => null);
+      console.error(`❌ [API] Error ${response.status}:`, errorData);
+      throw new Error(errorData?.error || `HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
+    console.log(`✅ [API] Response from ${endpoint}:`, data);
     return data;
   } catch (error: any) {
     // ネットワークエラーの場合
     if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+      console.error(`❌ [API] Network error:`, error);
       throw new Error(`Rails APIサーバーに接続できません。${url} が起動しているか確認してください。`);
     }
     
+    console.error(`❌ [API] Request failed for ${endpoint}:`, error);
     throw error;
   }
 }
