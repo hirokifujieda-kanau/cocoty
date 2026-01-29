@@ -78,6 +78,7 @@ export async function getTarotCards(): Promise<TarotCard[]> {
 
 /**
  * 今日タロット占いができるかチェック（認証必要）
+ * バックエンドAPIで制限を確認
  * 
  * @returns can_read: true（占える）/ false（今日はもう占った）
  * @example

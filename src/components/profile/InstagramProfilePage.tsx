@@ -14,6 +14,9 @@ import { SettingsModal } from '@/components/profile';
 import ProfileEditModal from '@/components/profile/ProfileEditModal';
 import ShareProfileModal from '@/components/profile/ShareProfileModal';
 import MandalaDisplay from '@/components/profile/MandalaDisplay';
+import { RpgDiagnosisModal } from '@/components/rpg/RpgDiagnosisModal';
+import { RpgDiagnosisCard } from '@/components/profile/RpgDiagnosisCard';
+import { TarotCard } from '@/components/profile/TarotCard';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getCurrentUser, getProfile, updateProfile, type Profile } from '@/lib/api/client';
@@ -52,8 +55,13 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       if (isOwner) {
         // 自分のプロフィールを取得
         const response = await getCurrentUser();
+        console.log('📥 [InstagramProfilePage] API Response:', response);
         
         if (response.profile) {
+          console.log('📋 [InstagramProfilePage] Profile data:', {
+            rpg_diagnosis_completed_at: response.profile.rpg_diagnosis_completed_at,
+            tarot_last_drawn_at: response.profile.tarot_last_drawn_at,
+          });
           setDisplayUser(response.profile);
           setIsFirstTimeUser(false);
         } else {
@@ -118,6 +126,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     if (displayUser) {
       console.log('🎨 [InstagramProfilePage] displayUser updated:', {
         name: displayUser.name,
+        tarot_last_drawn_at: displayUser.tarot_last_drawn_at,
+        rpg_diagnosis_completed_at: displayUser.rpg_diagnosis_completed_at,
         mandala_thumbnail_url: displayUser.mandala_thumbnail_url,
         mandala_detail_url: displayUser.mandala_detail_url,
       });
@@ -248,6 +258,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [showSettings, setShowSettings] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showShareProfile, setShowShareProfile] = useState(false);
+  const [showRpgDiagnosis, setShowRpgDiagnosis] = useState(false);
   
   // デバッグ用: showSettingsの変更を監視
   useEffect(() => {
@@ -609,35 +620,88 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
           {/* 曼荼羅アートとタロット・診断ボタンを縦並びに */}
           <div className="flex flex-col gap-6 items-start mt-6">
-            {isOwner && (
+            {isOwner && displayUser && (
               <div className="w-full flex flex-col items-center" style={{ gap: '56px' }}>
                 <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
-                  {/* タロット占い */}
-                  <button
-                    onClick={() => setShowDailyTarot(true)}
-                    className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden flex-shrink-0"
-                    style={{ 
-                      width: 'clamp(150px, 26vw, 200px)', 
-                      height: 'clamp(56px, 10vw, 75px)',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <img src="/タロット占い.svg" alt="今日のタロット占い" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
-                  </button>
+                  {/* タロット占い - 1日1回制限（0時リセット） */}
+                  {(() => {
+                    const lastDrawn = displayUser.tarot_last_drawn_at 
+                      ? new Date(displayUser.tarot_last_drawn_at) 
+                      : null;
+                    const today = new Date();
+                    const isDrawnToday = lastDrawn && 
+                      lastDrawn.getDate() === today.getDate() &&
+                      lastDrawn.getMonth() === today.getMonth() &&
+                      lastDrawn.getFullYear() === today.getFullYear();
 
-                  {/* 季節診断 */}
-                  <button
-                    onClick={() => setShowSeasonalDiagnosis(true)}
-                    className="hover:opacity-80 transition-all transform hover:scale-105 rounded-xl overflow-hidden"
-                    style={{ 
-                      width: 'clamp(150px, 26vw, 200px)', 
-                      height: 'clamp(56px, 10vw, 75px)',
-                      flexShrink: 0,
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <img src="/診断.svg" alt="パーソナル診断" className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" />
-                  </button>
+                    return (
+                      <div className="relative">
+                        <button
+                          onClick={async () => {
+                            // モーダルを開く前に最新のプロフィールを取得
+                            await refetchProfile();
+                            setShowDailyTarot(true);
+                          }}
+                          className={`transition-all transform rounded-xl overflow-hidden flex-shrink-0 ${
+                            isDrawnToday 
+                              ? 'opacity-90 cursor-pointer hover:opacity-100 hover:scale-105' 
+                              : 'hover:opacity-80 hover:scale-105'
+                          }`}
+                          style={{ 
+                            width: 'clamp(150px, 26vw, 200px)', 
+                            height: 'clamp(56px, 10vw, 75px)',
+                            boxSizing: 'border-box'
+                          }}
+                        >
+                          <img 
+                            src="/タロット占い.svg" 
+                            alt={isDrawnToday ? "今日の結果" : "今日のタロット占い"} 
+                            className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" 
+                          />
+                        </button>
+                        {isDrawnToday && (
+                          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                            本日完了
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* RPG診断 - 1回のみ（完了後は結果のみ） */}
+                  {(() => {
+                    const isCompleted = !!displayUser.rpg_diagnosis_completed_at;
+
+                    return (
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowRpgDiagnosis(true)}
+                          className={`transition-all transform rounded-xl overflow-hidden ${
+                            isCompleted 
+                              ? 'opacity-60 cursor-default' 
+                              : 'hover:opacity-80 hover:scale-105'
+                          }`}
+                          style={{ 
+                            width: 'clamp(150px, 26vw, 200px)', 
+                            height: 'clamp(56px, 10vw, 75px)',
+                            flexShrink: 0,
+                            boxSizing: 'border-box'
+                          }}
+                        >
+                          <img 
+                            src="/診断.svg" 
+                            alt={isCompleted ? "診断結果" : "RPG診断"} 
+                            className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" 
+                          />
+                        </button>
+                        {isCompleted && (
+                          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                            完了
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* 曼荼羅アート */}
@@ -993,6 +1057,30 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
           {activeTab === 'fortune' && (
             <div className="py-6 px-4">
+              {/* RPG診断とタロット占いのカード */}
+              {displayUser && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <RpgDiagnosisCard
+                    profile={displayUser!}
+                    isOwner={isOwner}
+                    onOpenDiagnosis={async () => {
+                      // モーダルを開く前に最新のプロフィールを取得
+                      await refetchProfile();
+                      setShowRpgDiagnosis(true);
+                    }}
+                  />
+                  <TarotCard
+                    profile={displayUser!}
+                    isOwner={isOwner}
+                    onOpenTarot={async () => {
+                      // モーダルを開く前に最新のプロフィールを取得
+                      await refetchProfile();
+                      setShowDailyTarot(true);
+                    }}
+                  />
+                </div>
+              )}
+
               <div className="space-y-4">
                 {/* タロット占い */}
                 <button
@@ -1145,9 +1233,17 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       {showDailyTarot && displayUser && (
         <DailyTarot 
           isOpen={showDailyTarot}
-          onClose={() => setShowDailyTarot(false)}
+          onClose={() => {
+            console.log('🔒 [InstagramProfilePage] DailyTarot closed, refetching profile...');
+            setShowDailyTarot(false);
+            // タロット占い完了後、プロフィールを再取得
+            setTimeout(() => {
+              refetchProfile();
+            }, 500); // 少し遅延させてバックエンドの更新を待つ
+          }}
           userId={displayUser.id.toString()}
           userName={displayUser.name}
+          profile={displayUser}
         />
       )}
       
@@ -1183,6 +1279,20 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       <ShareProfileModal
         isOpen={showShareProfile}
         onClose={() => setShowShareProfile(false)}
+      />
+
+      {/* RPG診断モーダル */}
+      <RpgDiagnosisModal
+        isOpen={showRpgDiagnosis}
+        onClose={() => {
+          console.log('🔒 [InstagramProfilePage] RpgDiagnosis closed, refetching profile...');
+          setShowRpgDiagnosis(false);
+          // 診断完了後、プロフィールを再取得
+          setTimeout(() => {
+            refetchProfile();
+          }, 500); // 少し遅延させてバックエンドの更新を待つ
+        }}
+        profile={displayUser}
       />
     </div>
     </div>
