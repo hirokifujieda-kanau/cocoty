@@ -7,7 +7,7 @@
  */
 export function isLocalEnvironment(): boolean {
   return process.env.NODE_ENV === 'development' || 
-         process.env.NEXT_PUBLIC_API_BASE_URL?.includes('localhost') || 
+         process.env.NEXT_PUBLIC_API_URL?.includes('localhost') || 
          false;
 }
 
