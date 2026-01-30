@@ -11,9 +11,9 @@ import DailyTarot from '@/components/fortune/DailyTarot';
 import SeasonalDiagnosisHub from '@/components/fortune/SeasonalDiagnosisHub';
 import MentalStatsAdmin from '@/components/fortune/MentalStatsAdmin';
 import { SettingsModal } from '@/components/profile';
-import ProfileEditModal from '@/components/profile/ProfileEditModal';
+import ProfileEditPage from '@/components/profile/ProfileEditPage';
 import ShareProfileModal from '@/components/profile/ShareProfileModal';
-import MandalaDisplay from '@/components/profile/MandalaDisplay';
+import MandalaGallery from '@/components/profile/MandalaGallery';
 import { RpgDiagnosisModal } from '@/components/rpg/RpgDiagnosisModal';
 import { RpgDiagnosisCard } from '@/components/profile/RpgDiagnosisCard';
 import { TarotCard } from '@/components/profile/TarotCard';
@@ -381,6 +381,17 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
   // ここから先は displayUser が必ず存在する
 
+  // プロフィール編集画面を表示中は、それだけを表示
+  if (showEditProfile) {
+    return (
+      <ProfileEditPage
+        onClose={() => setShowEditProfile(false)}
+        onSave={refetchProfile}
+        userId={userId || undefined}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -621,7 +632,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           {/* 曼荼羅アートとタロット・診断ボタンを縦並びに */}
           <div className="flex flex-col gap-6 items-start mt-6">
             {isOwner && displayUser && (
-              <div className="w-full flex flex-col items-center" style={{ gap: '56px' }}>
+              <div className="w-full flex flex-col items-center" style={{ gap: '48px' }}>
                 <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
                   {/* タロット占い - 1日1回制限（0時リセット） */}
                   {(() => {
@@ -703,17 +714,33 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     );
                   })()}
                 </div>
+              </div>
+            )}
 
-                {/* 曼荼羅アート */}
-                {displayUser && (
-                  <div className="w-full flex items-center justify-center">
-                    <MandalaDisplay
-                      thumbnailUrl={displayUser.mandala_thumbnail_url}
-                      detailUrl={displayUser.mandala_detail_url}
-                      userName={displayUser.name}
-                    />
-                  </div>
-                )}
+            {/* マンダラチャート（全ユーザーに表示） */}
+            {displayUser && (
+              <div className="w-full flex flex-col items-center" style={{ marginTop: isOwner ? '48px' : '0' }}>
+                <div className="w-[343px]">
+                  <h2 
+                    className="font-bold text-white text-center mb-0 py-3 rounded-t-lg"
+                    style={{
+                      fontFamily: 'Noto Sans JP',
+                      fontWeight: 700,
+                      fontSize: '16px',
+                      lineHeight: '16px',
+                      letterSpacing: '0%',
+                      color: '#FFFFFF',
+                      boxShadow: '0px 1px 1px 0px #F0AC3C',
+                      background: '#FFBA48'
+                    }}
+                  >
+                    マンダラチャート
+                  </h2>
+                  <MandalaGallery
+                    userId={displayUser.id.toString()}
+                    isOwner={isOwner}
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -1267,13 +1294,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
-      />
-      
-      <ProfileEditModal
-        isOpen={showEditProfile}
-        onClose={() => setShowEditProfile(false)}
-        onSave={refetchProfile}
-        userId={userId || undefined}
       />
       
       <ShareProfileModal

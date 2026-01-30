@@ -391,11 +391,15 @@ export interface RpgQuestionsResponse {
 
 /**
  * RPG診断の質問一覧を取得
+ * 一時的にNext.jsのローカルAPIを使用（TODO: Railsバックエンドに移行）
  */
 export async function getRpgQuestions(): Promise<RpgQuestionsResponse> {
-  return apiRequest<RpgQuestionsResponse>('/rpg_questions', {
-    requireAuth: false,
-  });
+  // 一時的にNext.jsのローカルAPIエンドポイントを使用
+  const response = await fetch('/api/rpg_questions');
+  if (!response.ok) {
+    throw new Error(`Failed to fetch RPG questions: ${response.status}`);
+  }
+  return response.json();
 }
 
 export interface RpgDiagnosisData {
