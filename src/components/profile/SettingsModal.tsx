@@ -67,7 +67,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
       </div>
 
       {/* Settings Header - 設定画面のヘッダー */}
-      <div className="bg-white shrink-0" style={{ paddingTop: '26px', paddingBottom: '26px' }}>
+      <div className="bg-white shrink-0 border-b border-gray-200" style={{ paddingTop: '26px', paddingBottom: '26px' }}>
         <div className="flex items-center justify-between px-4 page-container">
           <button
             onClick={onClose}

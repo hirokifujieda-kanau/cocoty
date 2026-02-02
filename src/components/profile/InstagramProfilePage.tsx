@@ -719,7 +719,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
             {/* マンダラチャート（全ユーザーに表示） */}
             {displayUser && (
-              <div className={`w-full flex flex-col items-center ${isOwner ? 'mt-12' : 'mt-0'}`}>
+              <div className={`w-full flex flex-col items-center ${isOwner ? 'mt-8' : 'mt-0'}`}>
                 <div className={styles.mandalaContainer}>
                   <h2 className="font-noto font-bold text-base leading-4 text-white text-center mb-0 py-3 rounded-t-lg shadow-[0px_1px_1px_0px_#F0AC3C] bg-[#FFBA48]">
                     マンダラチャート
