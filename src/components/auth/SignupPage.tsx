@@ -216,7 +216,7 @@ const SignupPage: React.FC = () => {
       <div className="sticky top-0 bg-white py-8 px-4">
         <div className="flex items-center justify-center gap-4 relative page-container">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/login')}
             className="absolute left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ChevronLeft className="h-6 w-6 text-gray-900" />
