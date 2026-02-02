@@ -17,6 +17,7 @@ import MandalaGallery from '@/components/profile/MandalaGallery';
 import { RpgDiagnosisModal } from '@/components/rpg/RpgDiagnosisModal';
 import { RpgDiagnosisCard } from '@/components/profile/RpgDiagnosisCard';
 import { TarotCard } from '@/components/profile/TarotCard';
+import AvatarUploadModal from '@/components/profile/AvatarUploadModal';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getCurrentUser, getProfile, updateProfile, type Profile } from '@/lib/api/client';
@@ -32,6 +33,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [error, setError] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+  const [showAvatarUploadModal, setShowAvatarUploadModal] = useState(false);
   
   // propsからuserIdを取得、なければURLパラメータを確認
   const userIdFromUrl = searchParams.get('userId');
@@ -452,10 +454,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     id="avatar-upload-icon"
                     disabled={uploadingAvatar}
                   />
-                  <label
-                    htmlFor="avatar-upload-icon"
+                  <button
+                    onClick={() => setShowAvatarUploadModal(true)}
                     className={`absolute hover:opacity-80 transition-all cursor-pointer flex items-center justify-center z-10 ${styles.avatarLabel}`}
                     title="プロフィール画像を変更"
+                    disabled={uploadingAvatar}
                   >
                     {uploadingAvatar ? (
                       <div className="animate-spin rounded-full h-6 w-6 border-2 border-purple-600 border-t-transparent" />
@@ -479,7 +482,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                         </span>
                       </div>
                     )}
-                  </label>
+                  </button>
                 </>
               )}
             </div>
@@ -1301,6 +1304,15 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           }, 500); // 少し遅延させてバックエンドの更新を待つ
         }}
         profile={displayUser}
+      />
+
+      {/* アバターアップロードモーダル */}
+      <AvatarUploadModal
+        isOpen={showAvatarUploadModal}
+        onClose={() => setShowAvatarUploadModal(false)}
+        onUploadClick={() => {
+          document.getElementById('avatar-upload-icon')?.click();
+        }}
       />
     </div>
     </div>
