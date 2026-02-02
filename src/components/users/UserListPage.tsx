@@ -132,14 +132,14 @@ export function UserListPage() {
       </div>
 
       {/* Content */}
-      <div>
+      <div className="max-w-[812px] mx-auto px-4 pc:px-[106px]">
         {/* User List */}
-        <div>
+        <div className="grid grid-cols-1 pc:grid-cols-2">
           {data.profiles.map((profile) => (
             <div
               key={profile.id}
               onClick={() => router.push(`/profile/${profile.id}`)}
-              className="flex items-start gap-2 px-4 py-[19px] border-b border-gray-200 hover:bg-gray-100 transition cursor-pointer"
+              className="flex items-start gap-2 px-4 py-[19px] border-b border-gray-200 pc:border-r pc:last:border-r-0 pc:odd:border-r hover:bg-gray-100 transition cursor-pointer"
               style={{ gap: '8px' }}
             >
               {/* Avatar */}

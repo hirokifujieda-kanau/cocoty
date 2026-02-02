@@ -67,27 +67,29 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
       </div>
 
       {/* Settings Header - 設定画面のヘッダー */}
-      <div className="flex items-center justify-between px-4 bg-white shrink-0" style={{ paddingTop: '26px', paddingBottom: '26px' }}>
-        <button
-          onClick={onClose}
-          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-          aria-label="戻る"
-        >
-          <ChevronLeft className="h-6 w-6 text-gray-800" />
-        </button>
-        <h1 className="flex-1 text-center font-bold text-xl" style={{ fontFamily: '"Noto Sans JP"', fontSize: '20px', lineHeight: '20px', color: '#1A1A1A' }}>設定</h1>
-        <div className="w-8" />
+      <div className="bg-white shrink-0" style={{ paddingTop: '26px', paddingBottom: '26px' }}>
+        <div className="flex items-center justify-between px-4 max-w-[343px] pc:max-w-[812px] mx-auto">
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="戻る"
+          >
+            <ChevronLeft className="h-6 w-6 text-gray-800" />
+          </button>
+          <h1 className="flex-1 text-center font-bold text-xl" style={{ fontFamily: '"Noto Sans JP"', fontSize: '20px', lineHeight: '20px', color: '#1A1A1A' }}>設定</h1>
+          <div className="w-8" />
+        </div>
       </div>
 
       {/* Menu Content */}
       <div className="flex-1 bg-white overflow-y-auto">
-        <div>
+        <div className="max-w-[343px] pc:max-w-[812px] mx-auto">
           {menuItems.map((item, index) => (
             <button
               key={index}
               onClick={item.onClick}
               disabled={loading && item.isDanger}
-              className={`w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full flex items-center justify-between px-6 pc:px-[106px] py-4 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 item.isDanger ? 'text-red-600' : 'text-gray-900'
               }`}
             >
