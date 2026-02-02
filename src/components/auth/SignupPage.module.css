@@ -38,3 +38,8 @@
   appearance: textfield;
 }
 
+@media (min-width: 750px) {
+  .signupForm {
+    padding-inline: calc(var(--spacing) * 9);
+  }
+}

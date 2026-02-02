@@ -11,12 +11,13 @@ import DailyTarot from '@/components/fortune/DailyTarot';
 import SeasonalDiagnosisHub from '@/components/fortune/SeasonalDiagnosisHub';
 import MentalStatsAdmin from '@/components/fortune/MentalStatsAdmin';
 import { SettingsModal } from '@/components/profile';
-import ProfileEditModal from '@/components/profile/ProfileEditModal';
+import ProfileEditPage from '@/components/profile/ProfileEditPage';
 import ShareProfileModal from '@/components/profile/ShareProfileModal';
-import MandalaDisplay from '@/components/profile/MandalaDisplay';
+import MandalaGallery from '@/components/profile/MandalaGallery';
 import { RpgDiagnosisModal } from '@/components/rpg/RpgDiagnosisModal';
 import { RpgDiagnosisCard } from '@/components/profile/RpgDiagnosisCard';
 import { TarotCard } from '@/components/profile/TarotCard';
+import AvatarUploadModal from '@/components/profile/AvatarUploadModal';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getCurrentUser, getProfile, updateProfile, type Profile } from '@/lib/api/client';
@@ -32,6 +33,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [error, setError] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+  const [showAvatarUploadModal, setShowAvatarUploadModal] = useState(false);
   
   // propsからuserIdを取得、なければURLパラメータを確認
   const userIdFromUrl = searchParams.get('userId');
@@ -381,11 +383,22 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
   // ここから先は displayUser が必ず存在する
 
+  // プロフィール編集画面を表示中は、それだけを表示
+  if (showEditProfile) {
+    return (
+      <ProfileEditPage
+        onClose={() => setShowEditProfile(false)}
+        onSave={refetchProfile}
+        userId={userId || undefined}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 z-50 h-[30px] bg-[#FFD26A] flex items-center">
-        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,106px)]" style={{ maxWidth: '750px' }}>
+        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,55px)]" style={{ maxWidth: '750px' }}>
           {/* Logo */}
           <h1 className="font-noto text-base font-medium text-white leading-none">
             ここてぃ
@@ -441,10 +454,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     id="avatar-upload-icon"
                     disabled={uploadingAvatar}
                   />
-                  <label
-                    htmlFor="avatar-upload-icon"
+                  <button
+                    onClick={() => setShowAvatarUploadModal(true)}
                     className={`absolute hover:opacity-80 transition-all cursor-pointer flex items-center justify-center z-10 ${styles.avatarLabel}`}
                     title="プロフィール画像を変更"
+                    disabled={uploadingAvatar}
                   >
                     {uploadingAvatar ? (
                       <div className="animate-spin rounded-full h-6 w-6 border-2 border-purple-600 border-t-transparent" />
@@ -468,7 +482,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                         </span>
                       </div>
                     )}
-                  </label>
+                  </button>
                 </>
               )}
             </div>
@@ -621,7 +635,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           {/* 曼荼羅アートとタロット・診断ボタンを縦並びに */}
           <div className="flex flex-col gap-6 items-start mt-6">
             {isOwner && displayUser && (
-              <div className="w-full flex flex-col items-center" style={{ gap: '56px' }}>
+              <div className="w-full flex flex-col items-center" style={{ gap: '48px' }}>
                 <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
                   {/* タロット占い - 1日1回制限（0時リセット） */}
                   {(() => {
@@ -703,17 +717,21 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     );
                   })()}
                 </div>
+              </div>
+            )}
 
-                {/* 曼荼羅アート */}
-                {displayUser && (
-                  <div className="w-full flex items-center justify-center">
-                    <MandalaDisplay
-                      thumbnailUrl={displayUser.mandala_thumbnail_url}
-                      detailUrl={displayUser.mandala_detail_url}
-                      userName={displayUser.name}
-                    />
-                  </div>
-                )}
+            {/* マンダラチャート（全ユーザーに表示） */}
+            {displayUser && (
+              <div className={`w-full flex flex-col items-center ${isOwner ? 'mt-8' : 'mt-0'}`}>
+                <div className={styles.mandalaContainer}>
+                  <h2 className="font-noto font-bold text-base leading-4 text-white text-center mb-0 py-3 rounded-t-lg shadow-[0px_1px_1px_0px_#F0AC3C] bg-[#FFBA48]">
+                    マンダラチャート
+                  </h2>
+                  <MandalaGallery
+                    userId={displayUser.id.toString()}
+                    isOwner={isOwner}
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -1269,13 +1287,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         onClose={() => setShowSettings(false)}
       />
       
-      <ProfileEditModal
-        isOpen={showEditProfile}
-        onClose={() => setShowEditProfile(false)}
-        onSave={refetchProfile}
-        userId={userId || undefined}
-      />
-      
       <ShareProfileModal
         isOpen={showShareProfile}
         onClose={() => setShowShareProfile(false)}
@@ -1293,6 +1304,15 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           }, 500); // 少し遅延させてバックエンドの更新を待つ
         }}
         profile={displayUser}
+      />
+
+      {/* アバターアップロードモーダル */}
+      <AvatarUploadModal
+        isOpen={showAvatarUploadModal}
+        onClose={() => setShowAvatarUploadModal(false)}
+        onUploadClick={() => {
+          document.getElementById('avatar-upload-icon')?.click();
+        }}
       />
     </div>
     </div>

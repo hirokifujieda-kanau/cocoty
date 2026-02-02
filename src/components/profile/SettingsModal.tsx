@@ -52,7 +52,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 bg-black/40 z-50 flex flex-col h-screen max-h-screen overflow-hidden">
       {/* Top Header - プロフィール画面と同じヘッダー */}
       <div className="sticky top-0 z-50 h-[30px] bg-[#FFD26A] flex items-center">
-        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,106px)]" style={{ maxWidth: '750px' }}>
+        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,55px)]" style={{ maxWidth: '750px' }}>
           <h1 className="font-noto text-base font-medium text-white leading-none">ここてぃ</h1>
           <div className="flex gap-2 items-center">
             <div className="relative flex items-center my-1 ml-[9px]">
@@ -67,27 +67,29 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
       </div>
 
       {/* Settings Header - 設定画面のヘッダー */}
-      <div className="flex items-center justify-between px-4 bg-white shrink-0" style={{ paddingTop: '26px', paddingBottom: '26px' }}>
-        <button
-          onClick={onClose}
-          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-          aria-label="戻る"
-        >
-          <ChevronLeft className="h-6 w-6 text-gray-800" />
-        </button>
-        <h1 className="flex-1 text-center font-bold text-xl" style={{ fontFamily: '"Noto Sans JP"', fontSize: '20px', lineHeight: '20px', color: '#1A1A1A' }}>設定</h1>
-        <div className="w-8" />
+      <div className="bg-white shrink-0 border-b border-gray-200" style={{ paddingTop: '26px', paddingBottom: '26px' }}>
+        <div className="flex items-center justify-between px-4 page-container">
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="戻る"
+          >
+            <ChevronLeft className="h-6 w-6 text-gray-800" />
+          </button>
+          <h1 className="flex-1 text-center font-bold text-xl" style={{ fontFamily: '"Noto Sans JP"', fontSize: '20px', lineHeight: '20px', color: '#1A1A1A' }}>設定</h1>
+          <div className="w-8" />
+        </div>
       </div>
 
       {/* Menu Content */}
       <div className="flex-1 bg-white overflow-y-auto">
-        <div>
+        <div className="page-container">
           {menuItems.map((item, index) => (
             <button
               key={index}
               onClick={item.onClick}
               disabled={loading && item.isDanger}
-              className={`w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full flex items-center justify-between px-6 pc:px-[106px] py-4 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 item.isDanger ? 'text-red-600' : 'text-gray-900'
               }`}
             >

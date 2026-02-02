@@ -29,8 +29,17 @@
 
 @media (min-width: 750px) {
   .profileSection {
-    padding-left: 106px;
-    padding-right: 106px;
+    padding-left: 57px;
+    padding-right: 57px;
   }
 }
 
+.mandalaContainer {
+  width: 343px;
+}
+
+@media (min-width: 750px) {
+  .mandalaContainer {
+    width: 472px;
+  }
+}

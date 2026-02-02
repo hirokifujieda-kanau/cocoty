@@ -101,7 +101,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex flex-col h-screen max-h-screen overflow-hidden">
+    <div className="fixed inset-0 bg-white z-50 flex flex-col h-screen max-h-screen overflow-hidden">
       {/* Top Header */}
       <div className="sticky top-0 border-b border-gray-200 z-50 bg-[#FFD26A]">
         <div className="mx-auto h-[30px] flex items-center" style={{ maxWidth: '750px', paddingLeft: 'clamp(26px, 8vw, 106px)', paddingRight: 'clamp(26px, 8vw, 106px)' }}>
@@ -133,7 +133,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
       </div>
 
       {/* Page Header */}
-      <div className="flex items-center justify-between px-4 bg-white shrink-0 py-[26px]">
+      <div className="flex items-center justify-between px-4 bg-white shrink-0 py-[26px] page-container">
         <button
           onClick={onBack}
           className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -148,7 +148,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
       {/* Content Wrapper with white background */}
       <div className="flex-1 bg-white overflow-y-auto">
         {/* Content */}
-        <div className="mx-auto py-6 px-[37.5px] max-w-[448px] w-full">
+        <div className="mx-auto py-6 px-[37.5px] page-container">
           <div className="space-y-6">
           {/* Current Password Field */}
           <div>
@@ -261,12 +261,12 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
           )}
 
           {/* Save Button */}
-          <div className="flex justify-center pt-4 ml-20 mr-20">
+          <div className="flex justify-center pt-4">
             <button
               type="submit"
               onClick={handleSave}
               disabled={loading || currentPassword.length < 8 || newPassword.length < 8 || confirmPassword.length < 8}
-              className="w-full gap-2 rounded-[12px] border-none font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300"
+              className="w-[140px] gap-2 rounded-[12px] border-none font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300"
               style={{
                 backgroundColor: currentPassword.length >= 8 && newPassword.length >= 8 && confirmPassword.length >= 8 ? '#FFBA48' : '#F8E8AA',
                 cursor: loading || currentPassword.length < 8 || newPassword.length < 8 || confirmPassword.length < 8 ? 'not-allowed' : 'pointer',
