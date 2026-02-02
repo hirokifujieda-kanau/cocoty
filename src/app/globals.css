@@ -75,3 +75,10 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out;
 }
+
+/* Page Container - 共通の横幅管理 */
+@layer components {
+  .page-container {
+    @apply max-w-[550px] mx-auto w-full;
+  }
+}

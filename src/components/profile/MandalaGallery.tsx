@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import styles from './MandalaGallery.module.css';
 
 interface MandalaImage {
   id: string;
@@ -80,7 +81,7 @@ const MandalaGallery: React.FC<MandalaGalleryProps> = ({ userId, isOwner }) => {
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`w-[343px] h-[231px] rounded-b-xl cursor-pointer transition-all ${
+          className={`${styles.mandalaContainer} h-[231px] rounded-b-xl cursor-pointer transition-all ${
             isDragging
               ? 'bg-purple-100'
               : 'bg-gray-100'
@@ -108,12 +109,7 @@ const MandalaGallery: React.FC<MandalaGalleryProps> = ({ userId, isOwner }) => {
       {/* 画像表示 */}
       {images.length > 0 && (
         <div
-          className="relative flex items-center justify-center group cursor-pointer rounded-b-xl overflow-hidden shadow-md"
-          style={{ 
-            width: '343px',
-            height: '231px',
-            backgroundColor: '#F9F9F9'
-          }}
+          className={`relative flex items-center justify-center group cursor-pointer rounded-b-xl overflow-hidden shadow-md ${styles.mandalaContainer} h-[231px] bg-[#F9F9F9]`}
           onClick={() => setSelectedImage(images[0].url)}
         >
           <img

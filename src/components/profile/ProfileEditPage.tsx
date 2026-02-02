@@ -175,7 +175,7 @@ const ProfileEditPage: React.FC<ProfileEditPageProps> = ({ onClose, onSave, user
     <div className="min-h-screen bg-white">
       {/* 上部の黄色いヘッダー */}
       <div className="sticky top-0 bg-[#FFD26A] h-[30px] z-50 flex items-center">
-        <div className="mx-auto flex items-center justify-between w-full max-w-[750px] px-[clamp(26px,8vw,106px)]">
+        <div className="mx-auto flex items-center justify-between w-full max-w-[750px] px-[clamp(26px,8vw,55px)]">
           <h1 className="font-noto text-base font-medium text-white leading-none">
             ここてぃ
           </h1>
@@ -205,7 +205,7 @@ const ProfileEditPage: React.FC<ProfileEditPageProps> = ({ onClose, onSave, user
 
       {/* ヘッダー（ユーザー一覧と同じレイアウト） */}
       <div className="sticky top-[30px] bg-white py-8 px-4 border-b border-gray-200 z-10">
-        <div className="flex items-center justify-center gap-4 relative">
+        <div className="flex items-center justify-center gap-4 relative page-container">
           <button
             onClick={onClose}
             className="absolute left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -219,7 +219,7 @@ const ProfileEditPage: React.FC<ProfileEditPageProps> = ({ onClose, onSave, user
       </div>
 
       {/* コンテンツ */}
-      <div className="max-w-2xl mx-auto pb-6 px-4">
+      <div className="page-container pb-6 px-4">
         <form onSubmit={handleSubmit(handleProfileFormSubmission)} className="space-y-6">
           {/* 自己紹介セクション */}
           <ProfileBioSection

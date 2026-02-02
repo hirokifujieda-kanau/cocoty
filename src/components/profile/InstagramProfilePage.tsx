@@ -396,7 +396,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 z-50 h-[30px] bg-[#FFD26A] flex items-center">
-        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,106px)]" style={{ maxWidth: '750px' }}>
+        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,55px)]" style={{ maxWidth: '750px' }}>
           {/* Logo */}
           <h1 className="font-noto text-base font-medium text-white leading-none">
             ここてぃ
@@ -720,7 +720,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             {/* マンダラチャート（全ユーザーに表示） */}
             {displayUser && (
               <div className={`w-full flex flex-col items-center ${isOwner ? 'mt-12' : 'mt-0'}`}>
-                <div className="w-[343px]">
+                <div className={styles.mandalaContainer}>
                   <h2 className="font-noto font-bold text-base leading-4 text-white text-center mb-0 py-3 rounded-t-lg shadow-[0px_1px_1px_0px_#F0AC3C] bg-[#FFBA48]">
                     マンダラチャート
                   </h2>

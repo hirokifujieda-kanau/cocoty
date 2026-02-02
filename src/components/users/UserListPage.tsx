@@ -88,7 +88,7 @@ export function UserListPage() {
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
       <div className="sticky top-0 bg-[#FFD26A] h-[30px] z-50 flex items-center">
-        <div className="mx-auto flex items-center justify-between w-full max-w-[750px] px-[clamp(26px,8vw,106px)]">
+        <div className="mx-auto flex items-center justify-between w-full max-w-[750px] px-[clamp(26px,8vw,55px)]">
           <h1 className="font-noto text-base font-medium text-white leading-none">
             ここてぃ
           </h1>
@@ -118,7 +118,7 @@ export function UserListPage() {
 
       {/* Page Title Header */}
       <div className="sticky top-[30px] bg-white py-8 px-4 border-b border-gray-200">
-        <div className="flex items-center justify-center gap-4 relative">
+        <div className="flex items-center justify-center gap-4 relative page-container">
           <button
             onClick={() => router.back()}
             className="absolute left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -132,9 +132,9 @@ export function UserListPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-[812px] mx-auto px-4 pc:px-[106px]">
+      <div className="page-container px-4">
         {/* User List */}
-        <div className="grid grid-cols-1 pc:grid-cols-2">
+        <div className="grid grid-cols-1">
           {data.profiles.map((profile) => (
             <div
               key={profile.id}

@@ -52,7 +52,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 bg-black/40 z-50 flex flex-col h-screen max-h-screen overflow-hidden">
       {/* Top Header - プロフィール画面と同じヘッダー */}
       <div className="sticky top-0 z-50 h-[30px] bg-[#FFD26A] flex items-center">
-        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,106px)]" style={{ maxWidth: '750px' }}>
+        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,55px)]" style={{ maxWidth: '750px' }}>
           <h1 className="font-noto text-base font-medium text-white leading-none">ここてぃ</h1>
           <div className="flex gap-2 items-center">
             <div className="relative flex items-center my-1 ml-[9px]">
@@ -68,7 +68,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
       {/* Settings Header - 設定画面のヘッダー */}
       <div className="bg-white shrink-0" style={{ paddingTop: '26px', paddingBottom: '26px' }}>
-        <div className="flex items-center justify-between px-4 max-w-[343px] pc:max-w-[812px] mx-auto">
+        <div className="flex items-center justify-between px-4 page-container">
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -83,7 +83,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
       {/* Menu Content */}
       <div className="flex-1 bg-white overflow-y-auto">
-        <div className="max-w-[343px] pc:max-w-[812px] mx-auto">
+        <div className="page-container">
           {menuItems.map((item, index) => (
             <button
               key={index}

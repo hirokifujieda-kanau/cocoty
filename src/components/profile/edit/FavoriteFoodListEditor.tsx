@@ -24,7 +24,7 @@ export const FavoriteFoodListEditor: React.FC<FavoriteFoodListEditorProps> = ({
   const hasReachedMaximumFoodCount = currentFavoriteFoodList.length >= MAXIMUM_FAVORITE_FOOD_COUNT;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-2">
       <h2 className="font-noto font-bold text-xs leading-5 text-[#1A1A1A]">
         好きな食べ物
         <span className="font-noto font-bold text-[10px] leading-3 text-[#828282] ml-3">
