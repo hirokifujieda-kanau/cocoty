@@ -1,0 +1,13 @@
+.tarotBackgroundPc {
+  background-image: url(/tarot-material/shine.png), url(/tarot-material/background.svg), linear-gradient(180deg, #0B031A 0%, #180936 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: center calc(-17px + 111px), center calc(60px + 111px), center;
+  background-size: 349px, auto, cover;
+}
+
+.tarotBackgroundSp {
+  background-image: url(/tarot-material/shine.png), url(/tarot-material/background.svg), linear-gradient(180deg, #0B031A 0%, #180936 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: center -17px, center 60px, center;
+  background-size: 349px, auto, cover;
+}
