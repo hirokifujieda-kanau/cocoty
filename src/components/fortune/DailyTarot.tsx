@@ -78,19 +78,45 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
 
           // 今日占えるかチェック（認証必要）
           // ※ローカル環境でも制限を適用（バックエンドと整合性を取るため）
-          const { can_read } = await canReadTarotToday();
-          
-          if (!can_read) {
-            console.log('🚫 今日はすでにタロット占いを実行済みです');
-            setStep('alreadyDrawn');
-          } else {
-            console.log('✅ タロット占い実行可能');
-            setStep('target');
+          try {
+            const { can_read } = await canReadTarotToday();
+            
+            if (!can_read) {
+              console.log('🚫 今日はすでにタロット占いを実行済みです');
+              setStep('alreadyDrawn');
+            } else {
+              console.log('✅ タロット占い実行可能');
+              setStep('target');
+            }
+          } catch (apiErr) {
+            console.error('🔴 [DailyTarot] can_read_today API エラー:', apiErr);
+            // APIエラーの場合、フロントエンド側でチェック
+            if (profile?.tarot_last_drawn_at) {
+              const lastDrawn = new Date(profile.tarot_last_drawn_at);
+              const today = new Date();
+              const isDrawnToday = 
+                lastDrawn.getDate() === today.getDate() &&
+                lastDrawn.getMonth() === today.getMonth() &&
+                lastDrawn.getFullYear() === today.getFullYear();
+              
+              if (isDrawnToday) {
+                console.log('🚫 [Fallback] 今日はすでにタロット占いを実行済みです（フロントエンド判定）');
+                setStep('alreadyDrawn');
+              } else {
+                console.log('✅ [Fallback] タロット占い実行可能（フロントエンド判定）');
+                setStep('target');
+              }
+            } else {
+              // プロフィール情報がない場合は実行可能とする
+              console.log('⚠️ [Fallback] プロフィール情報なし、タロット実行可能');
+              setStep('target');
+            }
           }
         } catch (err) {
           console.error('Failed to initialize tarot:', err);
           setError('タロットデータの読み込みに失敗しました');
-          setStep('target'); // エラーでも続行
+          // カード取得に失敗した場合は続行不可
+          setStep('check');
         } finally {
           setLoading(false);
         }
