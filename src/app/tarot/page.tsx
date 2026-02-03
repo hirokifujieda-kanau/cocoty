@@ -11,10 +11,14 @@ type TargetType = 'self' | 'partner' | null;
 
 // 選択画面のコンテンツコンポーネント
 function TarotSelectionContent({ 
+  selectedTarget,
   setSelectedTarget, 
+  onDecide,
   router 
 }: { 
-  setSelectedTarget: (target: TargetType) => void; 
+  selectedTarget: TargetType;
+  setSelectedTarget: (target: TargetType) => void;
+  onDecide: () => void;
   router: ReturnType<typeof useRouter>;
 }) {
   return (
@@ -71,46 +75,81 @@ function TarotSelectionContent({
             {/* 自分ボタン */}
             <button
               onClick={() => setSelectedTarget('self')}
-              className="transform hover:scale-105 transition-all"
+              className="relative transform hover:scale-105 transition-all"
             >
               <Image
                 src="/tarot-material/tarot_me.svg"
                 alt="自分"
                 width={95}
                 height={153}
+                className="relative z-10"
               />
+              {selectedTarget === 'self' && (
+                <div 
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{ width: '180px', height: '260px' }}
+                >
+                  <img
+                    src="/tarot-material/effect.svg"
+                    alt="選択中"
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  />
+                </div>
+              )}
             </button>
 
             {/* 相手ボタン */}
             <button
               onClick={() => setSelectedTarget('partner')}
-              className="transform hover:scale-105 transition-all"
+              className="relative transform hover:scale-105 transition-all"
             >
               <Image
                 src="/tarot-material/tarot_someone.svg"
                 alt="相手"
                 width={95}
                 height={153}
+                className="relative z-10"
               />
+              {selectedTarget === 'partner' && (
+                <div 
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{ width: '180px', height: '260px' }}
+                >
+                  <img
+                    src="/tarot-material/effect.svg"
+                    alt="選択中"
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  />
+                </div>
+              )}
             </button>
           </div>
           
           {/* 決定ボタン */}
           <div className="flex justify-center mt-8">
             <button
+              onClick={onDecide}
+              disabled={selectedTarget === null}
               style={{
                 width: '140px',
                 height: '48px',
                 borderRadius: '8px',
-                background: 'linear-gradient(180deg, #D0D0D0 0%, #848484 100%)',
-                border: '1px solid #CECECE',
-                boxShadow: '0px 4px 0px 0px #676158',
+                background: selectedTarget === null 
+                  ? 'linear-gradient(180deg, #D0D0D0 0%, #848484 100%)'
+                  : 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)',
+                border: selectedTarget === null 
+                  ? '1px solid #CECECE'
+                  : '1px solid #FFB370',
+                boxShadow: selectedTarget === null 
+                  ? '0px 4px 0px 0px #676158'
+                  : '0px 4px 0px 0px #5B3500',
                 fontFamily: 'Noto Sans JP',
                 fontWeight: 700,
                 fontSize: '16px',
                 lineHeight: '16px',
                 textAlign: 'center',
-                color: '#FFFFFF'
+                color: '#FFFFFF',
+                cursor: selectedTarget === null ? 'not-allowed' : 'pointer'
               }}
             >
               決定
@@ -126,6 +165,14 @@ export default function TarotPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [selectedTarget, setSelectedTarget] = useState<TargetType>(null);
+  const [isDecided, setIsDecided] = useState(false); // 決定ボタンが押されたかどうか
+
+  // 決定ボタンが押された時の処理
+  const handleDecide = () => {
+    if (selectedTarget !== null) {
+      setIsDecided(true); // 決定されたらカード引く画面へ
+    }
+  };
 
   if (!user) {
     return (
@@ -148,17 +195,27 @@ export default function TarotPage() {
     );
   }
 
-  // ターゲット選択前の画面
-  if (selectedTarget === null) {
+  // ターゲット選択画面(決定ボタンを押すまで)
+  if (!isDecided) {
     return (
       <>
         {/* SP用 */}
         <div className={`min-h-screen md:hidden ${styles.tarotBackgroundSp}`}>
-          <TarotSelectionContent setSelectedTarget={setSelectedTarget} router={router} />
+          <TarotSelectionContent 
+            selectedTarget={selectedTarget} 
+            setSelectedTarget={setSelectedTarget} 
+            onDecide={handleDecide}
+            router={router} 
+          />
         </div>
         {/* PC用 */}
         <div className={`min-h-screen hidden md:block ${styles.tarotBackgroundPc}`}>
-          <TarotSelectionContent setSelectedTarget={setSelectedTarget} router={router} />
+          <TarotSelectionContent 
+            selectedTarget={selectedTarget} 
+            setSelectedTarget={setSelectedTarget} 
+            onDecide={handleDecide}
+            router={router} 
+          />
         </div>
       </>
     );
@@ -171,7 +228,10 @@ export default function TarotPage() {
       <div className="sticky top-0 z-10">
         <div style={{ paddingInline: 'calc(var(--spacing) * 4)' }} className="flex items-center gap-4">
           <button
-            onClick={() => setSelectedTarget(null)}
+            onClick={() => {
+              setSelectedTarget(null);
+              setIsDecided(false); // 選択画面に戻る
+            }}
             className="text-white hover:text-gray-300 transition-colors"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
