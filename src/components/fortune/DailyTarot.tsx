@@ -5,6 +5,7 @@ import { X, Sparkles } from 'lucide-react';
 import {
   canReadTarotToday,
   getTarotCards,
+  getTarotReadings,
   createTarotReading,
   drawRandomCard,
   generateInterpretation,
@@ -57,6 +58,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   const [selectedReading, setSelectedReading] = useState<TarotReading | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [showHistoryDetail, setShowHistoryDetail] = useState(false);
+  const [todayReading, setTodayReading] = useState<TarotReading | null>(null);
 
   // stepの変更をログ出力
   useEffect(() => {
@@ -83,6 +85,18 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
             
             if (!can_read) {
               console.log('🚫 今日はすでにタロット占いを実行済みです');
+              
+              // 今日の占い結果を取得
+              try {
+                const { readings } = await getTarotReadings(1, 1);
+                if (readings && readings.length > 0) {
+                  setTodayReading(readings[0]);
+                  console.log('✅ 今日の占い結果を取得しました:', readings[0]);
+                }
+              } catch (err) {
+                console.error('今日の占い結果取得エラー:', err);
+              }
+              
               setStep('alreadyDrawn');
             } else {
               console.log('✅ タロット占い実行可能');
@@ -173,50 +187,70 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
     setDrawnCard(result);
     
     // 解釈を生成
+    let generatedInterpretation = '';
     if (target && mentalState) {
-      const interp = generateInterpretation(target, mentalState, result.card, result.isReversed);
-      setInterpretation(interp);
+      generatedInterpretation = generateInterpretation(target, mentalState, result.card, result.isReversed);
+      setInterpretation(generatedInterpretation);
     }
     
-    // めくり演出後に結果表示
-    setTimeout(() => {
+    // めくり演出後に結果表示 + 自動保存
+    setTimeout(async () => {
       setStep('result');
+      
+      // 占い結果を自動的にバックエンドに保存
+      if (target && mentalState) {
+        try {
+          setLoading(true);
+          await createTarotReading({
+            target,
+            mental_state: mentalState,
+            card_id: result.card.id,
+            is_reversed: result.isReversed,
+            interpretation: generatedInterpretation,
+            user_comment: undefined // 初回は感想なし
+          });
+          console.log('✅ Tarot reading auto-saved to backend');
+        } catch (err) {
+          console.error('❌ Failed to auto-save tarot reading:', err);
+          setError('占い結果の自動保存に失敗しました');
+        } finally {
+          setLoading(false);
+        }
+      }
     }, 2000);
   };
 
-  // 感想を保存してバックエンドに送信
+  // 感想を追加で保存（更新）
   const handleSaveComment = async () => {
-    if (!target || !mentalState || !drawnCard) return;
+    if (!target || !mentalState || !drawnCard || !userComment.trim()) {
+      // 感想がない場合はそのまま閉じる
+      handleClose();
+      return;
+    }
     
     try {
       setLoading(true);
       setError(null);
 
+      // 感想を追加して再保存（上書き）
       await createTarotReading({
         target,
         mental_state: mentalState,
         card_id: drawnCard.card.id,
         is_reversed: drawnCard.isReversed,
         interpretation,
-        user_comment: userComment || undefined
+        user_comment: userComment
       });
 
-      console.log('✅ Tarot reading saved to backend');
-      
-      // 成功通知
-      if (userComment.trim()) {
-        alert('✅ 感想を保存しました！\n\nあなたの記録が残りました。\n履歴からいつでも振り返ることができます。');
-      } else {
-        alert('✅ 占い結果を保存しました！\n\n履歴から確認できます。');
-      }
+      console.log('✅ Tarot reading comment updated');
+      alert('✅ 感想を保存しました！\n\nあなたの記録が残りました。\n履歴からいつでも振り返ることができます。');
       
       // モーダルを閉じる
       handleClose();
     } catch (err) {
-      console.error('Failed to save tarot reading:', err);
-      setError('占い結果の保存に失敗しました');
+      console.error('Failed to update tarot reading comment:', err);
+      setError('感想の保存に失敗しました');
       
-      // 失敗通知
       const errorMessage = err instanceof Error ? err.message : '不明なエラーが発生しました';
       alert(
         '❌ 感想の保存に失敗しました\n\n' +
@@ -298,7 +332,11 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           {step === 'alreadyDrawn' && (
             <AlreadyDrawnStep 
               onViewHistory={handleViewHistory}
-              lastDrawnCard={profile?.tarot_last_drawn ? JSON.parse(profile.tarot_last_drawn) : null}
+              lastDrawnCard={todayReading ? {
+                card_name: todayReading.card.name,
+                card_number: todayReading.card.id,
+                interpretation: todayReading.interpretation
+              } : null}
             />
           )}
 
