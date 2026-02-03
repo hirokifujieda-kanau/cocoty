@@ -274,15 +274,15 @@ export default function TarotPage() {
     });
   };
 
-  // シャッフル画面で自動的に次へ進む
-  useEffect(() => {
-    if (tarotState.step === 'shuffle') {
-      const timer = setTimeout(() => {
-        handleShuffleComplete();
-      }, 2000); // 2秒後
-      return () => clearTimeout(timer);
-    }
-  }, [tarotState.step]);
+  // シャッフル画面で自動的に次へ進む（コメントアウト - 決定ボタンで進むように変更）
+  // useEffect(() => {
+  //   if (tarotState.step === 'shuffle') {
+  //     const timer = setTimeout(() => {
+  //       handleShuffleComplete();
+  //     }, 2000); // 2秒後
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [tarotState.step]);
 
   // カード公開画面で自動的に結果へ進む
   useEffect(() => {
@@ -415,6 +415,24 @@ export default function TarotPage() {
             タロット占い
           </h3>
           
+          {tarotState.step === 'shuffle' && (
+            <p 
+              className="font-bold" 
+              style={{
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 700,
+                fontSize: '12px',
+                lineHeight: '20px',
+                letterSpacing: '0%',
+                textAlign: 'center',
+                color: '#FFFFFF',
+                marginBottom: '12px'
+              }}
+            >
+              カードをシャッフルします
+            </p>
+          )}
+          
           {tarotState.step === 'mental' && (
             <>
               <MentalCheckStep
@@ -456,7 +474,31 @@ export default function TarotPage() {
           )}
           
           {tarotState.step === 'shuffle' && (
-            <ShuffleStep />
+            <>
+              <ShuffleStep />
+              <div className="flex justify-center" style={{ marginTop: '48px' }}>
+                <button
+                  onClick={handleShuffleComplete}
+                  style={{
+                    width: '140px',
+                    height: '48px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)',
+                    border: '1px solid #FFB370',
+                    boxShadow: '0px 4px 0px 0px #5B3500',
+                    fontFamily: 'Noto Sans JP',
+                    fontWeight: 700,
+                    fontSize: '16px',
+                    lineHeight: '16px',
+                    textAlign: 'center',
+                    color: '#FFFFFF',
+                    cursor: 'pointer'
+                  }}
+                >
+                  止める
+                </button>
+              </div>
+            </>
           )}
           
           {tarotState.step === 'select' && (
@@ -540,6 +582,24 @@ export default function TarotPage() {
             タロット占い
           </h3>
           
+          {tarotState.step === 'shuffle' && (
+            <p 
+              className="font-bold" 
+              style={{
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 700,
+                fontSize: '12px',
+                lineHeight: '20px',
+                letterSpacing: '0%',
+                textAlign: 'center',
+                color: '#FFFFFF',
+                marginBottom: '12px'
+              }}
+            >
+              カードをシャッフルします
+            </p>
+          )}
+          
           {tarotState.step === 'mental' && (
             <>
               <MentalCheckStep
@@ -581,7 +641,31 @@ export default function TarotPage() {
           )}
           
           {tarotState.step === 'shuffle' && (
-            <ShuffleStep />
+            <>
+              <ShuffleStep />
+              <div className="flex justify-center" style={{ marginTop: '48px' }}>
+                <button
+                  onClick={handleShuffleComplete}
+                  style={{
+                    width: '140px',
+                    height: '48px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)',
+                    border: '1px solid #FFB370',
+                    boxShadow: '0px 4px 0px 0px #5B3500',
+                    fontFamily: 'Noto Sans JP',
+                    fontWeight: 700,
+                    fontSize: '16px',
+                    lineHeight: '16px',
+                    textAlign: 'center',
+                    color: '#FFFFFF',
+                    cursor: 'pointer'
+                  }}
+                >
+                  止める
+                </button>
+              </div>
+            </>
           )}
           
           {tarotState.step === 'select' && (
