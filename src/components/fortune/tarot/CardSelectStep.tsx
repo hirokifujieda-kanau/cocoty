@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { WhiteoutAnimation } from './WhiteoutAnimation';
 
 interface CardSelectStepProps {
   onSelect: (index: number) => void;
@@ -15,7 +16,7 @@ const STYLES = {
     letterSpacing: '0%',
     textAlign: 'center' as const,
     color: '#FFFFFF',
-    marginBottom: '12px',
+    marginBottom: '36px',
   },
   decideButton: {
     enabled: {
@@ -55,8 +56,83 @@ const EFFECT_SIZE = {
   height: 270,
 } as const;
 
+// タロットカードボタンコンポーネント
+interface TarotCardButtonProps {
+  cardIndex: number;
+  isSelected: boolean;
+  onCardClick: (index: number) => void;
+}
+
+const TarotCardButton: React.FC<TarotCardButtonProps> = ({ 
+  cardIndex, 
+  isSelected, 
+  onCardClick 
+}) => {
+  return (
+    <button
+      onClick={() => onCardClick(cardIndex)}
+      className="relative transform hover:scale-105 transition-all"
+      aria-label={`カード${cardIndex + 1}`}
+    >
+      <Image
+        src="/tarot-material/tarot_default.svg"
+        alt="タロットカード"
+        width={CARD_SIZE.width}
+        height={CARD_SIZE.height}
+        className="relative z-10"
+      />
+      {isSelected && (
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20" 
+          style={{ 
+            width: `${EFFECT_SIZE.width}px`, 
+            height: `${EFFECT_SIZE.height}px` 
+          }}
+        >
+          <Image
+            src="/tarot-material/effect.svg"
+            alt="選択エフェクト"
+            fill
+            style={{ objectFit: 'contain' }}
+          />
+        </div>
+      )}
+    </button>
+  );
+};
+
+// 決定ボタンコンポーネント
+interface DecideButtonProps {
+  isEnabled: boolean;
+  onClick: () => void;
+}
+
+const DecideButton: React.FC<DecideButtonProps> = ({ isEnabled, onClick }) => {
+  const buttonStyle = isEnabled 
+    ? STYLES.decideButton.enabled 
+    : STYLES.decideButton.disabled;
+
+  return (
+    <div className="flex justify-center" style={{ marginTop: '48px' }}>
+      <button
+        onClick={onClick}
+        disabled={!isEnabled}
+        style={{
+          ...STYLES.decideButton.base,
+          ...buttonStyle,
+        }}
+        aria-label="選択を決定"
+      >
+        決定
+      </button>
+    </div>
+  );
+};
+
+// メインコンポーネント
 export const CardSelectStep: React.FC<CardSelectStepProps> = ({ onSelect }) => {
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const handleCardClick = (index: number) => {
     setSelectedCardIndex(index);
@@ -64,68 +140,40 @@ export const CardSelectStep: React.FC<CardSelectStepProps> = ({ onSelect }) => {
 
   const handleDecideClick = () => {
     if (selectedCardIndex !== null) {
-      onSelect(selectedCardIndex);
+      setIsAnimating(true);
+      setTimeout(() => {
+        onSelect(selectedCardIndex);
+      }, 3000);
     }
   };
 
   const isCardSelected = selectedCardIndex !== null;
-  const buttonStyle = isCardSelected ? STYLES.decideButton.enabled : STYLES.decideButton.disabled;
 
   return (
-    <div className="text-center">
-      <h3 style={STYLES.heading}>
-        カードを1枚選んでください
-      </h3>
-      
-      <div className="flex justify-center gap-6">
-        {[0, 1, 2].map((cardIndex) => {
-          const isSelected = selectedCardIndex === cardIndex;
-          
-          return (
-            <button
+    <>
+      <div className="text-center">
+        <h3 style={STYLES.heading}>
+          カードを1枚選んでください
+        </h3>
+        
+        <div className="flex justify-center gap-6">
+          {[0, 1, 2].map((cardIndex) => (
+            <TarotCardButton
               key={cardIndex}
-              onClick={() => handleCardClick(cardIndex)}
-              className="relative transform hover:scale-105 transition-all"
-              aria-label={`カード${cardIndex + 1}`}
-            >
-              <Image
-                src="/tarot-material/tarot_default.svg"
-                alt="タロットカード"
-                width={CARD_SIZE.width}
-                height={CARD_SIZE.height}
-                className="relative z-10"
-              />
-              {isSelected && (
-                <div 
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20" 
-                  style={{ width: `${EFFECT_SIZE.width}px`, height: `${EFFECT_SIZE.height}px` }}
-                >
-                  <Image
-                    src="/tarot-material/effect.svg"
-                    alt="選択エフェクト"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                  />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-      
-      <div className="flex justify-center" style={{ marginTop: '48px' }}>
-        <button
+              cardIndex={cardIndex}
+              isSelected={selectedCardIndex === cardIndex}
+              onCardClick={handleCardClick}
+            />
+          ))}
+        </div>
+        
+        <DecideButton
+          isEnabled={isCardSelected}
           onClick={handleDecideClick}
-          disabled={!isCardSelected}
-          style={{
-            ...STYLES.decideButton.base,
-            ...buttonStyle,
-          }}
-          aria-label="選択を決定"
-        >
-          決定
-        </button>
+        />
       </div>
-    </div>
+
+      {isAnimating && <WhiteoutAnimation />}
+    </>
   );
 };
