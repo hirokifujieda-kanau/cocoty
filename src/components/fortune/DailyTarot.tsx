@@ -1,33 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 import {
-  canReadTarotToday,
-  getTarotCards,
-  createTarotReading,
-  drawRandomCard,
-  generateInterpretation,
-  type TarotCard,
-  type TarotReading
-} from '@/lib/api/tarot';
-import type { Profile } from '@/lib/api/client';
-import {
-  AlreadyDrawnStep,
-  TargetSelectStep,
   MentalCheckStep,
   ShuffleStep,
   CardSelectStep,
-  RevealStep,
   ResultStep,
   CommentStep,
-  TarotHistoryList,
-  TarotHistoryDetail,
-  type Step,
   type Target,
   type MentalState,
-  type DrawnCardResult
+  type Step,
+  type TarotState,
 } from './tarot';
+import type { Profile } from '@/lib/api/client';
+import styles from './DailyTarot.module.css';
 
 interface DailyTarotProps {
   isOpen: boolean;
@@ -37,6 +24,85 @@ interface DailyTarotProps {
   profile?: Profile | null;
 }
 
+type TargetType = 'self' | 'partner' | null;
+
+// 定数
+const INITIAL_TAROT_STATE: TarotState = {
+  step: 'mental',
+  target: null,
+  mentalState: null,
+  selectedCardIndex: null,
+  drawnCard: null,
+  interpretation: '',
+  userComment: '',
+  isShuffling: false,
+  isRevealing: false,
+};
+
+const STEP_ORDER: Step[] = ['mental', 'shuffle', 'select', 'result', 'comment'];
+
+const HEADING_STYLE = {
+  fontFamily: 'Noto Sans JP',
+  fontWeight: 700,
+  fontSize: '16px',
+  lineHeight: '16px',
+  textAlign: 'center' as const,
+  background: 'linear-gradient(360deg, #EDCFAC -31.25%, #E4BC89 75%)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  backgroundClip: 'text',
+  marginTop: '30px',
+  marginBottom: '12px',
+};
+
+const SUBHEADING_STYLE = {
+  fontFamily: 'Noto Sans JP',
+  fontWeight: 700,
+  fontSize: '12px',
+  lineHeight: '20px',
+  textAlign: 'center' as const,
+  color: '#FFFFFF',
+  marginBottom: '32px',
+};
+
+const getButtonStyle = (isEnabled: boolean) => ({
+  width: '140px',
+  height: '48px',
+  borderRadius: '8px',
+  background: isEnabled 
+    ? 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)'
+    : 'linear-gradient(180deg, #D0D0D0 0%, #848484 100%)',
+  border: isEnabled 
+    ? '1px solid #FFB370'
+    : '1px solid #CECECE',
+  boxShadow: isEnabled 
+    ? '0px 4px 0px 0px #5B3500'
+    : '0px 4px 0px 0px #676158',
+  fontFamily: 'Noto Sans JP',
+  fontWeight: 700,
+  fontSize: '16px',
+  lineHeight: '16px',
+  textAlign: 'center' as const,
+  color: '#FFFFFF',
+  cursor: isEnabled ? 'pointer' : 'not-allowed',
+});
+
+// 戻るボタンアイコン
+const BackIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// 決定ボタンコンポーネント
+const DecideButton: React.FC<{ onClick: () => void; disabled: boolean }> = ({ onClick, disabled }) => (
+  <div className="flex justify-center" style={{ marginTop: '48px' }}>
+    <button onClick={onClick} disabled={disabled} style={getButtonStyle(!disabled)}>
+      決定
+    </button>
+  </div>
+);
+
 const DailyTarot: React.FC<DailyTarotProps> = ({
   isOpen,
   onClose,
@@ -44,294 +110,214 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   userName,
   profile
 }) => {
-  const [step, setStep] = useState<Step>('check');
-  const [target, setTarget] = useState<Target | null>(null);
-  const [mentalState, setMentalState] = useState<MentalState | null>(null);
-  const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
-  const [drawnCard, setDrawnCard] = useState<DrawnCardResult | null>(null);
-  const [interpretation, setInterpretation] = useState<string>('');
-  const [userComment, setUserComment] = useState<string>('');
-  const [tarotCards, setTarotCards] = useState<TarotCard[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedReading, setSelectedReading] = useState<TarotReading | null>(null);
-  const [showHistory, setShowHistory] = useState(false);
-  const [showHistoryDetail, setShowHistoryDetail] = useState(false);
+  const [selectedTarget, setSelectedTarget] = useState<TargetType>(null);
+  const [isDecided, setIsDecided] = useState(false);
+  const [tarotState, setTarotState] = useState<TarotState>(INITIAL_TAROT_STATE);
+  const [tempMentalState, setTempMentalState] = useState<MentalState | null>(null);
 
-  // stepの変更をログ出力
-  useEffect(() => {
-    console.log('🎴 [DailyTarot] step changed:', step);
-  }, [step]);
+  const resetState = () => {
+    setSelectedTarget(null);
+    setIsDecided(false);
+    setTarotState(INITIAL_TAROT_STATE);
+    setTempMentalState(null);
+  };
 
-  // 初期化：タロットカードマスタデータを取得 & 今日占いができるかチェック
-  useEffect(() => {
-    if (isOpen && step === 'check') {
-      console.log('🔄 [DailyTarot] 初期化開始');
-      const initialize = async () => {
-        try {
-          setLoading(true);
-          setError(null);
-
-          // タロットカードマスタを取得（認証不要）
-          const cards = await getTarotCards();
-          setTarotCards(cards);
-
-          // 今日占えるかチェック（認証必要）
-          // ※ローカル環境でも制限を適用（バックエンドと整合性を取るため）
-          const { can_read } = await canReadTarotToday();
-          
-          if (!can_read) {
-            console.log('🚫 今日はすでにタロット占いを実行済みです');
-            setStep('alreadyDrawn');
-          } else {
-            console.log('✅ タロット占い実行可能');
-            setStep('target');
-          }
-        } catch (err) {
-          console.error('Failed to initialize tarot:', err);
-          setError('タロットデータの読み込みに失敗しました');
-          setStep('target'); // エラーでも続行
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      initialize();
+  const handleDecide = () => {
+    if (selectedTarget !== null) {
+      setIsDecided(true);
+      setTarotState(prev => ({
+        ...prev,
+        target: selectedTarget === 'self' ? 'self' : 'other',
+        step: 'mental',
+      }));
     }
-  }, [isOpen, step]);
+  };
 
-  // モーダルを閉じる
-  const handleClose = () => {
-    // リセット（stepはcheckに戻す - 次回開いたときに再初期化される）
-    setStep('check');
-    setTarget(null);
-    setMentalState(null);
-    setSelectedCardIndex(null);
-    setDrawnCard(null);
-    setInterpretation('');
-    setUserComment('');
-    setShowHistory(false);
-    setShowHistoryDetail(false);
+  const handleMentalSelect = (state: MentalState) => {
+    setTempMentalState(state);
+  };
+  
+  const handleMentalDecide = () => {
+    if (tempMentalState !== null) {
+      setTarotState(prev => ({
+        ...prev,
+        mentalState: tempMentalState,
+        step: 'shuffle',
+      }));
+    }
+  };
+
+  const handleShuffleComplete = () => {
+    setTarotState(prev => ({ ...prev, step: 'select' }));
+  };
+
+  const handleCardSelect = (index: number) => {
+    // ホワイトアウト演出後、直接結果画面へ (revealステップをスキップ)
+    setTarotState(prev => ({
+      ...prev,
+      selectedCardIndex: index,
+      drawnCard: {
+        card: {
+          id: 1,
+          name: '魔術師',
+          name_en: 'The Magician',
+          meaning: '創造、行動力、自信、新しい始まり',
+          reverse_meaning: '優柔不断、未熟、操作、欺瞞',
+          description: '新しい始まりと創造の力を象徴するカードです。',
+          image_url: '/tarot-images/1-the-magician.svg',
+        },
+        isReversed: Math.random() > 0.5,
+      },
+      interpretation: 'あなたには無限の可能性があります。今こそ行動を起こす時です。',
+      step: 'result',
+    }));
+  };
+
+  const handleToComment = () => {
+    setTarotState(prev => ({ ...prev, step: 'comment' }));
+  };
+
+  const handleComplete = () => {
+    resetState();
     onClose();
   };
 
-  // 対象選択
-  const handleTargetSelect = (selectedTarget: Target) => {
-    setTarget(selectedTarget);
-    setStep('mental');
-  };
-
-  // メンタルステート選択
-  const handleMentalSelect = (state: MentalState) => {
-    setMentalState(state);
-    setStep('shuffle');
-    
-    // シャッフル演出後にカード選択へ
-    setTimeout(() => {
-      setStep('select');
-    }, 3000);
-  };
-
-  // カード選択
-  const handleCardSelect = (index: number) => {
-    if (tarotCards.length === 0) {
-      setError('タロットカードが読み込まれていません');
-      return;
-    }
-
-    setSelectedCardIndex(index);
-    setStep('reveal');
-    
-    // カードを引く（tarotCardsを渡す）
-    const result = drawRandomCard(tarotCards);
-    setDrawnCard(result);
-    
-    // 解釈を生成
-    if (target && mentalState) {
-      const interp = generateInterpretation(target, mentalState, result.card, result.isReversed);
-      setInterpretation(interp);
-    }
-    
-    // めくり演出後に結果表示
-    setTimeout(() => {
-      setStep('result');
-    }, 2000);
-  };
-
-  // 感想を保存してバックエンドに送信
-  const handleSaveComment = async () => {
-    if (!target || !mentalState || !drawnCard) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
-
-      await createTarotReading({
-        target,
-        mental_state: mentalState,
-        card_id: drawnCard.card.id,
-        is_reversed: drawnCard.isReversed,
-        interpretation,
-        user_comment: userComment || undefined
-      });
-
-      console.log('✅ Tarot reading saved to backend');
-      
-      // 成功通知
-      if (userComment.trim()) {
-        alert('✅ 感想を保存しました！\n\nあなたの記録が残りました。\n履歴からいつでも振り返ることができます。');
-      } else {
-        alert('✅ 占い結果を保存しました！\n\n履歴から確認できます。');
+  const handleBack = () => {
+    if (tarotState.step === 'mental') {
+      setSelectedTarget(null);
+      setIsDecided(false);
+    } else {
+      const currentIndex = STEP_ORDER.indexOf(tarotState.step);
+      if (currentIndex > 0) {
+        setTarotState(prev => ({
+          ...prev,
+          step: STEP_ORDER[currentIndex - 1],
+        }));
       }
-      
-      // モーダルを閉じる
-      handleClose();
-    } catch (err) {
-      console.error('Failed to save tarot reading:', err);
-      setError('占い結果の保存に失敗しました');
-      
-      // 失敗通知
-      const errorMessage = err instanceof Error ? err.message : '不明なエラーが発生しました';
-      alert(
-        '❌ 感想の保存に失敗しました\n\n' +
-        'エラー内容: ' + errorMessage + '\n\n' +
-        '再度お試しいただくか、時間をおいてから試してください。'
-      );
-    } finally {
-      setLoading(false);
     }
-  };
-
-  // 履歴表示
-  const handleViewHistory = () => {
-    setShowHistory(true);
-  };
-
-  // 履歴詳細表示
-  const handleViewHistoryDetail = (reading: TarotReading) => {
-    setSelectedReading(reading);
-    setShowHistory(false);
-    setShowHistoryDetail(true);
-  };
-
-  // 履歴詳細を閉じる
-  const handleCloseHistoryDetail = () => {
-    setShowHistoryDetail(false);
-    setSelectedReading(null);
   };
 
   if (!isOpen) return null;
 
-  return (
-    <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
-        <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 rounded-2xl shadow-2xl">
-        {/* ヘッダー */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-gradient-to-r from-purple-800 to-indigo-800 border-b border-purple-600">
-          <div className="flex items-center gap-3">
-            <Sparkles className="h-6 w-6 text-yellow-300" />
-            <h2 className="text-2xl font-bold text-white">今日のタロット占い</h2>
+  // ターゲット選択カードコンポーネント
+  const TargetCard: React.FC<{ 
+    type: 'self' | 'partner'; 
+    isSelected: boolean;
+  }> = ({ type, isSelected }) => (
+    <button
+      onClick={() => setSelectedTarget(type)}
+      className="relative transform hover:scale-105 transition-all"
+    >
+      <Image
+        src={`/tarot-material/tarot_${type === 'self' ? 'me' : 'someone'}.svg`}
+        alt={type === 'self' ? '自分' : '相手'}
+        width={95}
+        height={153}
+        className="relative z-10"
+      />
+      {isSelected && (
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20"
+          style={{ width: '180px', height: '270px' }}
+        >
+          <img
+            src="/tarot-material/effect.svg"
+            alt="選択中"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
+        </div>
+      )}
+    </button>
+  );
+
+  if (!isDecided) {
+    return (
+      <div className="fixed inset-0 z-50" style={{ overflow: 'auto' }}>
+        <div className={`min-h-screen ${styles.tarotBackgroundSp}`}>
+          <div className="sticky top-0 z-10">
+            <div style={{ paddingInline: 'calc(var(--spacing) * 1)' }}>
+              <button onClick={onClose} className="text-white hover:text-gray-300 transition-colors">
+                <BackIcon />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            {/* 履歴ボタン */}
-            <button
-              onClick={handleViewHistory}
-              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all flex items-center gap-2"
-              title="過去の占い結果を見る"
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="hidden sm:inline">履歴</span>
-            </button>
-            {/* 閉じるボタン */}
-            <button
-              onClick={handleClose}
-              className="text-white hover:text-gray-300 transition-colors"
-            >
-              <X className="h-6 w-6" />
+
+          <div className="mx-auto" style={{ padding: 'calc(var(--spacing) * 6)', maxWidth: '1024px' }}>
+            <div className="text-center">
+              <h3 className="font-bold" style={HEADING_STYLE}>タロット占い</h3>
+              <p style={SUBHEADING_STYLE}>どちらを占いますか？</p>
+              <div className="flex justify-center gap-6">
+                <TargetCard type="self" isSelected={selectedTarget === 'self'} />
+                <TargetCard type="partner" isSelected={selectedTarget === 'partner'} />
+              </div>
+              <DecideButton onClick={handleDecide} disabled={selectedTarget === null} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50" style={{ overflow: 'auto' }}>
+      <div className={`min-h-screen ${styles.tarotBackgroundSp}`}>
+        <div className="sticky top-0 z-10">
+          <div style={{ paddingInline: 'calc(var(--spacing) * 1)' }}>
+            <button onClick={handleBack} className="text-white hover:text-gray-300 transition-colors">
+              <BackIcon />
             </button>
           </div>
         </div>
 
-        {/* コンテンツ */}
-        <div className="p-8">
-          {loading && (
-            <div className="text-center text-white">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-              <p>読み込み中...</p>
-            </div>
+        <div className="mx-auto" style={{ padding: 'calc(var(--spacing) * 6)', maxWidth: '1024px' }}>
+          <h3 className="font-bold" style={HEADING_STYLE}>タロット占い</h3>
+          
+          {tarotState.step === 'shuffle' && (
+            <p className="font-bold" style={{ ...SUBHEADING_STYLE, marginBottom: '12px' }}>
+              カードをシャッフルします
+            </p>
           )}
-
-          {error && (
-            <div className="bg-red-500 text-white px-4 py-3 rounded mb-4">
-              {error}
-            </div>
+          
+          {tarotState.step === 'mental' && (
+            <>
+              <MentalCheckStep target={tarotState.target || 'self'} onSelect={handleMentalSelect} />
+              <DecideButton onClick={handleMentalDecide} disabled={tempMentalState === null} />
+            </>
           )}
-
-          {step === 'alreadyDrawn' && (
-            <AlreadyDrawnStep 
-              onViewHistory={handleViewHistory}
-              lastDrawnCard={profile?.tarot_last_drawn ? JSON.parse(profile.tarot_last_drawn) : null}
-            />
+          
+          {tarotState.step === 'shuffle' && (
+            <>
+              <ShuffleStep />
+              <div className="flex justify-center" style={{ marginTop: '48px' }}>
+                <button onClick={handleShuffleComplete} style={getButtonStyle(true)}>
+                  止める
+                </button>
+              </div>
+            </>
           )}
-
-          {step === 'target' && (
-            <TargetSelectStep onSelect={handleTargetSelect} />
-          )}
-
-          {step === 'mental' && target && (
-            <MentalCheckStep target={target} onSelect={handleMentalSelect} />
-          )}
-
-          {step === 'shuffle' && (
-            <ShuffleStep />
-          )}
-
-          {step === 'select' && (
-            <CardSelectStep onSelect={handleCardSelect} />
-          )}
-
-          {step === 'reveal' && (
-            <RevealStep />
-          )}
-
-          {step === 'result' && drawnCard && (
+          
+          {tarotState.step === 'select' && <CardSelectStep onSelect={handleCardSelect} />}
+          
+          {tarotState.step === 'result' && tarotState.drawnCard && (
             <ResultStep
-              drawnCard={drawnCard}
-              interpretation={interpretation}
-              onComment={() => setStep('comment')}
-              onClose={handleClose}
+              drawnCard={tarotState.drawnCard}
+              interpretation={tarotState.interpretation}
+              onComment={handleToComment}
+              onClose={handleComplete}
             />
           )}
-
-          {step === 'comment' && (
+          
+          {tarotState.step === 'comment' && (
             <CommentStep
-              comment={userComment}
-              onChange={setUserComment}
-              onSave={handleSaveComment}
-              onBack={() => setStep('result')}
-              isLoading={loading}
+              comment={tarotState.userComment}
+              onChange={(comment) => setTarotState(prev => ({ ...prev, userComment: comment }))}
+              onSave={handleComplete}
+              onBack={() => setTarotState(prev => ({ ...prev, step: 'result' }))}
             />
           )}
         </div>
       </div>
     </div>
-
-    {/* 履歴表示モーダル */}
-    <TarotHistoryList
-        isOpen={showHistory}
-        onClose={() => setShowHistory(false)}
-        onSelectReading={handleViewHistoryDetail}
-      />
-
-      {/* 履歴詳細表示モーダル */}
-      <TarotHistoryDetail
-        isOpen={showHistoryDetail}
-        onClose={handleCloseHistoryDetail}
-        reading={selectedReading}
-      />
-    </>
   );
 };
 
