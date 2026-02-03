@@ -540,9 +540,19 @@ export interface TarotDrawResponse {
 /**
  * タロットカードを引く（認証必須）
  * @param count 引くカードの枚数（デフォルト: 3）
+ * @param target 占う対象（'self' | 'partner'）
+ * @param mentalState 気分の状態（'sunny' | 'cloudy' | 'rainy' | 'very-rainy'）
  */
-export async function drawTarotCards(count: number = 3): Promise<TarotDrawResponse> {
-  return apiRequest<TarotDrawResponse>(`/tarot/draw?count=${count}`, {
+export async function drawTarotCards(
+  count: number = 3,
+  target?: 'self' | 'partner',
+  mentalState?: 'sunny' | 'cloudy' | 'rainy' | 'very-rainy'
+): Promise<TarotDrawResponse> {
+  const params = new URLSearchParams({ count: count.toString() });
+  if (target) params.append('target', target);
+  if (mentalState) params.append('mental_state', mentalState);
+  
+  return apiRequest<TarotDrawResponse>(`/tarot/draw?${params.toString()}`, {
     method: 'POST',
     requireAuth: true,
   });
