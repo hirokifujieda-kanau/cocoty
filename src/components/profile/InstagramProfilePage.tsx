@@ -206,9 +206,19 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   // アバターアップロード処理
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user || !displayUser) return;
+    if (!file || !user || !displayUser) {
+      console.log('❌ Avatar upload cancelled:', { file: !!file, user: !!user, displayUser: !!displayUser });
+      return;
+    }
 
     try {
+      console.log('📤 Starting avatar upload...', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        profileId: displayUser.id
+      });
+      
       setUploadingAvatar(true);
 
       // Cloudinaryにアップロード
@@ -217,6 +227,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default');
       formData.append('public_id', `${user.uid}_avatar_${Date.now()}`);
 
+      console.log('☁️ Uploading to Cloudinary...');
       const cloudinaryResponse = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
         {
@@ -226,21 +237,28 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       );
 
       if (!cloudinaryResponse.ok) {
-        throw new Error('Cloudinary upload failed');
+        const errorText = await cloudinaryResponse.text();
+        console.error('❌ Cloudinary upload failed:', errorText);
+        throw new Error(`Cloudinary upload failed: ${cloudinaryResponse.status}`);
       }
 
       const cloudinaryData = await cloudinaryResponse.json();
       const avatarUrl = cloudinaryData.secure_url;
+      console.log('✅ Cloudinary upload success:', avatarUrl);
 
       // プロフィールを更新
+      console.log('💾 Updating profile with avatar URL...');
       await updateProfile(displayUser.id, { avatar_url: avatarUrl });
+      console.log('✅ Profile updated successfully');
 
       // プロフィールを再読み込み
+      console.log('🔄 Refetching profile...');
       await refetchProfile();
 
       alert('プロフィール画像を更新しました！');
-    } catch {
-      alert('画像のアップロードに失敗しました');
+    } catch (error: any) {
+      console.error('❌ Avatar upload error:', error);
+      alert(`画像のアップロードに失敗しました: ${error.message || '不明なエラー'}`);
     } finally {
       setUploadingAvatar(false);
     }
