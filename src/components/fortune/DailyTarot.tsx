@@ -8,6 +8,8 @@ import {
   CardSelectStep,
   ResultStep,
   CommentStep,
+  HistoryStep,
+  HistoryDetailStep,
   type Target,
   type MentalState,
   type Step,
@@ -39,7 +41,7 @@ const INITIAL_TAROT_STATE: TarotState = {
   isRevealing: false,
 };
 
-const STEP_ORDER: Step[] = ['mental', 'shuffle', 'select', 'result', 'comment'];
+const STEP_ORDER: Step[] = ['mental', 'shuffle', 'select', 'result', 'comment', 'history', 'historyDetail'];
 
 const HEADING_STYLE = {
   fontFamily: 'Noto Sans JP',
@@ -114,6 +116,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   const [isDecided, setIsDecided] = useState(false);
   const [tarotState, setTarotState] = useState<TarotState>(INITIAL_TAROT_STATE);
   const [tempMentalState, setTempMentalState] = useState<MentalState | null>(null);
+  const [selectedReading, setSelectedReading] = useState<any>(null);
 
   const resetState = () => {
     setSelectedTarget(null);
@@ -174,7 +177,10 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   };
 
   const handleToComment = () => {
-    setTarotState(prev => ({ ...prev, step: 'comment' }));
+    // TODO: ここで実際にデータを保存する処理を追加
+    // 例: await createTarotReading(tarotState);
+    
+    setTarotState(prev => ({ ...prev, step: 'history' }));
   };
 
   const handleComplete = () => {
@@ -186,6 +192,15 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
     if (tarotState.step === 'mental') {
       setSelectedTarget(null);
       setIsDecided(false);
+    } else if (tarotState.step === 'historyDetail') {
+      // 履歴詳細から履歴一覧に戻る
+      setTarotState(prev => ({
+        ...prev,
+        step: 'history',
+      }));
+    } else if (tarotState.step === 'history') {
+      // 履歴一覧から完全に閉じる
+      handleComplete();
     } else {
       const currentIndex = STEP_ORDER.indexOf(tarotState.step);
       if (currentIndex > 0) {
@@ -313,6 +328,23 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
               onChange={(comment) => setTarotState(prev => ({ ...prev, userComment: comment }))}
               onSave={handleComplete}
               onBack={() => setTarotState(prev => ({ ...prev, step: 'result' }))}
+            />
+          )}
+          
+          {tarotState.step === 'history' && (
+            <HistoryStep
+              onClose={handleComplete}
+              onViewDetail={(reading) => {
+                setSelectedReading(reading);
+                setTarotState(prev => ({ ...prev, step: 'historyDetail' }));
+              }}
+            />
+          )}
+          
+          {tarotState.step === 'historyDetail' && selectedReading && (
+            <HistoryDetailStep
+              reading={selectedReading}
+              onBack={() => setTarotState(prev => ({ ...prev, step: 'history' }))}
             />
           )}
         </div>
