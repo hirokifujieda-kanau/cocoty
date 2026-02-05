@@ -6,6 +6,11 @@ interface ResultStepProps {
   interpretation: string;
   onComment: () => void;
   onClose: () => void;
+  initialShowConfirmation?: boolean;
+  savedFeeling?: 'good' | 'soso' | 'bad' | null;
+  savedComment?: string;
+  onSaveData?: (feeling: 'good' | 'soso' | 'bad' | null, comment: string) => void;
+  target?: 'self' | 'partner' | null;
 }
 
 type Feeling = 'good' | 'soso' | 'bad' | null;
@@ -14,11 +19,16 @@ export const ResultStep: React.FC<ResultStepProps> = ({
   drawnCard,
   interpretation,
   onComment,
-  onClose
+  onClose,
+  initialShowConfirmation = false,
+  savedFeeling = null,
+  savedComment = '',
+  onSaveData,
+  target = null
 }) => {
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [selectedFeeling, setSelectedFeeling] = useState<Feeling>(null);
-  const [comment, setComment] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(initialShowConfirmation);
+  const [selectedFeeling, setSelectedFeeling] = useState<Feeling>(savedFeeling);
+  const [comment, setComment] = useState(savedComment);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // テキストエリアの高さを自動調整
@@ -228,27 +238,7 @@ export const ResultStep: React.FC<ResultStepProps> = ({
                 </p>
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '16px' }}>
-              <button
-                onClick={() => setShowConfirmation(false)}
-                style={{
-                  width: '140px',
-                  height: '48px',
-                  borderRadius: '8px',
-                  fontFamily: 'Noto Sans JP',
-                  fontWeight: 700,
-                  fontSize: '16px',
-                  lineHeight: '16px',
-                  textAlign: 'center',
-                  color: '#FFFFFF',
-                  background: 'linear-gradient(180deg, #D0D0D0 0%, #848484 100%)',
-                  border: '1px solid #CECECE',
-                  boxShadow: '0px 4px 0px 0px #676158',
-                  cursor: 'pointer'
-                }}
-              >
-                戻る
-              </button>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
               <button
                 onClick={onComment}
                 style={{
@@ -539,7 +529,10 @@ export const ResultStep: React.FC<ResultStepProps> = ({
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
             <button
-              onClick={() => setShowConfirmation(true)}
+              onClick={() => {
+                onSaveData?.(selectedFeeling, comment);
+                setShowConfirmation(true);
+              }}
               disabled={selectedFeeling === null || comment.trim() === ''}
               style={{
                 width: '140px',

@@ -117,6 +117,9 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   const [tarotState, setTarotState] = useState<TarotState>(INITIAL_TAROT_STATE);
   const [tempMentalState, setTempMentalState] = useState<MentalState | null>(null);
   const [selectedReading, setSelectedReading] = useState<any>(null);
+  const [showResultConfirmation, setShowResultConfirmation] = useState(false);
+  const [savedFeeling, setSavedFeeling] = useState<'good' | 'soso' | 'bad' | null>(null);
+  const [savedComment, setSavedComment] = useState('');
 
   const resetState = () => {
     setSelectedTarget(null);
@@ -156,6 +159,10 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
 
   const handleCardSelect = (index: number) => {
     // ホワイトアウト演出後、直接結果画面へ (revealステップをスキップ)
+    // 新しいカード選択時は感想入力画面から開始し、前回のデータをリセット
+    setShowResultConfirmation(false);
+    setSavedFeeling(null);
+    setSavedComment('');
     setTarotState(prev => ({
       ...prev,
       selectedCardIndex: index,
@@ -180,6 +187,8 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
     // TODO: ここで実際にデータを保存する処理を追加
     // 例: await createTarotReading(tarotState);
     
+    // 確認ページを表示した状態で履歴へ
+    setShowResultConfirmation(true);
     setTarotState(prev => ({ ...prev, step: 'history' }));
   };
 
@@ -189,6 +198,12 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   };
 
   const handleBack = () => {
+    // result ステップで確認画面が表示されている場合は、感想入力画面に戻る
+    if (tarotState.step === 'result' && showResultConfirmation) {
+      setShowResultConfirmation(false);
+      return;
+    }
+    
     if (tarotState.step === 'mental') {
       setSelectedTarget(null);
       setIsDecided(false);
@@ -199,8 +214,11 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
         step: 'history',
       }));
     } else if (tarotState.step === 'history') {
-      // 履歴一覧から完全に閉じる
-      handleComplete();
+      // 履歴一覧から確認ページに戻る
+      setTarotState(prev => ({
+        ...prev,
+        step: 'result',
+      }));
     } else {
       const currentIndex = STEP_ORDER.indexOf(tarotState.step);
       if (currentIndex > 0) {
@@ -314,12 +332,55 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           {tarotState.step === 'select' && <CardSelectStep onSelect={handleCardSelect} />}
           
           {tarotState.step === 'result' && tarotState.drawnCard && (
-            <ResultStep
-              drawnCard={tarotState.drawnCard}
-              interpretation={tarotState.interpretation}
-              onComment={handleToComment}
-              onClose={handleComplete}
-            />
+            <>
+              {/* 本日の占い結果とターゲットバッジ */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
+                {selectedTarget && (
+                  <div
+                    style={{
+                      fontFamily: 'Noto Sans JP',
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      lineHeight: '20px',
+                      textAlign: 'center',
+                      color: '#FFFFFF',
+                      background: selectedTarget === 'self' ? '#3A84C9' : '#C93A67',
+                      padding: '0 7.5px',
+                      borderRadius: '10px'
+                    }}
+                  >
+                    {selectedTarget === 'self' ? '自分' : '相手'}
+                  </div>
+                )}
+                <p
+                  style={{
+                    fontFamily: 'Noto Sans JP',
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    lineHeight: '20px',
+                    textAlign: 'center',
+                    color: '#FFFFFF',
+                    margin: 0
+                  }}
+                >
+                  本日の占い結果
+                </p>
+              </div>
+              <ResultStep
+                drawnCard={tarotState.drawnCard}
+                interpretation={tarotState.interpretation}
+                onComment={handleToComment}
+                onClose={handleComplete}
+                initialShowConfirmation={showResultConfirmation}
+                savedFeeling={savedFeeling}
+                savedComment={savedComment}
+                target={selectedTarget}
+                onSaveData={(feeling, comment) => {
+                  setSavedFeeling(feeling);
+                  setSavedComment(comment);
+                }}
+              />
+            </>
           )}
           
           {tarotState.step === 'comment' && (

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTarotReadings, type TarotReading } from '@/lib/api/tarot';
+import { generateMockReadings } from '@/lib/mock/mockTarot';
 
 interface HistoryStepProps {
   onClose: () => void;
@@ -23,9 +24,20 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
     try {
       setLoading(true);
       setError(null);
-      const response = await getTarotReadings(page, perPage);
-      setReadings(response.readings);
-      setTotalPages(response.pagination.total_pages);
+      
+      // モックデータを使用
+      const mockReadings = generateMockReadings(20);
+      const startIndex = (page - 1) * perPage;
+      const endIndex = startIndex + perPage;
+      const paginatedReadings = mockReadings.slice(startIndex, endIndex);
+      
+      setReadings(paginatedReadings);
+      setTotalPages(Math.ceil(mockReadings.length / perPage));
+      
+      // 本番環境用のAPI呼び出し（コメントアウト）
+      // const response = await getTarotReadings(page, perPage);
+      // setReadings(response.readings);
+      // setTotalPages(response.pagination.total_pages);
     } catch (err) {
       console.error('Failed to fetch readings:', err);
       setError('占い履歴の取得に失敗しました');
@@ -70,8 +82,19 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-2xl font-bold text-white mb-2">占い履歴</h3>
-        <p className="text-purple-200">過去の占い結果を振り返りましょう</p>
+        <h3
+          style={{
+            fontFamily: 'Noto Sans JP',
+            fontWeight: 700,
+            fontSize: '12px',
+            lineHeight: '20px',
+            letterSpacing: '0%',
+            textAlign: 'center',
+            color: '#FFFFFF'
+          }}
+        >
+          過去の占い
+        </h3>
       </div>
 
       {error && (
@@ -93,7 +116,10 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
               <button
                 key={reading.id}
                 onClick={() => onViewDetail(reading)}
-                className="w-full p-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl transition-all text-left border border-purple-400/30 hover:border-purple-400"
+                className="w-full p-4 backdrop-blur-sm rounded-xl transition-all text-left border border-purple-400/30 hover:border-purple-400"
+                style={{
+                  background: 'linear-gradient(180deg, #1B2742 0%, #0F172A 100%)'
+                }}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
