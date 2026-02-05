@@ -121,6 +121,35 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   const [savedFeeling, setSavedFeeling] = useState<'good' | 'soso' | 'bad' | null>(null);
   const [savedComment, setSavedComment] = useState('');
 
+  // 現在の占い結果をTarotReading形式で作成
+  const getCurrentReading = () => {
+    if (!tarotState.drawnCard || !selectedTarget || !tarotState.mentalState) {
+      return null;
+    }
+    
+    // MentalStateをAPIの型にマッピング
+    const mentalStateMap: Record<MentalState, 'sunny' | 'cloudy' | 'rainy'> = {
+      'sunny': 'sunny',
+      'cloudy': 'cloudy',
+      'rainy': 'rainy',
+      'very-rainy': 'rainy', // very-rainyはrainyにマッピング
+    };
+    
+    return {
+      id: 0, // 仮のID
+      user_id: parseInt(userId) || 0,
+      target: selectedTarget === 'self' ? 'self' : 'other' as 'self' | 'other',
+      mental_state: mentalStateMap[tarotState.mentalState],
+      card_id: tarotState.drawnCard.card.id,
+      is_reversed: tarotState.drawnCard.isReversed,
+      interpretation: tarotState.interpretation,
+      user_comment: savedComment,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      card: tarotState.drawnCard.card,
+    };
+  };
+
   const resetState = () => {
     setSelectedTarget(null);
     setIsDecided(false);
@@ -275,7 +304,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
             </div>
           </div>
 
-          <div className="mx-auto" style={{ padding: 'calc(var(--spacing) * 6)', maxWidth: '1024px' }}>
+          <div className="mx-auto" style={{ paddingBlock: 'calc(var(--spacing) * 6)', paddingInline: '16px', maxWidth: '1024px' }}>
             <div className="text-center">
               <h3 className="font-bold" style={HEADING_STYLE}>タロット占い</h3>
               <p style={SUBHEADING_STYLE}>どちらを占いますか？</p>
@@ -302,7 +331,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           </div>
         </div>
 
-        <div className="mx-auto" style={{ padding: 'calc(var(--spacing) * 6)', maxWidth: '1024px' }}>
+        <div className="mx-auto" style={{ paddingBlock: 'calc(var(--spacing) * 6)', paddingInline: '16px', maxWidth: '1024px' }}>
           <h3 className="font-bold" style={HEADING_STYLE}>タロット占い</h3>
           
           {tarotState.step === 'shuffle' && (
@@ -399,6 +428,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
                 setSelectedReading(reading);
                 setTarotState(prev => ({ ...prev, step: 'historyDetail' }));
               }}
+              currentReading={getCurrentReading()}
             />
           )}
           

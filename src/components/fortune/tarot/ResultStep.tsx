@@ -49,117 +49,110 @@ export const ResultStep: React.FC<ResultStepProps> = ({
     return (
       <div className="space-y-6">
         <div className="text-center">
-          {/* space.png画像 + オーバーレイコンテンツ */}
-          <div className="mb-6 relative mx-auto" style={{ marginTop: '24px', width: '332px', height: '301px' }}>
-            {/* 背景画像 */}
-            <img
-              src="/tarot-material/space.png"
-              alt="タロット結果"
-              width={332}
-              height={301}
-              style={{ width: '332px', height: '301px', borderRadius: '10px' }}
-              className="absolute inset-0"
-            />
-            
-            {/* padding付きコンテナ - これがabsoluteの基準点 */}
-            <div className="absolute inset-0 pointer-events-none" style={{ padding: '31px 16px 23px 16px' }}>
-              {/* この中のrelativeコンテナがabsolute配置の基準 */}
-              <div className="relative w-full h-full">
-                {/* 左上: カード名 */}
-                <div className="absolute" style={{ top: 0, left: 0 }}>
-                  <h3 
-                    style={{
-                      fontFamily: 'Inter',
-                      fontWeight: 500,
-                      fontSize: '16px',
-                      lineHeight: '130%',
-                      textAlign: 'center',
-                      color: '#C4C46D'
-                    }}
-                  >
-                    ペンタクル クイーン
-                  </h3>
-                  <p
-                    style={{
-                      fontFamily: 'Noto Sans JP',
-                      fontWeight: 700,
-                      fontSize: '12px',
-                      lineHeight: '20px',
-                      textAlign: 'center',
-                      color: '#C4C46D'
-                    }}
-                  >
-                    (正位置)
-                  </p>
-                </div>
-
-                {/* 左下: カード画像 */}
-                <div className="absolute" style={{ bottom: 0, left: 0 }}>
-                  <img
-                    alt="カード"
-                    width={114}
-                    height={191}
-                    src="/tarot-images/1-the-magician.svg"
-                  />
-                </div>
-
-                {/* 右側: バッジ + タイトル + 説明 */}
-                <div 
-                  className="absolute"
+          {/* カード情報表示エリア */}
+          <div 
+            className="mb-6 relative mx-auto rounded-xl overflow-hidden"
+            style={{ 
+              marginTop: '24px', 
+              width: '332px', 
+              height: '301px',
+              backgroundImage: 'url(/tarot-material/space.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              padding: '31px 16px 23px 16px',
+              display: 'flex'
+            }}
+          >
+            {/* 左側: カード名 + カード画像 */}
+            <div>
+              {/* カード名と位置 */}
+              <div>
+                <h3 
                   style={{
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    maxWidth: '180px',
-                    paddingLeft: '16px'
+                    fontFamily: 'Inter',
+                    fontWeight: 500,
+                    fontSize: '16px',
+                    lineHeight: '130%',
+                    textAlign: 'left',
+                    color: '#C4C46D',
+                    margin: 0
                   }}
                 >
-                  {/* バッジ */}
-                  <div style={{ marginRight: '22px' }}>
-                    <div className="bg-yellow-600 text-white px-3 py-1 rounded-full text-xs inline-block">
-                      あなたに夢中！
-                    </div>
-                  </div>
+                  ペンタクル クイーン
+                </h3>
+                <p
+                  style={{
+                    fontFamily: 'Noto Sans JP',
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    lineHeight: '20px',
+                    textAlign: 'center',
+                    color: '#C4C46D',
+                    margin: 0
+                  }}
+                >
+                  (正位置)
+                </p>
+              </div>
 
-                  {/* タイトル */}
-                  <h4
-                    style={{
-                      fontFamily: 'Inter',
-                      fontWeight: 500,
-                      fontSize: '14px',
-                      lineHeight: '130%',
-                      textAlign: 'center',
-                      color: '#FFFFFF',
-                      marginTop: '8px',
-                      marginBottom: '8px'
-                    }}
-                  >
-                    欲望に正直に<br />突き進みたい
-                  </h4>
+              {/* カード画像 */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                <img
+                  alt="カード"
+                  width={114}
+                  height={191}
+                  src="/tarot-images/1-the-magician.svg"
+                />
+              </div>
+            </div>
 
-                  {/* 説明文 */}
-                  <p
-                    style={{
-                      fontFamily: 'Noto Sans JP',
-                      fontWeight: 400,
-                      fontSize: '10px',
-                      lineHeight: '16px',
-                      textAlign: 'center',
-                      color: '#FFFFFF'
-                    }}
-                  >
-                    誰に対してもフェアな態度でいたいと思っています。
-                    知的で大人な対応ですが、
-                    情があるとは言いがたいかも。
-                    「人の気持ちがわからない」と
-                    突き放し気味で、
-                    ずかずかと土足で心に踏み込んでくるような人には激しく抵抗し、
-                    嫌ってしまう。
-                  </p>
+            {/* 右側: バッジ + タイトル + 説明 */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {/* バッジ */}
+              <div>
+                <div className="bg-yellow-600 text-white px-3 py-1 rounded-full text-xs inline-block">
+                  あなたに夢中！
                 </div>
               </div>
+
+              {/* タイトル */}
+              <h4
+                style={{
+                  fontFamily: 'Inter',
+                  fontWeight: 500,
+                  fontSize: '14px',
+                  lineHeight: '130%',
+                  textAlign: 'center',
+                  color: '#FFFFFF',
+                  margin: 0
+                }}
+              >
+                欲望に正直に<br />突き進みたい
+              </h4>
+
+              {/* ボーダー */}
+              <div style={{ borderBottom: '1px solid #73732F', width: '153px', margin: '0 auto' }} />
+
+              {/* 説明文 */}
+              <p
+                style={{
+                  fontFamily: 'Noto Sans JP',
+                  fontWeight: 400,
+                  fontSize: '10px',
+                  lineHeight: '16px',
+                  textAlign: 'center',
+                  color: '#FFFFFF',
+                  margin: 0
+                }}
+              >
+                誰に対してもフェアな態度でいたいと思っています。
+                知的で大人な対応ですが、
+                情があるとは言いがたいかも。
+                「人の気持ちがわからない」と
+                突き放し気味で、
+                ずかずかと土足で心に踏み込んでくるような人には激しく抵抗し、
+                嫌ってしまう。
+              </p>
             </div>
           </div>
         </div>
@@ -169,6 +162,8 @@ export const ResultStep: React.FC<ResultStepProps> = ({
           <div className="text-center">
             <h3
               style={{
+                width: '343px',
+                margin: '0 auto',
                 fontFamily: 'Noto Sans JP',
                 fontWeight: 700,
                 fontSize: '12px',
@@ -186,6 +181,8 @@ export const ResultStep: React.FC<ResultStepProps> = ({
           </div>
           <div
             style={{
+              width: '343px',
+              margin: '0 auto',
               background: 'linear-gradient(180deg, rgba(145, 97, 196, 0.8) 0%, rgba(86, 76, 145, 0.8) 138.68%)',
               borderRadius: '0px 0px 10px 10px',
               padding: '16px'
@@ -238,28 +235,30 @@ export const ResultStep: React.FC<ResultStepProps> = ({
                 </p>
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
-              <button
-                onClick={onComment}
-                style={{
-                  width: '140px',
-                  height: '48px',
-                  borderRadius: '8px',
-                  fontFamily: 'Noto Sans JP',
-                  fontWeight: 700,
-                  fontSize: '16px',
-                  lineHeight: '16px',
-                  textAlign: 'center',
-                  color: '#FFFFFF',
-                  background: 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)',
-                  border: '1px solid #FFB370',
-                  boxShadow: '0px 4px 0px 0px #5B3500',
-                  cursor: 'pointer'
-                }}
-              >
-                保存して終了
-              </button>
-            </div>
+          </div>
+
+          {/* 過去の占い結果ボタン */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '42px' }}>
+            <button
+              onClick={onComment}
+              style={{
+                width: '140px',
+                height: '48px',
+                borderRadius: '8px',
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 700,
+                fontSize: '16px',
+                lineHeight: '16px',
+                textAlign: 'center',
+                color: '#FFFFFF',
+                background: 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)',
+                border: '1px solid #FFB370',
+                boxShadow: '0px 4px 0px 0px #5B3500',
+                cursor: 'pointer'
+              }}
+            >
+              過去の占い結果
+            </button>
           </div>
         </div>
       </div>
@@ -269,110 +268,110 @@ export const ResultStep: React.FC<ResultStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        {/* space.png画像 + オーバーレイコンテンツ */}
-        <div className="mb-6 relative mx-auto" style={{ marginTop: '24px', width: '332px', height: '301px' }}>
-          {/* 背景画像 */}
-          <img
-            src="/tarot-material/space.png"
-            alt="タロット結果"
-            width={332}
-            height={301}
-            style={{ width: '332px', height: '301px', borderRadius: '10px' }}
-            className="absolute inset-0"
-          />
-          
-          {/* padding付きコンテナ - これがabsoluteの基準点 */}
-          <div className="absolute inset-0 pointer-events-none" style={{ padding: '31px 16px 23px 16px' }}>
-            {/* この中のrelativeコンテナがabsolute配置の基準 */}
-            <div className="relative w-full h-full">
-              {/* 左上: カード名 */}
-              <div className="absolute" style={{ top: 0, left: 0 }}>
-                <h3 
-                  style={{
-                    fontFamily: 'Inter',
-                    fontWeight: 500,
-                    fontSize: '16px',
-                    lineHeight: '130%',
-                    letterSpacing: '0%',
-                    textAlign: 'center',
-                    color: '#C4C46D'
-                  }}
-                >
-                  ペンタクル クイーン
-                </h3>
-                <p 
-                  style={{
-                    fontFamily: 'Noto Sans JP',
-                    fontWeight: 700,
-                    fontSize: '12px',
-                    lineHeight: '20px',
-                    letterSpacing: '0%',
-                    textAlign: 'center',
-                    color: '#C4C46D'
-                  }}
-                >
-                  (正位置)
-                </p>
-              </div>
-              
-              {/* 左下: カード画像 */}
-              <div className="absolute" style={{ bottom: 0, left: 0 }}>
-                <img
-                  alt="カード"
-                  src="/tarot-images/1-the-magician.svg"
-                  width="114"
-                  height="191"
-                />
-              </div>
-              
-              {/* 右側: バッジ、タイトル、テキストをまとめたコンテナ */}
-              <div className="absolute" style={{ right: 0, top: 0, bottom: 0, display: 'flex', flexDirection: 'column', maxWidth: '180px', paddingLeft: '16px' }}>
-                {/* バッジ */}
-                <div style={{ marginRight: '22px' }}>
-                  <div className="bg-yellow-600 text-white px-3 py-1 rounded-full text-xs inline-block">
-                    あなたに夢中！
-                  </div>
-                </div>
-                
-                {/* タイトル */}
-                <h4 
-                  style={{
-                    fontFamily: 'Inter',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    lineHeight: '130%',
-                    letterSpacing: '0%',
-                    textAlign: 'center',
-                    color: '#FFFFFF',
-                    marginTop: '8px',
-                    marginBottom: '8px'
-                  }}
-                >
-                  欲望に正直に<br />突き進みたい
-                </h4>
-                
-                {/* テキスト */}
-                <p 
-                  style={{
-                    fontFamily: 'Noto Sans JP',
-                    fontWeight: 400,
-                    fontSize: '10px',
-                    lineHeight: '16px',
-                    letterSpacing: '0%',
-                    textAlign: 'center',
-                    color: '#FFFFFF'
-                  }}
-                >
-                  誰に対してもフェアな態度でいたいと思っています。
-                  知的で大人な対応ですが、
-                  情があるとは言いがたいかも。
-                  「人の気持ちがわからない」と
-                  突き放し気味で、
-                  ずかずかと土足で心に踏み込んでくるような人には激しく抵抗し、
-                  嫌ってしまう。
-                </p>
+        {/* カード情報表示エリア */}
+        <div 
+          className="mb-6 relative mx-auto rounded-xl overflow-hidden"
+          style={{ 
+            marginTop: '24px', 
+            width: '332px', 
+            height: '301px',
+            backgroundImage: 'url(/tarot-material/space.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            padding: '31px 16px 23px 16px',
+            display: 'flex'
+          }}
+        >
+          {/* 左側: カード名 + カード画像 */}
+          <div>
+            {/* カード名と位置 */}
+            <div>
+              <h3 
+                style={{
+                  fontFamily: 'Inter',
+                  fontWeight: 500,
+                  fontSize: '16px',
+                  lineHeight: '130%',
+                  textAlign: 'left',
+                  color: '#C4C46D',
+                  margin: 0
+                }}
+              >
+                ペンタクル クイーン
+              </h3>
+              <p
+                style={{
+                  fontFamily: 'Noto Sans JP',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  lineHeight: '20px',
+                  textAlign: 'center',
+                  color: '#C4C46D',
+                  margin: 0
+                }}
+              >
+                (正位置)
+              </p>
+            </div>
+
+            {/* カード画像 */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+              <img
+                alt="カード"
+                width={114}
+                height={191}
+                src="/tarot-images/1-the-magician.svg"
+              />
+            </div>
+          </div>
+
+          {/* 右側: バッジ + タイトル + 説明 */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {/* バッジ */}
+            <div>
+              <div className="bg-yellow-600 text-white px-3 py-1 rounded-full text-xs inline-block">
+                あなたに夢中！
               </div>
             </div>
+
+            {/* タイトル */}
+            <h4
+              style={{
+                fontFamily: 'Inter',
+                fontWeight: 500,
+                fontSize: '14px',
+                lineHeight: '130%',
+                textAlign: 'center',
+                color: '#FFFFFF',
+                margin: 0
+              }}
+            >
+              欲望に正直に<br />突き進みたい
+            </h4>
+
+            {/* ボーダー */}
+            <div style={{ borderBottom: '1px solid #73732F', width: '153px', margin: '0 auto' }} />
+
+            {/* 説明文 */}
+            <p
+              style={{
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 400,
+                fontSize: '10px',
+                lineHeight: '16px',
+                textAlign: 'center',
+                color: '#FFFFFF',
+                margin: 0
+              }}
+            >
+              誰に対してもフェアな態度でいたいと思っています。
+              知的で大人な対応ですが、
+              情があるとは言いがたいかも。
+              「人の気持ちがわからない」と
+              突き放し気味で、
+              ずかずかと土足で心に踏み込んでくるような人には激しく抵抗し、
+              嫌ってしまう。
+            </p>
           </div>
         </div>
       </div>
@@ -382,6 +381,8 @@ export const ResultStep: React.FC<ResultStepProps> = ({
         <div className="text-center">
           <h3 
             style={{
+              width: '332px',
+              margin: '0 auto',
               fontFamily: 'Noto Sans JP',
               fontWeight: 700,
               fontSize: '12px',
@@ -402,6 +403,8 @@ export const ResultStep: React.FC<ResultStepProps> = ({
         {/* グラデーション背景のコンテナ */}
         <div 
           style={{
+            width: '332px',
+            margin: '0 auto',
             background: 'linear-gradient(180deg, rgba(145, 97, 196, 0.8) 0%, rgba(86, 76, 145, 0.8) 138.68%)',
             borderRadius: '0 0 10px 10px',
             padding: '16px'
@@ -503,29 +506,31 @@ export const ResultStep: React.FC<ResultStepProps> = ({
             2.占いの感想を記録しておきましょう！
           </p>
 
-          <textarea
-            ref={textareaRef}
-            value={comment}
-            onChange={handleCommentChange}
-            placeholder="今の気持ちをそのまま書いてみてください。"
-            className="px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-            style={{
-              width: '300px',
-              minHeight: '88px',
-              background: '#FFFFFF80',
-              border: 'none',
-              borderRadius: '12px',
-              marginBottom: '12px',
-              fontFamily: 'Noto Sans JP',
-              fontWeight: 700,
-              fontSize: '10px',
-              lineHeight: '20px',
-              letterSpacing: '0%',
-              color: '#2F2B37',
-              resize: 'none',
-              overflow: 'hidden'
-            }}
-          />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <textarea
+              ref={textareaRef}
+              value={comment}
+              onChange={handleCommentChange}
+              placeholder="今の気持ちをそのまま書いてみてください。"
+              className="px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              style={{
+                width: '300px',
+                minHeight: '88px',
+                background: '#FFFFFF80',
+                border: 'none',
+                borderRadius: '12px',
+                marginBottom: '12px',
+                fontFamily: 'Noto Sans JP',
+                fontWeight: 700,
+                fontSize: '10px',
+                lineHeight: '20px',
+                letterSpacing: '0%',
+                color: '#2F2B37',
+                resize: 'none',
+                overflow: 'hidden'
+              }}
+            />
+          </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
             <button

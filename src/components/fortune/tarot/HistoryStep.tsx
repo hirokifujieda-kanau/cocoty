@@ -6,9 +6,10 @@ import { generateMockReadings } from '@/lib/mock/mockTarot';
 interface HistoryStepProps {
   onClose: () => void;
   onViewDetail: (reading: TarotReading) => void;
+  currentReading?: TarotReading | null;
 }
 
-export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail }) => {
+export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail, currentReading }) => {
   const [readings, setReadings] = useState<TarotReading[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +19,7 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
 
   useEffect(() => {
     fetchReadings(currentPage);
-  }, [currentPage]);
+  }, [currentPage, currentReading]);
 
   const fetchReadings = async (page: number) => {
     try {
@@ -26,13 +27,22 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
       setError(null);
       
       // モックデータを使用
-      const mockReadings = generateMockReadings(20);
+      let mockReadings = generateMockReadings(20);
+      
+      // 現在の占い結果があれば一番上に追加
+      if (currentReading) {
+        mockReadings = [currentReading, ...mockReadings];
+      }
+      
+      // 総ページ数を計算（全データ件数に基づく）
+      const totalCount = mockReadings.length;
+      setTotalPages(Math.ceil(totalCount / perPage));
+      
       const startIndex = (page - 1) * perPage;
       const endIndex = startIndex + perPage;
       const paginatedReadings = mockReadings.slice(startIndex, endIndex);
       
       setReadings(paginatedReadings);
-      setTotalPages(Math.ceil(mockReadings.length / perPage));
       
       // 本番環境用のAPI呼び出し（コメントアウト）
       // const response = await getTarotReadings(page, perPage);
@@ -48,13 +58,10 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString('ja-JP', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}/${month}/${day}`;
   };
 
   const getMentalStateLabel = (state: string) => {
@@ -111,80 +118,164 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
         </div>
       ) : (
         <>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {readings.map((reading) => (
-              <button
-                key={reading.id}
-                onClick={() => onViewDetail(reading)}
-                className="w-full p-4 backdrop-blur-sm rounded-xl transition-all text-left border border-purple-400/30 hover:border-purple-400"
-                style={{
-                  background: 'linear-gradient(180deg, #1B2742 0%, #0F172A 100%)'
-                }}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-purple-300" />
-                    <span className="text-sm text-purple-200">
-                      {formatDate(reading.created_at)}
-                    </span>
+          <div className="space-y-0 max-h-96 overflow-y-auto backdrop-blur-sm rounded-xl" style={{ width: '343px', margin: '0 auto', background: 'linear-gradient(180deg, #1B2742 0%, #0F172A 100%)' }}>
+            {readings.map((reading, index) => (
+              <div key={reading.id}>
+                <button
+                  onClick={() => onViewDetail(reading)}
+                  className="w-full p-4 transition-all text-left"
+                  style={{
+                    background: 'transparent'
+                  }}
+                >
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  {/* 左側: カード画像 */}
+                  <div style={{ flexShrink: 0 }}>
+                    <img
+                      alt="カード"
+                      width={30}
+                      height={49}
+                      src={reading.card.image_url}
+                    />
                   </div>
-                  <div className="flex gap-2">
-                    <span className="text-xs px-2 py-1 bg-purple-500/30 rounded-full text-white">
-                      {getTargetLabel(reading.target)}
-                    </span>
-                    <span className="text-xs px-2 py-1 bg-blue-500/30 rounded-full text-white">
-                      {getMentalStateLabel(reading.mental_state)}
-                    </span>
+                  
+                  {/* 右側: テキスト情報 */}
+                  <div style={{ flex: 1 }}>
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span
+                          style={{
+                            fontFamily: 'Noto Sans JP',
+                            fontWeight: 700,
+                            fontSize: '8px',
+                            lineHeight: '1',
+                            letterSpacing: '0%',
+                            textAlign: 'center',
+                            color: '#FFFFFF',
+                            background: reading.target === 'self' ? '#3A84C9' : '#C93A67',
+                            padding: '3px 5px',
+                            borderRadius: '10px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          {getTargetLabel(reading.target)}
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: 'Noto Sans JP',
+                            fontWeight: 700,
+                            fontSize: '10px',
+                            lineHeight: '20px',
+                            letterSpacing: '0%',
+                            textAlign: 'center',
+                            color: '#AEAEAE'
+                          }}
+                        >
+                          {formatDate(reading.created_at)}
+                        </span>
+                        <span 
+                          style={{
+                            fontFamily: 'Noto Sans JP',
+                            fontWeight: 700,
+                            fontSize: '12px',
+                            lineHeight: '100%',
+                            letterSpacing: '0%',
+                            textAlign: 'center',
+                            color: '#C4C46D',
+                            margin: 0
+                          }}
+                        >
+                          {reading.card.name}
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: 'Noto Sans JP',
+                            fontWeight: 700,
+                            fontSize: '12px',
+                            lineHeight: '100%',
+                            letterSpacing: '0%',
+                            textAlign: 'center',
+                            color: '#C4C46D',
+                            margin: 0
+                          }}
+                        >
+                          ({reading.is_reversed ? '逆位置' : '正位置'})
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                      </div>
+                    </div>
+                    
+                    {reading.user_comment && (
+                      <p
+                        style={{
+                          fontFamily: 'Noto Sans JP',
+                          fontWeight: 400,
+                          fontSize: '12px',
+                          lineHeight: '112.99999999999999%',
+                          letterSpacing: '0%',
+                          color: '#FFFFFF',
+                          marginTop: '8px',
+                          marginBottom: 0
+                        }}
+                      >
+                        {reading.user_comment}
+                      </p>
+                    )}
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="text-2xl">
-                    {reading.is_reversed ? '🔄' : '✨'}
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-white">
-                      {reading.card.name}
-                    </h4>
-                    <p className="text-sm text-purple-200">
-                      {reading.card.name_en}
-                      {reading.is_reversed && ' (逆位置)'}
-                    </p>
-                  </div>
-                </div>
-
-                {reading.user_comment && (
-                  <div className="mt-3 pt-3 border-t border-purple-400/30">
-                    <p className="text-sm text-purple-100 italic">
-                      💭 {reading.user_comment}
-                    </p>
-                  </div>
+                </button>
+                {/* 最後の項目以外に区切り線 */}
+                {index < readings.length - 1 && (
+                  <div style={{ borderBottom: '1px solid #73732F', width: '169px', margin: '0 auto' }} />
                 )}
-              </button>
+              </div>
             ))}
           </div>
 
           {/* ページネーション */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-2" style={{ width: '343px', margin: '0 auto' }}>
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="p-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all"
+                className="p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                style={{ background: 'transparent', display: 'flex', alignItems: 'center' }}
               >
-                <ChevronLeft className="h-5 w-5 text-white" />
+                <ChevronLeft style={{ width: '16px', height: '24px', marginRight: '-10px' }} className="text-white" />
+                <ChevronLeft style={{ width: '16px', height: '24px' }} className="text-white" />
               </button>
               
-              <span className="text-white">
-                {currentPage} / {totalPages}
-              </span>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className="w-4 h-4 flex items-center justify-center rounded transition-all"
+                  style={{
+                    background: currentPage === pageNum ? '#C4C46D' : 'transparent',
+                    color: '#FFFFFF',
+                    fontFamily: 'Noto Sans JP',
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    lineHeight: '100%',
+                    letterSpacing: '0%',
+                    textAlign: 'center'
+                  }}
+                >
+                  {pageNum}
+                </button>
+              ))}
               
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="p-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all"
+                className="p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                style={{ background: 'transparent', display: 'flex', alignItems: 'center' }}
               >
-                <ChevronRight className="h-5 w-5 text-white" />
+                <ChevronRight style={{ width: '16px', height: '24px', marginRight: '-10px' }} className="text-white" />
+                <ChevronRight style={{ width: '16px', height: '24px' }} className="text-white" />
               </button>
             </div>
           )}
@@ -194,6 +285,7 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
       <button
         onClick={onClose}
         className="w-full px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all"
+        style={{ width: '343px', margin: '0 auto', display: 'block' }}
       >
         閉じる
       </button>
