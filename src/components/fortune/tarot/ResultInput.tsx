@@ -172,7 +172,7 @@ export const ResultInput: React.FC<ResultInputProps> = ({
                   boxShadow: isSaveDisabled ? '0px 4px 0px 0px #676158' : '0px 4px 0px 0px #5B3500'
                 }}
               >
-                感想を残す
+                記録する
               </button>
             </div>
           </div>
