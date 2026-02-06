@@ -48,16 +48,11 @@ export const ResultInput: React.FC<ResultInputProps> = ({
       <div className="text-center">
         {/* カード情報表示エリア */}
         <div 
-          className="mb-6 relative mx-auto rounded-xl overflow-hidden"
+          className="mb-6 relative mx-auto rounded-xl overflow-hidden w-[332px] h-[301px] p-[31px_16px_23px_16px] flex mt-6"
           style={{ 
-            marginTop: '24px', 
-            width: '332px', 
-            height: '301px',
             backgroundImage: 'url(/tarot-material/space.png)',
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            padding: '31px 16px 23px 16px',
-            display: 'flex'
+            backgroundPosition: 'center'
           }}
         >
           {/* 左側: カード名 + カード画像 */}
@@ -94,11 +89,11 @@ export const ResultInput: React.FC<ResultInputProps> = ({
 
             {/* タイトル */}
             <h4 className="font-medium text-sm text-center text-white m-0" style={{ fontFamily: 'Inter', lineHeight: '130%' }}>
-              欲望に正直に<br />突き進みたい
+              {interpretation}
             </h4>
 
             {/* ボーダー */}
-            <div className="mx-auto" style={{ borderBottom: '1px solid #73732F', width: '153px' }} />
+            <div className="mx-auto border-b w-[153px]" style={{ borderColor: '#73732F' }} />
 
             {/* 説明文 */}
             <p className="font-normal text-center text-white m-0" style={{ fontFamily: 'Noto Sans JP', fontSize: '10px', lineHeight: '16px' }}>
@@ -111,17 +106,11 @@ export const ResultInput: React.FC<ResultInputProps> = ({
         <div>
           <div className="text-center">
             <h3 
-              className="font-bold text-xs text-center m-0"
+              className="font-bold text-xs text-center m-0 w-[332px] mx-auto rounded-t-lg py-3"
               style={{
-                width: '332px',
-                margin: '0 auto',
-                fontFamily: 'Noto Sans JP',
-                lineHeight: '20px',
                 color: '#E9D9FD',
                 boxShadow: '0px 1px 1px 0px #1A1045',
-                background: '#2E206B',
-                borderRadius: '8px 8px 0 0',
-                padding: '12px'
+                background: '#2E206B'
               }}
             >
               今の気持ちを少しだけ振り返ってみましょう
@@ -130,12 +119,9 @@ export const ResultInput: React.FC<ResultInputProps> = ({
 
           {/* グラデーション背景のコンテナ */}
           <div 
+            className="w-[332px] mx-auto rounded-b-lg p-4"
             style={{
-              width: '332px',
-              margin: '0 auto',
-              background: 'linear-gradient(180deg, rgba(145, 97, 196, 0.8) 0%, rgba(86, 76, 145, 0.8) 138.68%)',
-              borderRadius: '0 0 10px 10px',
-              padding: '16px'
+              background: 'linear-gradient(180deg, rgba(145, 97, 196, 0.8) 0%, rgba(86, 76, 145, 0.8) 138.68%)'
             }}
           >
             <p className="font-bold text-xs text-center text-white mb-3" style={{ fontFamily: 'Noto Sans JP', lineHeight: '20px' }}>
@@ -158,22 +144,15 @@ export const ResultInput: React.FC<ResultInputProps> = ({
                 value={comment}
                 onChange={handleCommentChange}
                 placeholder="今の気持ちをそのまま書いてみてください。"
-                className="px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-[300px] min-h-[88px] px-4 py-3 text-white rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none overflow-hidden"
                 style={{
-                  width: '300px',
-                  minHeight: '88px',
                   background: '#FFFFFF80',
-                  border: 'none',
-                  borderRadius: '12px',
-                  marginBottom: '12px',
                   fontFamily: 'Noto Sans JP',
                   fontWeight: 700,
                   fontSize: '10px',
                   lineHeight: '20px',
                   letterSpacing: '0%',
-                  color: '#2F2B37',
-                  resize: 'none',
-                  overflow: 'hidden'
+                  color: '#2F2B37'
                 }}
               />
             </div>
@@ -182,19 +161,15 @@ export const ResultInput: React.FC<ResultInputProps> = ({
               <button
                 onClick={handleSave}
                 disabled={isSaveDisabled}
-                className="font-bold text-base text-center text-white"
+                className="font-bold text-base text-center text-white w-[140px] h-[48px] rounded-lg cursor-pointer disabled:cursor-not-allowed"
                 style={{
-                  width: '140px',
-                  height: '48px',
-                  borderRadius: '8px',
                   fontFamily: 'Noto Sans JP',
                   lineHeight: '16px',
                   background: isSaveDisabled 
                     ? 'linear-gradient(180deg, #D0D0D0 0%, #848484 100%)'
                     : 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)',
                   border: isSaveDisabled ? '1px solid #CECECE' : '1px solid #FFB370',
-                  boxShadow: isSaveDisabled ? '0px 4px 0px 0px #676158' : '0px 4px 0px 0px #5B3500',
-                  cursor: isSaveDisabled ? 'not-allowed' : 'pointer'
+                  boxShadow: isSaveDisabled ? '0px 4px 0px 0px #676158' : '0px 4px 0px 0px #5B3500'
                 }}
               >
                 感想を残す
