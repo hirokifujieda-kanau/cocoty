@@ -306,7 +306,13 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   };
 
   const handleBack = () => {
-    // result ステップで確認画面が表示されている場合は、感想入力画面に戻る
+    // 今日の占い結果（確認画面）が表示されている場合は、モーダルを閉じてプロフィール画面に戻る
+    if (tarotState.step === 'result' && showResultConfirmation && isDrawnToday) {
+      handleComplete(); // モーダルを閉じる
+      return;
+    }
+    
+    // result ステップで確認画面が表示されている場合（今日初めての占い）は、感想入力画面に戻る
     if (tarotState.step === 'result' && showResultConfirmation) {
       setShowResultConfirmation(false);
       return;
