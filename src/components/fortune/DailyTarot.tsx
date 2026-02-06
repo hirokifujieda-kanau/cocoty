@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import React from 'react';
 import {
   MentalCheckStep,
   ShuffleStep,
@@ -10,12 +9,11 @@ import {
   CommentStep,
   HistoryStep,
   HistoryDetailStep,
-  type Target,
-  type MentalState,
-  type Step,
-  type TarotState,
 } from './tarot';
 import type { Profile } from '@/lib/api/client';
+import { useTarotState } from '@/hooks/useTarotState';
+import { HEADING_STYLE, SUBHEADING_STYLE, getButtonStyle } from './tarot/constants';
+import { BackIcon, DecideButton, TargetCard } from './tarot/components';
 import styles from './DailyTarot.module.css';
 
 interface DailyTarotProps {
@@ -24,135 +22,8 @@ interface DailyTarotProps {
   userId: string;
   userName: string;
   profile?: Profile | null;
-  isDrawnToday?: boolean; // 今日既に占いを実施済みか
+  isDrawnToday?: boolean;
 }
-
-type TargetType = 'self' | 'partner' | null;
-
-// 定数
-const INITIAL_TAROT_STATE: TarotState = {
-  step: 'target',
-  target: null,
-  mentalState: null,
-  selectedCardIndex: null,
-  drawnCard: null,
-  interpretation: '',
-  userComment: '',
-  isShuffling: false,
-  isRevealing: false,
-};
-
-const STEP_ORDER: Step[] = ['target', 'mental', 'shuffle', 'select', 'result', 'comment', 'history', 'historyDetail'];
-
-const HEADING_STYLE = {
-  fontFamily: 'Noto Sans JP',
-  fontWeight: 700,
-  fontSize: '16px',
-  lineHeight: '16px',
-  textAlign: 'center' as const,
-  background: 'linear-gradient(360deg, #EDCFAC -31.25%, #E4BC89 75%)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  backgroundClip: 'text',
-  marginTop: '30px',
-  marginBottom: '12px',
-};
-
-const SUBHEADING_STYLE = {
-  fontFamily: 'Noto Sans JP',
-  fontWeight: 700,
-  fontSize: '12px',
-  lineHeight: '20px',
-  textAlign: 'center' as const,
-  color: '#FFFFFF',
-  marginBottom: '32px',
-};
-
-const getButtonStyle = (isEnabled: boolean) => ({
-  width: '140px',
-  height: '48px',
-  borderRadius: '8px',
-  background: isEnabled 
-    ? 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)'
-    : 'linear-gradient(180deg, #D0D0D0 0%, #848484 100%)',
-  border: isEnabled 
-    ? '1px solid #FFB370'
-    : '1px solid #CECECE',
-  boxShadow: isEnabled 
-    ? '0px 4px 0px 0px #5B3500'
-    : '0px 4px 0px 0px #676158',
-  fontFamily: 'Noto Sans JP',
-  fontWeight: 700,
-  fontSize: '16px',
-  lineHeight: '16px',
-  textAlign: 'center' as const,
-  color: '#FFFFFF',
-  cursor: isEnabled ? 'pointer' : 'not-allowed',
-});
-
-// 戻るボタンアイコン
-const BackIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-// 決定ボタンコンポーネント
-const DecideButton: React.FC<{ onClick: () => void; disabled: boolean }> = ({ onClick, disabled }) => (
-  <div className="flex justify-center" style={{ marginTop: '48px' }}>
-    <button onClick={onClick} disabled={disabled} style={getButtonStyle(!disabled)}>
-      決定
-    </button>
-  </div>
-);
-
-// ターゲット選択カードコンポーネント（外に出して最適化）
-const TargetCard = React.memo<{ 
-  type: 'self' | 'partner'; 
-  isSelected: boolean;
-  selectedTarget: 'self' | 'partner' | null;
-  onSelect: (type: 'self' | 'partner') => void;
-}>(({ type, isSelected, selectedTarget, onSelect }) => {
-  const shouldDarken = selectedTarget !== null && !isSelected;
-  
-  return (
-    <button
-      onClick={() => onSelect(type)}
-      className="relative transform hover:scale-105 transition-all"
-      style={{
-        filter: shouldDarken ? 'brightness(0.4) saturate(0.3)' : 'none',
-        opacity: shouldDarken ? 0.6 : 1
-      }}
-    >
-      <Image
-        src={`/tarot-material/tarot_${type === 'self' ? 'me' : 'someone'}.svg`}
-        alt={type === 'self' ? '自分' : '相手'}
-        width={95}
-        height={153}
-        className="relative z-10"
-        style={{ width: 'auto', height: 'auto' }}
-      />
-      {/* エフェクトは常に存在させ、opacityで制御 */}
-      <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20"
-        style={{ 
-          width: '180px', 
-          height: '270px',
-          opacity: isSelected ? 1 : 0,
-          transition: 'opacity 0.2s ease-in-out'
-        }}
-      >
-        <img
-          src="/tarot-material/effect.svg"
-          alt="選択中"
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-        />
-      </div>
-    </button>
-  );
-});
-
-TargetCard.displayName = 'TargetCard';
 
 const DailyTarot: React.FC<DailyTarotProps> = ({
   isOpen,
@@ -160,239 +31,29 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   userId,
   userName,
   profile,
-  isDrawnToday = false
+  isDrawnToday = false,
 }) => {
-  const [selectedTarget, setSelectedTarget] = useState<TargetType>(null);
-  const [isDecided, setIsDecided] = useState(false);
-  const [tarotState, setTarotState] = useState<TarotState>(INITIAL_TAROT_STATE);
-  const [tempMentalState, setTempMentalState] = useState<MentalState | null>(null);
-  const [selectedReading, setSelectedReading] = useState<any>(null);
-  const [showResultConfirmation, setShowResultConfirmation] = useState(false);
-  const [savedFeeling, setSavedFeeling] = useState<'good' | 'soso' | 'bad' | null>(null);
-  const [savedComment, setSavedComment] = useState('');
-
-  // 初期化時に今日の占い結果を読み込む
-  useEffect(() => {
-    if (isDrawnToday) {
-      const todayReading = getTodayReading();
-      if (todayReading) {
-        setSelectedTarget(todayReading.selectedTarget);
-        setTarotState(todayReading.tarotState);
-        setSavedFeeling(todayReading.savedFeeling);
-        setSavedComment(todayReading.savedComment);
-        setShowResultConfirmation(true);
-      }
-    }
-  }, [isDrawnToday]);
-
-  // 今日の占い結果をlocalStorageから取得
-  const getTodayReading = () => {
-    const today = new Date().toDateString();
-    const storedData = localStorage.getItem('tarot_today_reading');
-    if (storedData) {
-      const reading = JSON.parse(storedData);
-      // 日付が今日と一致するかチェック
-      if (reading.date === today) {
-        return reading.data;
-      }
-    }
-    return null;
-  };
-
-  // 占い完了時に今日の結果を保存
-  const saveTodayReading = (reading: any) => {
-    const today = new Date().toDateString();
-    localStorage.setItem('tarot_today_reading', JSON.stringify({
-      date: today,
-      data: reading
-    }));
-  };
-
-  // 現在の占い結果をTarotReading形式で作成
-  const getCurrentReading = () => {
-    if (!tarotState.drawnCard || !selectedTarget || !tarotState.mentalState) {
-      return null;
-    }
-    
-    // MentalStateをAPIの型にマッピング
-    const mentalStateMap: Record<MentalState, 'sunny' | 'cloudy' | 'rainy'> = {
-      'sunny': 'sunny',
-      'cloudy': 'cloudy',
-      'rainy': 'rainy',
-      'very-rainy': 'rainy', // very-rainyはrainyにマッピング
-    };
-    
-    return {
-      id: 0, // 仮のID
-      user_id: parseInt(userId) || 0,
-      target: selectedTarget === 'self' ? 'self' : 'other' as 'self' | 'other',
-      mental_state: mentalStateMap[tarotState.mentalState],
-      card_id: tarotState.drawnCard.card.id,
-      is_reversed: tarotState.drawnCard.isReversed,
-      interpretation: tarotState.interpretation,
-      user_comment: savedComment,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      card: tarotState.drawnCard.card,
-    };
-  };
-
-  const resetState = () => {
-    setSelectedTarget(null);
-    setTarotState(INITIAL_TAROT_STATE);
-    setTempMentalState(null);
-  };
-
-  // 初期化時に今日既に占いを実施済みの場合、今日の結果を表示
-  useEffect(() => {
-    console.log('🔍 [DailyTarot] useEffect triggered - isOpen:', isOpen, 'isDrawnToday:', isDrawnToday);
-    if (isOpen && isDrawnToday) {
-      const todayReading = getTodayReading();
-      console.log('📖 [DailyTarot] getTodayReading result:', todayReading);
-      if (todayReading) {
-        console.log('✅ [DailyTarot] 今日の結果を復元します');
-        // 今日の結果を設定して確認画面を表示
-        const restoredState = {
-          ...todayReading.tarotState,
-          step: 'result' as const, // 結果表示ステップに設定
-        };
-        setTarotState(restoredState);
-        setSelectedTarget(todayReading.selectedTarget);
-        setSavedFeeling(todayReading.savedFeeling);
-        setSavedComment(todayReading.savedComment);
-        setShowResultConfirmation(true);
-        console.log('📺 [DailyTarot] Restored state:', {
-          step: restoredState.step,
-          showResultConfirmation: true,
-          hasDrawnCard: !!restoredState.drawnCard
-        });
-      } else {
-        console.log('⚠️ [DailyTarot] 今日の結果が見つかりませんでした');
-      }
-    } else if (isOpen && !isDrawnToday) {
-      console.log('🆕 [DailyTarot] 新規占いを開始');
-      // 占い未実施の場合は初期化
-      resetState();
-    }
-  }, [isOpen, isDrawnToday]);
-
-  const handleDecide = () => {
-    if (selectedTarget !== null) {
-      setTarotState(prev => ({
-        ...prev,
-        target: selectedTarget === 'self' ? 'self' : 'other',
-        step: 'mental',
-      }));
-    }
-  };
-
-  const handleMentalSelect = (state: MentalState) => {
-    setTempMentalState(state);
-  };
-  
-  const handleMentalDecide = () => {
-    if (tempMentalState !== null) {
-      setTarotState(prev => ({
-        ...prev,
-        mentalState: tempMentalState,
-        step: 'shuffle',
-      }));
-    }
-  };
-
-  const handleShuffleComplete = () => {
-    setTarotState(prev => ({ ...prev, step: 'select' }));
-  };
-
-  const handleCardSelect = (index: number) => {
-    // ホワイトアウト演出後、直接結果画面へ (revealステップをスキップ)
-    // 新しいカード選択時は感想入力画面から開始し、前回のデータをリセット
-    setShowResultConfirmation(false);
-    setSavedFeeling(null);
-    setSavedComment('');
-    setTarotState(prev => ({
-      ...prev,
-      selectedCardIndex: index,
-      drawnCard: {
-        card: {
-          id: 1,
-          name: '魔術師',
-          name_en: 'The Magician',
-          meaning: '創造、行動力、自信、新しい始まり',
-          reverse_meaning: '優柔不断、未熟、操作、欺瞞',
-          description: '新しい始まりと創造の力を象徴するカードです。',
-          image_url: '/tarot-images/1-the-magician.svg',
-        },
-        isReversed: Math.random() > 0.5,
-      },
-      interpretation: 'あなたには無限の可能性があります。今こそ行動を起こす時です。',
-      step: 'result',
-    }));
-  };
-
-  const handleToComment = () => {
-    // 今日の占い結果を保存
-    saveTodayReading({
-      tarotState,
-      selectedTarget,
-      savedFeeling,
-      savedComment,
-    });
-    
-    // 確認ページを表示した状態で履歴へ
-    setShowResultConfirmation(true);
-    setTarotState(prev => ({ ...prev, step: 'history' }));
-  };
-
-  const handleComplete = () => {
-    resetState();
-    onClose();
-  };
-
-  const handleBack = () => {
-    // 今日の占い結果（確認画面）が表示されている場合は、モーダルを閉じてプロフィール画面に戻る
-    if (tarotState.step === 'result' && showResultConfirmation && isDrawnToday) {
-      handleComplete(); // モーダルを閉じる
-      return;
-    }
-    
-    // result ステップで確認画面が表示されている場合（今日初めての占い）は、感想入力画面に戻る
-    if (tarotState.step === 'result' && showResultConfirmation) {
-      setShowResultConfirmation(false);
-      return;
-    }
-    
-    if (tarotState.step === 'mental') {
-      // mental ステップから target ステップに戻る
-      // 選択状態は保持したまま、ステップだけを戻す
-      setTempMentalState(null);
-      setTarotState(prev => ({
-        ...prev,
-        step: 'target',
-      }));
-      return;
-    } else if (tarotState.step === 'historyDetail') {
-      // 履歴詳細から履歴一覧に戻る
-      setTarotState(prev => ({
-        ...prev,
-        step: 'history',
-      }));
-    } else if (tarotState.step === 'history') {
-      // 履歴一覧から確認ページに戻る
-      setTarotState(prev => ({
-        ...prev,
-        step: 'result',
-      }));
-    } else {
-      const currentIndex = STEP_ORDER.indexOf(tarotState.step);
-      if (currentIndex > 0) {
-        setTarotState(prev => ({
-          ...prev,
-          step: STEP_ORDER[currentIndex - 1],
-        }));
-      }
-    }
-  };
+  const {
+    selectedTarget,
+    tarotState,
+    tempMentalState,
+    selectedReading,
+    showResultConfirmation,
+    savedFeeling,
+    savedComment,
+    setSelectedTarget,
+    setSelectedReading,
+    handleDecide,
+    handleMentalSelect,
+    handleMentalDecide,
+    handleShuffleComplete,
+    handleCardSelect,
+    handleToComment,
+    handleComplete,
+    handleBack,
+    handleSaveData,
+    getCurrentReading,
+  } = useTarotState({ isOpen, isDrawnToday, userId, onClose });
 
   if (!isOpen) return null;
 
@@ -500,21 +161,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
                   savedFeeling={savedFeeling}
                   savedComment={savedComment}
                   target={selectedTarget}
-                  onSaveData={(feeling, comment) => {
-                    console.log('💾 [DailyTarot] onSaveData called - feeling:', feeling, 'comment:', comment);
-                    setSavedFeeling(feeling);
-                    setSavedComment(comment);
-                    // 今日の占い結果を保存
-                    const dataToSave = {
-                      tarotState,
-                      selectedTarget,
-                      savedFeeling: feeling,
-                      savedComment: comment,
-                    };
-                    console.log('💾 [DailyTarot] Saving to localStorage:', dataToSave);
-                    saveTodayReading(dataToSave);
-                    console.log('✅ [DailyTarot] Saved to localStorage');
-                  }}
+                  onSaveData={handleSaveData}
                 />
               </>
             )}
@@ -522,9 +169,11 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
             {tarotState.step === 'comment' && (
               <CommentStep
                 comment={tarotState.userComment}
-                onChange={(comment) => setTarotState(prev => ({ ...prev, userComment: comment }))}
+                onChange={(comment) => {
+                  console.log('Comment changed:', comment);
+                }}
                 onSave={handleComplete}
-                onBack={() => setTarotState(prev => ({ ...prev, step: 'result' }))}
+                onBack={handleBack}
               />
             )}
             
@@ -533,7 +182,6 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
                 onClose={handleComplete}
                 onViewDetail={(reading) => {
                   setSelectedReading(reading);
-                  setTarotState(prev => ({ ...prev, step: 'historyDetail' }));
                 }}
                 currentReading={getCurrentReading()}
               />
@@ -542,7 +190,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
             {tarotState.step === 'historyDetail' && selectedReading && (
               <HistoryDetailStep
                 reading={selectedReading}
-                onBack={() => setTarotState(prev => ({ ...prev, step: 'history' }))}
+                onBack={handleBack}
               />
             )}
 
