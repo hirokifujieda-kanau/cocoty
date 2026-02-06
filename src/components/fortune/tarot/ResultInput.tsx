@@ -83,7 +83,7 @@ export const ResultInput: React.FC<ResultInputProps> = ({
             {/* バッジ */}
             <div>
               <div className="bg-yellow-600 text-white px-3 py-1 rounded-full text-xs inline-block">
-                あなたに夢中！
+                {drawnCard.isReversed ? drawnCard.card.reverse_meaning : drawnCard.card.meaning}
               </div>
             </div>
 
@@ -97,7 +97,7 @@ export const ResultInput: React.FC<ResultInputProps> = ({
 
             {/* 説明文 */}
             <p className="font-normal text-center text-white m-0" style={{ fontFamily: 'Noto Sans JP', fontSize: '10px', lineHeight: '16px' }}>
-              {interpretation}
+              {drawnCard.card.description}
             </p>
           </div>
         </div>
