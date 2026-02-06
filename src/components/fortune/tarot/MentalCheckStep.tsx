@@ -67,7 +67,7 @@ export const MentalCheckStep: React.FC<MentalCheckStepProps> = ({ target, onSele
               style={{
                 position: 'absolute',
                 top: '50%',
-                left: 'calc(50% - 2px)',
+                left: 'calc(50% - 6px)',
                 transform: 'translate(-50%, -50%) rotate(90deg)',
                 width: '160px',
                 height: '230px',
@@ -109,7 +109,7 @@ export const MentalCheckStep: React.FC<MentalCheckStepProps> = ({ target, onSele
               style={{
                 position: 'absolute',
                 top: '50%',
-                left: 'calc(50% - 2px)',
+                left: 'calc(50% - 6px)',
                 transform: 'translate(-50%, -50%) rotate(90deg)',
                 width: '160px',
                 height: '230px',
@@ -151,7 +151,7 @@ export const MentalCheckStep: React.FC<MentalCheckStepProps> = ({ target, onSele
               style={{
                 position: 'absolute',
                 top: '50%',
-                left: 'calc(50% - 2px)',
+                left: 'calc(50% - 6px)',
                 transform: 'translate(-50%, -50%) rotate(90deg)',
                 width: '160px',
                 height: '230px',
@@ -193,7 +193,7 @@ export const MentalCheckStep: React.FC<MentalCheckStepProps> = ({ target, onSele
               style={{
                 position: 'absolute',
                 top: '50%',
-                left: 'calc(50% - 2px)',
+                left: 'calc(50% - 6px)',
                 transform: 'translate(-50%, -50%) rotate(90deg)',
                 width: '160px',
                 height: '230px',
