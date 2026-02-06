@@ -12,6 +12,14 @@ export const HistoryDetailStep: React.FC<HistoryDetailStepProps> = ({ reading, o
     return target === 'self' ? '自分' : '相手';
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}/${month}/${day}`;
+  };
+
   const cardName = reading.card.name || 'カード';
   const position = reading.is_reversed ? '逆位置' : '正位置';
 
@@ -41,7 +49,7 @@ export const HistoryDetailStep: React.FC<HistoryDetailStepProps> = ({ reading, o
           color: '#FFFFFF', 
           margin: 0 
         }}>
-          本日の占い結果
+          {formatDate(reading.created_at)}の占い結果
         </p>
       </div>
 
@@ -143,23 +151,6 @@ export const HistoryDetailStep: React.FC<HistoryDetailStepProps> = ({ reading, o
                 </p>
               </div>
             </div>
-          </div>
-
-          {/* 過去の占い結果ボタン */}
-          <div className="flex justify-center mt-10">
-            <button
-              onClick={onBack}
-              className="font-bold text-base text-center text-white w-[140px] h-[48px] rounded-lg cursor-pointer"
-              style={{
-                fontFamily: 'Noto Sans JP',
-                lineHeight: '16px',
-                background: 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)',
-                border: '1px solid #FFB370',
-                boxShadow: '0px 4px 0px 0px #5B3500'
-              }}
-            >
-              過去の占い結果
-            </button>
           </div>
         </div>
       </div>
