@@ -52,21 +52,16 @@ export const ResultInput: React.FC<ResultInputProps> = ({
       <div className="text-center">
         {/* カード情報表示エリア */}
         <div 
-          className="mb-6 relative mx-auto rounded-xl overflow-hidden w-[332px] h-[301px] p-[31px_16px_23px_16px] flex mt-6"
-          style={{ 
-            backgroundImage: 'url(/tarot-material/space.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
+          className="mb-6 relative mx-auto rounded-xl overflow-hidden w-[332px] h-[301px] p-[31px_16px_23px_16px] flex mt-6 bg-cover bg-center bg-[url(/tarot-material/space.png)]"
         >
           {/* 左側: カード名 + カード画像 */}
           <div>
             {/* カード名と位置 */}
             <div>
-              <h3 className="font-medium text-base text-left m-0" style={{ fontFamily: 'Inter', lineHeight: '130%', color: '#C4C46D' }}>
+              <h3 className="font-medium text-base text-left m-0 font-inter leading-[130%] text-[#C4C46D]">
                 {cardName}
               </h3>
-              <p className="font-bold text-xs text-center m-0" style={{ fontFamily: 'Noto Sans JP', lineHeight: '20px', color: '#C4C46D' }}>
+              <p className="font-bold text-xs text-center m-0 font-noto-sans-jp leading-5 text-[#C4C46D]">
                 ({position})
               </p>
             </div>
@@ -92,15 +87,15 @@ export const ResultInput: React.FC<ResultInputProps> = ({
             </div>
 
             {/* タイトル */}
-            <h4 className="font-medium text-sm text-center text-white m-0" style={{ fontFamily: 'Inter', lineHeight: '130%' }}>
+            <h4 className="font-medium text-sm text-center text-white m-0 font-inter leading-[130%]">
               {interpretation}
             </h4>
 
             {/* ボーダー */}
-            <div className="mx-auto border-b w-[153px]" style={{ borderColor: '#73732F' }} />
+            <div className="mx-auto border-b w-[153px] border-[#73732F]" />
 
             {/* 説明文 */}
-            <p className="font-normal text-center text-white m-0" style={{ fontFamily: 'Noto Sans JP', fontSize: '10px', lineHeight: '16px' }}>
+            <p className="font-normal text-center text-white m-0 font-noto-sans-jp text-[10px] leading-4">
               {drawnCard.card.description}
             </p>
           </div>
@@ -110,12 +105,7 @@ export const ResultInput: React.FC<ResultInputProps> = ({
         <div>
           <div className="text-center">
             <h3 
-              className="font-bold text-xs text-center m-0 w-[332px] mx-auto rounded-t-lg py-3"
-              style={{
-                color: '#E9D9FD',
-                boxShadow: '0px 1px 1px 0px #1A1045',
-                background: '#2E206B'
-              }}
+              className="font-bold text-xs text-center m-0 w-[332px] mx-auto rounded-t-lg py-3 text-[#E9D9FD] shadow-[0px_1px_1px_0px_#1A1045] bg-[#2E206B]"
             >
               今の気持ちを少しだけ振り返ってみましょう
             </h3>
@@ -123,12 +113,9 @@ export const ResultInput: React.FC<ResultInputProps> = ({
 
           {/* グラデーション背景のコンテナ */}
           <div 
-            className="w-[332px] mx-auto rounded-b-lg p-4"
-            style={{
-              background: 'linear-gradient(180deg, rgba(145, 97, 196, 0.8) 0%, rgba(86, 76, 145, 0.8) 138.68%)'
-            }}
+            className="w-[332px] mx-auto rounded-b-lg p-4 bg-gradient-to-b from-[rgba(145,97,196,0.8)] to-[rgba(86,76,145,0.8)]"
           >
-            <p className="font-bold text-xs text-center text-white mb-3" style={{ fontFamily: 'Noto Sans JP', lineHeight: '20px' }}>
+            <p className="font-bold text-xs text-center text-white mb-3 font-noto-sans-jp leading-5">
               1.占いの結果はどう感じましたか？
             </p>
 
@@ -138,7 +125,7 @@ export const ResultInput: React.FC<ResultInputProps> = ({
               onSelect={setSelectedFeeling}
             />
 
-            <p className="font-bold text-xs text-center text-white mb-3" style={{ fontFamily: 'Noto Sans JP', lineHeight: '20px' }}>
+            <p className="font-bold text-xs text-center text-white mb-3 font-noto-sans-jp leading-5">
               2.占いの感想を記録しておきましょう！
             </p>
 
@@ -148,16 +135,7 @@ export const ResultInput: React.FC<ResultInputProps> = ({
                 value={comment}
                 onChange={handleCommentChange}
                 placeholder="今の気持ちをそのまま書いてみてください。"
-                className="w-[300px] min-h-[88px] px-4 py-3 text-white rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none overflow-hidden"
-                style={{
-                  background: '#FFFFFF80',
-                  fontFamily: 'Noto Sans JP',
-                  fontWeight: 700,
-                  fontSize: '10px',
-                  lineHeight: '20px',
-                  letterSpacing: '0%',
-                  color: '#2F2B37'
-                }}
+                className="w-[300px] min-h-[88px] px-4 py-3 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none overflow-hidden bg-[#FFFFFF80] font-noto-sans-jp font-bold text-[10px] leading-5 text-[#2F2B37]"
               />
             </div>
 
@@ -165,16 +143,11 @@ export const ResultInput: React.FC<ResultInputProps> = ({
               <button
                 onClick={handleSave}
                 disabled={isSaveDisabled}
-                className="font-bold text-base text-center text-white w-[140px] h-[48px] rounded-lg cursor-pointer disabled:cursor-not-allowed"
-                style={{
-                  fontFamily: 'Noto Sans JP',
-                  lineHeight: '16px',
-                  background: isSaveDisabled 
-                    ? 'linear-gradient(180deg, #D0D0D0 0%, #848484 100%)'
-                    : 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)',
-                  border: isSaveDisabled ? '1px solid #CECECE' : '1px solid #FFB370',
-                  boxShadow: isSaveDisabled ? '0px 4px 0px 0px #676158' : '0px 4px 0px 0px #5B3500'
-                }}
+                className={`font-bold text-base text-center text-white w-[140px] h-[48px] rounded-lg cursor-pointer disabled:cursor-not-allowed font-noto-sans-jp leading-4 ${
+                  isSaveDisabled
+                    ? 'bg-gradient-to-b from-[#D0D0D0] to-[#848484] border border-[#CECECE] shadow-[0px_4px_0px_0px_#676158]'
+                    : 'bg-gradient-to-b from-[#E3AC66] to-[#89602B] border border-[#FFB370] shadow-[0px_4px_0px_0px_#5B3500]'
+                }`}
               >
                 記録する
               </button>
