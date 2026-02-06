@@ -49,7 +49,11 @@ export const MentalCheckStep: React.FC<MentalCheckStepProps> = ({ target, onSele
         <button
           onClick={() => handleSelect('sunny')}
           className="transform hover:scale-105 transition-all relative"
-          style={{ overflow: 'visible' }}
+          style={{ 
+            overflow: 'visible',
+            filter: selectedMental !== null && selectedMental !== 'sunny' ? 'brightness(0.4) saturate(0.3)' : 'none',
+            opacity: selectedMental !== null && selectedMental !== 'sunny' ? 0.6 : 1
+          }}
         >
           <Image
             src="/tarot-material/sunny.svg"
@@ -87,7 +91,11 @@ export const MentalCheckStep: React.FC<MentalCheckStepProps> = ({ target, onSele
         <button
           onClick={() => handleSelect('cloudy')}
           className="transform hover:scale-105 transition-all relative"
-          style={{ overflow: 'visible' }}
+          style={{ 
+            overflow: 'visible',
+            filter: selectedMental !== null && selectedMental !== 'cloudy' ? 'brightness(0.4) saturate(0.3)' : 'none',
+            opacity: selectedMental !== null && selectedMental !== 'cloudy' ? 0.6 : 1
+          }}
         >
           <Image
             src="/tarot-material/cloudy.svg"
@@ -125,7 +133,11 @@ export const MentalCheckStep: React.FC<MentalCheckStepProps> = ({ target, onSele
         <button
           onClick={() => handleSelect('rainy')}
           className="transform hover:scale-105 transition-all relative"
-          style={{ overflow: 'visible' }}
+          style={{ 
+            overflow: 'visible',
+            filter: selectedMental !== null && selectedMental !== 'rainy' ? 'brightness(0.4) saturate(0.3)' : 'none',
+            opacity: selectedMental !== null && selectedMental !== 'rainy' ? 0.6 : 1
+          }}
         >
           <Image
             src="/tarot-material/rainy.svg"
@@ -163,7 +175,11 @@ export const MentalCheckStep: React.FC<MentalCheckStepProps> = ({ target, onSele
         <button
           onClick={() => handleSelect('very-rainy')}
           className="transform hover:scale-105 transition-all relative"
-          style={{ overflow: 'visible' }}
+          style={{ 
+            overflow: 'visible',
+            filter: selectedMental !== null && selectedMental !== 'very-rainy' ? 'brightness(0.4) saturate(0.3)' : 'none',
+            opacity: selectedMental !== null && selectedMental !== 'very-rainy' ? 0.6 : 1
+          }}
         >
           <Image
             src="/tarot-material/very-rainy.svg"

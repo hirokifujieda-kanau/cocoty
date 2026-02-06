@@ -60,19 +60,29 @@ const EFFECT_SIZE = {
 interface TarotCardButtonProps {
   cardIndex: number;
   isSelected: boolean;
+  selectedCardIndex: number | null;
   onCardClick: (index: number) => void;
 }
 
 const TarotCardButton: React.FC<TarotCardButtonProps> = ({ 
   cardIndex, 
   isSelected, 
+  selectedCardIndex,
   onCardClick 
 }) => {
+  // 何も選択されてない or 自分が選択されてる → そのまま
+  // 他が選択されてる → 暗くする
+  const shouldDarken = selectedCardIndex !== null && !isSelected;
+  
   return (
     <button
       onClick={() => onCardClick(cardIndex)}
       className="relative transform hover:scale-105 transition-all"
       aria-label={`カード${cardIndex + 1}`}
+      style={{
+        filter: shouldDarken ? 'brightness(0.4) saturate(0.3)' : 'none',
+        opacity: shouldDarken ? 0.6 : 1
+      }}
     >
       <Image
         src="/tarot-material/tarot_default.svg"
@@ -162,6 +172,7 @@ export const CardSelectStep: React.FC<CardSelectStepProps> = ({ onSelect }) => {
               key={cardIndex}
               cardIndex={cardIndex}
               isSelected={selectedCardIndex === cardIndex}
+              selectedCardIndex={selectedCardIndex}
               onCardClick={handleCardClick}
             />
           ))}
