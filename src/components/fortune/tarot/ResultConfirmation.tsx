@@ -24,21 +24,16 @@ export const ResultConfirmation: React.FC<ResultConfirmationProps> = ({
       <div className="text-center">
         {/* カード情報表示エリア */}
         <div 
-          className="mb-6 relative mx-auto rounded-xl overflow-hidden w-[332px] h-[301px] p-[31px_16px_23px_16px] flex mt-6"
-          style={{ 
-            backgroundImage: 'url(/tarot-material/space.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
+          className="mb-6 relative mx-auto rounded-xl overflow-hidden w-[332px] h-[301px] p-[31px_16px_23px_16px] flex mt-6 bg-cover bg-center bg-[url(/tarot-material/space.png)]"
         >
           {/* 左側: カード名 + カード画像 */}
           <div>
             {/* カード名と位置 */}
             <div>
-              <h3 className="font-medium text-base text-left m-0" style={{ fontFamily: 'Inter', lineHeight: '130%', color: '#C4C46D' }}>
+              <h3 className="font-medium text-base text-left m-0 font-inter leading-[130%] text-[#C4C46D]">
                 {cardName}
               </h3>
-              <p className="font-bold text-xs text-center m-0" style={{ fontFamily: 'Noto Sans JP', lineHeight: '20px', color: '#C4C46D' }}>
+              <p className="font-bold text-xs text-center m-0 font-noto-sans-jp leading-5 text-[#C4C46D]">
                 ({position})
               </p>
             </div>
@@ -64,15 +59,15 @@ export const ResultConfirmation: React.FC<ResultConfirmationProps> = ({
             </div>
 
             {/* タイトル */}
-            <h4 className="font-medium text-sm text-center text-white m-0" style={{ fontFamily: 'Inter', lineHeight: '130%' }}>
+            <h4 className="font-medium text-sm text-center text-white m-0 font-inter leading-[130%]">
               {interpretation}
             </h4>
 
             {/* ボーダー */}
-            <div className="mx-auto border-b w-[153px]" style={{ borderColor: '#73732F' }} />
+            <div className="mx-auto border-b w-[153px] border-[#73732F]" />
 
             {/* 説明文 */}
-            <p className="font-normal text-center text-white m-0" style={{ fontFamily: 'Noto Sans JP', fontSize: '10px', lineHeight: '16px' }}>
+            <p className="font-normal text-center text-white m-0 font-noto-sans-jp text-[10px] leading-4">
               {drawnCard.card.description}
             </p>
           </div>
@@ -82,21 +77,13 @@ export const ResultConfirmation: React.FC<ResultConfirmationProps> = ({
         <div>
           <div className="text-center">
             <h3 
-              className="font-bold text-xs text-center m-0 w-[343px] mx-auto rounded-t-lg py-3 px-0"
-              style={{
-                color: '#E9D9FD',
-                boxShadow: '0px 1px 1px 0px #1A1045',
-                background: '#2E206B'
-              }}
+              className="font-bold text-xs text-center m-0 w-[343px] mx-auto rounded-t-lg py-3 px-0 text-[#E9D9FD] shadow-[0px_1px_1px_0px_#1A1045] bg-[#2E206B]"
             >
               占い結果の感想
             </h3>
           </div>
           <div
-            className="w-[343px] mx-auto rounded-b-lg p-4"
-            style={{
-              background: 'linear-gradient(180deg, rgba(145, 97, 196, 0.8) 0%, rgba(86, 76, 145, 0.8) 138.68%)'
-            }}
+            className="w-[343px] mx-auto rounded-b-lg p-4 bg-gradient-to-b from-[rgba(145,97,196,0.8)] to-[rgba(86,76,145,0.8)]"
           >
             <div className="flex gap-4 items-start">
               {/* 選択された感情アイコン */}
@@ -111,8 +98,8 @@ export const ResultConfirmation: React.FC<ResultConfirmationProps> = ({
               </div>
 
               {/* 感想テキスト */}
-              <div className="flex-1 rounded-xl overflow-auto p-2 h-[63px]" style={{ background: 'rgba(255, 255, 255, 0.8)' }}>
-                <p className="font-bold text-xs m-0 whitespace-pre-wrap break-words" style={{ fontFamily: 'Noto Sans JP', lineHeight: '20px', color: '#2F2B37' }}>
+              <div className="flex-1 rounded-xl overflow-auto p-2 h-[63px] bg-[rgba(255,255,255,0.8)]">
+                <p className="font-bold text-xs m-0 whitespace-pre-wrap break-words font-noto-sans-jp leading-5 text-[#2F2B37]">
                   {comment}
                 </p>
               </div>
@@ -123,14 +110,7 @@ export const ResultConfirmation: React.FC<ResultConfirmationProps> = ({
           <div className="flex justify-center mt-10">
             <button
               onClick={onComplete}
-              className="font-bold text-base text-center text-white w-[140px] h-[48px] rounded-lg cursor-pointer"
-              style={{
-                fontFamily: 'Noto Sans JP',
-                lineHeight: '16px',
-                background: 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)',
-                border: '1px solid #FFB370',
-                boxShadow: '0px 4px 0px 0px #5B3500'
-              }}
+              className="font-bold text-base text-center text-white w-[140px] h-[48px] rounded-lg cursor-pointer font-noto-sans-jp leading-4 bg-gradient-to-b from-[#E3AC66] to-[#89602B] border border-[#FFB370] shadow-[0px_4px_0px_0px_#5B3500]"
             >
               過去の占い結果
             </button>
