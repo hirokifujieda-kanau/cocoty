@@ -38,10 +38,14 @@ export const ResultInput: React.FC<ResultInputProps> = ({
   };
 
   const handleSave = () => {
+    console.log('🔘 [ResultInput] handleSave clicked - feeling:', selectedFeeling, 'comment:', comment);
     onSave(selectedFeeling, comment);
   };
 
   const isSaveDisabled = selectedFeeling === null || comment.trim() === '';
+  
+  // デバッグ: ボタンの状態を常に表示
+  console.log('🎯 [ResultInput] Button state - disabled:', isSaveDisabled, 'feeling:', selectedFeeling, 'comment length:', comment.length);
 
   return (
     <div className="space-y-6">

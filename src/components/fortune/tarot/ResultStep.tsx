@@ -33,9 +33,12 @@ export const ResultStep: React.FC<ResultStepProps> = ({
   const [comment, setComment] = useState(savedComment);
 
   const handleSave = (newFeeling: Feeling, newComment: string) => {
+    console.log('📝 [ResultStep] handleSave called - feeling:', newFeeling, 'comment:', newComment);
     setFeeling(newFeeling);
     setComment(newComment);
+    console.log('📝 [ResultStep] Calling onSaveData...');
     onSaveData?.(newFeeling, newComment);
+    console.log('📝 [ResultStep] onSaveData called, showing confirmation');
     setShowConfirmation(true);
   };
 

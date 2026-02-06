@@ -24,6 +24,7 @@ interface DailyTarotProps {
   userId: string;
   userName: string;
   profile?: Profile | null;
+  isDrawnToday?: boolean; // 今日既に占いを実施済みか
 }
 
 type TargetType = 'self' | 'partner' | null;
@@ -110,7 +111,8 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   onClose,
   userId,
   userName,
-  profile
+  profile,
+  isDrawnToday = false
 }) => {
   const [selectedTarget, setSelectedTarget] = useState<TargetType>(null);
   const [isDecided, setIsDecided] = useState(false);
@@ -120,6 +122,43 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   const [showResultConfirmation, setShowResultConfirmation] = useState(false);
   const [savedFeeling, setSavedFeeling] = useState<'good' | 'soso' | 'bad' | null>(null);
   const [savedComment, setSavedComment] = useState('');
+
+  // 初期化時に今日の占い結果を読み込む
+  useEffect(() => {
+    if (isDrawnToday) {
+      const todayReading = getTodayReading();
+      if (todayReading) {
+        setSelectedTarget(todayReading.selectedTarget);
+        setTarotState(todayReading.tarotState);
+        setSavedFeeling(todayReading.savedFeeling);
+        setSavedComment(todayReading.savedComment);
+        setShowResultConfirmation(true);
+      }
+    }
+  }, [isDrawnToday]);
+
+  // 今日の占い結果をlocalStorageから取得
+  const getTodayReading = () => {
+    const today = new Date().toDateString();
+    const storedData = localStorage.getItem('tarot_today_reading');
+    if (storedData) {
+      const reading = JSON.parse(storedData);
+      // 日付が今日と一致するかチェック
+      if (reading.date === today) {
+        return reading.data;
+      }
+    }
+    return null;
+  };
+
+  // 占い完了時に今日の結果を保存
+  const saveTodayReading = (reading: any) => {
+    const today = new Date().toDateString();
+    localStorage.setItem('tarot_today_reading', JSON.stringify({
+      date: today,
+      data: reading
+    }));
+  };
 
   // 現在の占い結果をTarotReading形式で作成
   const getCurrentReading = () => {
@@ -156,6 +195,41 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
     setTarotState(INITIAL_TAROT_STATE);
     setTempMentalState(null);
   };
+
+  // 初期化時に今日既に占いを実施済みの場合、今日の結果を表示
+  useEffect(() => {
+    console.log('🔍 [DailyTarot] useEffect triggered - isOpen:', isOpen, 'isDrawnToday:', isDrawnToday);
+    if (isOpen && isDrawnToday) {
+      const todayReading = getTodayReading();
+      console.log('📖 [DailyTarot] getTodayReading result:', todayReading);
+      if (todayReading) {
+        console.log('✅ [DailyTarot] 今日の結果を復元します');
+        // 今日の結果を設定して確認画面を表示
+        const restoredState = {
+          ...todayReading.tarotState,
+          step: 'result' as const, // 結果表示ステップに設定
+        };
+        setTarotState(restoredState);
+        setSelectedTarget(todayReading.selectedTarget);
+        setIsDecided(true); // 決定済みフラグをtrueに
+        setSavedFeeling(todayReading.savedFeeling);
+        setSavedComment(todayReading.savedComment);
+        setShowResultConfirmation(true);
+        console.log('📺 [DailyTarot] Restored state:', {
+          step: restoredState.step,
+          isDecided: true,
+          showResultConfirmation: true,
+          hasDrawnCard: !!restoredState.drawnCard
+        });
+      } else {
+        console.log('⚠️ [DailyTarot] 今日の結果が見つかりませんでした');
+      }
+    } else if (isOpen && !isDrawnToday) {
+      console.log('🆕 [DailyTarot] 新規占いを開始');
+      // 占い未実施の場合は初期化
+      resetState();
+    }
+  }, [isOpen, isDrawnToday]);
 
   const handleDecide = () => {
     if (selectedTarget !== null) {
@@ -213,8 +287,13 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   };
 
   const handleToComment = () => {
-    // TODO: ここで実際にデータを保存する処理を追加
-    // 例: await createTarotReading(tarotState);
+    // 今日の占い結果を保存
+    saveTodayReading({
+      tarotState,
+      selectedTarget,
+      savedFeeling,
+      savedComment,
+    });
     
     // 確認ページを表示した状態で履歴へ
     setShowResultConfirmation(true);
@@ -285,6 +364,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           width={95}
           height={153}
           className="relative z-10"
+          style={{ width: 'auto', height: 'auto' }}
         />
         {isSelected && (
           <div 
@@ -415,8 +495,19 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
                 savedComment={savedComment}
                 target={selectedTarget}
                 onSaveData={(feeling, comment) => {
+                  console.log('💾 [DailyTarot] onSaveData called - feeling:', feeling, 'comment:', comment);
                   setSavedFeeling(feeling);
                   setSavedComment(comment);
+                  // 今日の占い結果を保存
+                  const dataToSave = {
+                    tarotState,
+                    selectedTarget,
+                    savedFeeling: feeling,
+                    savedComment: comment,
+                  };
+                  console.log('💾 [DailyTarot] Saving to localStorage:', dataToSave);
+                  saveTodayReading(dataToSave);
+                  console.log('✅ [DailyTarot] Saved to localStorage');
                 }}
               />
             </>

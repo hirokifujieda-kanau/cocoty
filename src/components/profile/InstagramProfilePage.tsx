@@ -1227,20 +1227,26 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         <DailyTarot 
           isOpen={showDailyTarot}
           onClose={() => {
-            console.log('🔒 [InstagramProfilePage] DailyTarot closed, refetching profile...');
+            console.log('🔒 [InstagramProfilePage] DailyTarot closed');
             setShowDailyTarot(false);
-            // タロット占い完了をlocalStorageに記録
+            
+            // localStorageから今日の占い完了状態を確認
             const today = new Date().toDateString();
-            localStorage.setItem('tarot_last_drawn_date', today);
-            setTarotDrawnToday(true);
-            // タロット占い完了後、プロフィールを再取得
+            const lastDrawnDate = localStorage.getItem('tarot_last_drawn_date');
+            const isDrawnToday = lastDrawnDate === today;
+            
+            console.log('📅 [InstagramProfilePage] onClose - lastDrawnDate:', lastDrawnDate, 'today:', today, 'isDrawnToday:', isDrawnToday);
+            setTarotDrawnToday(isDrawnToday);
+            
+            // プロフィールを再取得（バックエンドAPIとの同期用）
             setTimeout(() => {
               refetchProfile();
-            }, 500); // 少し遅延させてバックエンドの更新を待つ
+            }, 500);
           }}
           userId={displayUser.id.toString()}
           userName={displayUser.name}
           profile={displayUser}
+          isDrawnToday={tarotDrawnToday}
         />
       )}
       
