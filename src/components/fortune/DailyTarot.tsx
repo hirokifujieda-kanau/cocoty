@@ -74,12 +74,12 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           </div>
         </div>
 
-        <div className="mx-auto" style={{ paddingBlock: 'calc(var(--spacing) * 6)', paddingInline: '16px', maxWidth: '1024px' }}>
+        <div className="mx-auto py-[calc(var(--spacing)*6)] px-4 max-w-[1024px]">
           {/* タイトルは常に表示 */}
           <h3 className="font-bold" style={HEADING_STYLE}>タロット占い</h3>
           
           {/* コンテンツエリア - 高さを固定してレイアウトシフトを防ぐ */}
-          <div className="text-center" style={{ minHeight: '300px', position: 'relative' }}>
+          <div className="text-center min-h-[300px] relative">
             {tarotState.step === 'target' && (
               <>
                 <p style={SUBHEADING_STYLE}>どちらを占いますか？</p>
@@ -175,7 +175,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
             )}
 
             {/* 決定ボタンエリア - 常に同じ位置を確保 */}
-            <div className="flex justify-center" style={{ marginTop: 'calc(var(--spacing) * 6)' }}>
+            <div className="flex justify-center mt-[calc(var(--spacing)*6)]">
               {tarotState.step === 'target' && (
                 <DecideButton onClick={handleDecide} disabled={selectedTarget === null} />
               )}
