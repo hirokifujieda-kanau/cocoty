@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTarotReadings, type TarotReading } from '@/lib/api/tarot';
-import { generateMockReadings } from '@/lib/mock/mockTarot';
 
 interface HistoryStepProps {
   onClose: () => void;
@@ -34,28 +33,17 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail,
       setLoading(true);
       setError(null);
       
-      // モックデータを使用
-      let mockReadings = generateMockReadings(20);
+      // API呼び出しで履歴を取得
+      const response = await getTarotReadings(page, perPage);
+      let fetchedReadings = response.readings;
       
       // 現在の占い結果があれば一番上に追加
       if (currentReading) {
-        mockReadings = [currentReading, ...mockReadings];
+        fetchedReadings = [currentReading, ...fetchedReadings];
       }
       
-      // 総ページ数を計算（全データ件数に基づく）
-      const totalCount = mockReadings.length;
-      setTotalPages(Math.ceil(totalCount / perPage));
-      
-      const startIndex = (page - 1) * perPage;
-      const endIndex = startIndex + perPage;
-      const paginatedReadings = mockReadings.slice(startIndex, endIndex);
-      
-      setReadings(paginatedReadings);
-      
-      // 本番環境用のAPI呼び出し（コメントアウト）
-      // const response = await getTarotReadings(page, perPage);
-      // setReadings(response.readings);
-      // setTotalPages(response.pagination.total_pages);
+      setReadings(fetchedReadings);
+      setTotalPages(response.pagination.total_pages);
     } catch (err) {
       console.error('Failed to fetch readings:', err);
       setError('占い履歴の取得に失敗しました');
