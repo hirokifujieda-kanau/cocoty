@@ -61,8 +61,7 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail,
         <>
           <div 
             ref={historyListRef} 
-            className="space-y-0 max-h-96 md:max-h-[600px] overflow-y-auto backdrop-blur-sm rounded-xl w-[343px] mx-auto"
-            style={{ background: 'linear-gradient(180deg, #1B2742 0%, #0F172A 100%)' }}
+            className="space-y-0 max-h-96 md:max-h-[600px] overflow-y-auto backdrop-blur-sm rounded-xl w-[343px] mx-auto bg-gradient-to-b from-[#1B2742] to-[#0F172A]"
           >
             {readings.map((reading, index) => (
               <HistoryCard

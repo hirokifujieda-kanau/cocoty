@@ -26,10 +26,9 @@ export const FeelingSelector: React.FC<FeelingSelectorProps> = ({
           <button
             key={value}
             onClick={() => onSelect(value)}
-            className="bg-transparent border-none p-0 cursor-pointer relative block"
-            style={{
-              filter: shouldDarken ? 'brightness(0.3) saturate(0.5)' : 'none'
-            }}
+            className={`bg-transparent border-none p-0 cursor-pointer relative block ${
+              shouldDarken ? 'brightness-[0.3] saturate-50' : ''
+            }`}
           >
             <img 
               alt={label}
