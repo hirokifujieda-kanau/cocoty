@@ -74,15 +74,15 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           </div>
         </div>
 
-        <div className="mx-auto py-[calc(var(--spacing)*6)] px-4 max-w-[1024px]">
+        <div className="mx-auto" style={{ paddingBlock: 'calc(var(--spacing) * 6)', paddingInline: '16px', maxWidth: '1024px' }}>
           {/* タイトルは常に表示 */}
-          <h3 className="font-bold text-[32px] leading-[130%] text-center text-white font-inter mb-6">タロット占い</h3>
+          <h3 className="font-bold" style={HEADING_STYLE}>タロット占い</h3>
           
           {/* コンテンツエリア - 高さを固定してレイアウトシフトを防ぐ */}
-          <div className="text-center min-h-[300px] relative">
+          <div className="text-center" style={{ minHeight: '300px', position: 'relative' }}>
             {tarotState.step === 'target' && (
               <>
-                <p className="font-bold text-base leading-[130%] text-center text-white font-inter mb-6">どちらを占いますか？</p>
+                <p style={SUBHEADING_STYLE}>どちらを占いますか？</p>
                 <div className="flex justify-center gap-6">
                   <TargetCard 
                     type="self" 
@@ -175,7 +175,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
             )}
 
             {/* 決定ボタンエリア - 常に同じ位置を確保 */}
-            <div className="flex justify-center mt-12">
+            <div className="flex justify-center" style={{ marginTop: 'calc(var(--spacing) * 6)' }}>
               {tarotState.step === 'target' && (
                 <DecideButton onClick={handleDecide} disabled={selectedTarget === null} />
               )}
@@ -187,7 +187,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
               {tarotState.step === 'shuffle' && (
                 <button 
                   onClick={handleShuffleComplete}
-                  className="min-w-[200px] px-6 py-3 bg-[#C4C46D] hover:opacity-90 text-white font-bold rounded-[14px] transition-all font-noto-sans-jp text-base leading-5"
+                  className="w-[140px] h-12 rounded-lg border border-[#FFB370] bg-gradient-to-b from-[#E3AC66] to-[#89602B] shadow-[0_4px_0_0_#5B3500] font-bold text-base leading-4 text-center text-white font-noto-sans-jp cursor-pointer"
                 >
                   止める
                 </button>
