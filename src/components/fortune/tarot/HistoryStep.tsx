@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTarotReadings, type TarotReading } from '@/lib/api/tarot';
 import { generateMockReadings } from '@/lib/mock/mockTarot';
@@ -16,10 +16,18 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail,
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const perPage = 10;
+  const historyListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchReadings(currentPage);
   }, [currentPage, currentReading]);
+
+  // ページが変わったら一番上にスクロール
+  useEffect(() => {
+    if (historyListRef.current) {
+      historyListRef.current.scrollTop = 0;
+    }
+  }, [currentPage]);
 
   const fetchReadings = async (page: number) => {
     try {
@@ -118,7 +126,7 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail,
         </div>
       ) : (
         <>
-          <div className="space-y-0 max-h-96 overflow-y-auto backdrop-blur-sm rounded-xl" style={{ width: '343px', margin: '0 auto', background: 'linear-gradient(180deg, #1B2742 0%, #0F172A 100%)' }}>
+          <div ref={historyListRef} className="space-y-0 max-h-96 md:max-h-[600px] overflow-y-auto backdrop-blur-sm rounded-xl" style={{ width: '343px', margin: '0 auto', background: 'linear-gradient(180deg, #1B2742 0%, #0F172A 100%)' }}>
             {readings.map((reading, index) => (
               <div key={reading.id}>
                 <button
