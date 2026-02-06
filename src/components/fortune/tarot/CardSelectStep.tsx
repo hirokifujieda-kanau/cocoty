@@ -77,12 +77,10 @@ const TarotCardButton: React.FC<TarotCardButtonProps> = ({
   return (
     <button
       onClick={() => onCardClick(cardIndex)}
-      className="relative transform hover:scale-105 transition-all"
+      className={`relative transform hover:scale-105 transition-all ${
+        shouldDarken ? 'brightness-[0.4] saturate-[0.3] opacity-60' : ''
+      }`}
       aria-label={`カード${cardIndex + 1}`}
-      style={{
-        filter: shouldDarken ? 'brightness(0.4) saturate(0.3)' : 'none',
-        opacity: shouldDarken ? 0.6 : 1
-      }}
     >
       <Image
         src="/tarot-material/tarot_default.svg"
@@ -92,18 +90,12 @@ const TarotCardButton: React.FC<TarotCardButtonProps> = ({
         className="relative z-10"
       />
       {isSelected && (
-        <div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20" 
-          style={{ 
-            width: `${EFFECT_SIZE.width}px`, 
-            height: `${EFFECT_SIZE.height}px` 
-          }}
-        >
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-[180px] h-[270px]">
           <Image
             src="/tarot-material/effect.svg"
             alt="選択エフェクト"
             fill
-            style={{ objectFit: 'contain' }}
+            className="object-contain"
           />
         </div>
       )}
@@ -118,19 +110,16 @@ interface DecideButtonProps {
 }
 
 const DecideButton: React.FC<DecideButtonProps> = ({ isEnabled, onClick }) => {
-  const buttonStyle = isEnabled 
-    ? STYLES.decideButton.enabled 
-    : STYLES.decideButton.disabled;
-
   return (
-    <div className="flex justify-center" style={{ marginTop: '48px' }}>
+    <div className="flex justify-center mt-12">
       <button
         onClick={onClick}
         disabled={!isEnabled}
-        style={{
-          ...STYLES.decideButton.base,
-          ...buttonStyle,
-        }}
+        className={`w-[140px] h-12 rounded-lg border font-bold text-base leading-4 text-center text-white font-noto-sans-jp ${
+          isEnabled 
+            ? 'bg-gradient-to-b from-[#E3AC66] to-[#89602B] border-[#FFB370] shadow-[0_4px_0_0_#5B3500] cursor-pointer' 
+            : 'bg-gradient-to-b from-[#D0D0D0] to-[#848484] border-[#CECECE] shadow-[0_4px_0_0_#676158] cursor-not-allowed'
+        }`}
         aria-label="選択を決定"
       >
         決定
@@ -162,7 +151,7 @@ export const CardSelectStep: React.FC<CardSelectStepProps> = ({ onSelect }) => {
   return (
     <>
       <div className="text-center">
-        <h3 style={STYLES.heading}>
+        <h3 className="font-bold text-xs leading-5 text-center text-white font-noto-sans-jp mb-9">
           カードを1枚選んでください
         </h3>
         
