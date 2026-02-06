@@ -17,12 +17,11 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({
     <div>
       <button
         onClick={onClick}
-        className="w-full p-4 transition-all text-left"
-        style={{ background: 'transparent' }}
+        className="w-full p-4 transition-all text-left bg-transparent"
       >
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div className="flex gap-3">
           {/* 左側: カード画像 */}
-          <div style={{ flexShrink: 0 }}>
+          <div className="flex-shrink-0">
             <img
               alt="カード"
               width={30}
@@ -32,67 +31,21 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({
           </div>
 
           {/* 右側: テキスト情報 */}
-          <div style={{ flex: 1 }}>
+          <div className="flex-1">
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span
-                  style={{
-                    fontFamily: 'Noto Sans JP',
-                    fontWeight: 700,
-                    fontSize: '8px',
-                    lineHeight: '1',
-                    letterSpacing: '0%',
-                    textAlign: 'center',
-                    color: '#FFFFFF',
-                    background: reading.target === 'self' ? '#3A84C9' : '#C93A67',
-                    padding: '3px 5px',
-                    borderRadius: '10px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
+                <span className={`font-bold text-[8px] leading-none text-center text-white font-noto-sans-jp px-[5px] py-[3px] rounded-[10px] inline-flex items-center justify-center ${
+                  reading.target === 'self' ? 'bg-[#3A84C9]' : 'bg-[#C93A67]'
+                }`}>
                   {getTargetLabel(reading.target)}
                 </span>
-                <span
-                  style={{
-                    fontFamily: 'Noto Sans JP',
-                    fontWeight: 700,
-                    fontSize: '10px',
-                    lineHeight: '20px',
-                    letterSpacing: '0%',
-                    textAlign: 'center',
-                    color: '#AEAEAE',
-                  }}
-                >
+                <span className="font-bold text-[10px] leading-5 text-center text-[#AEAEAE] font-noto-sans-jp">
                   {formatDate(reading.created_at)}
                 </span>
-                <span
-                  style={{
-                    fontFamily: 'Noto Sans JP',
-                    fontWeight: 700,
-                    fontSize: '12px',
-                    lineHeight: '100%',
-                    letterSpacing: '0%',
-                    textAlign: 'center',
-                    color: '#C4C46D',
-                    margin: 0,
-                  }}
-                >
+                <span className="font-bold text-xs leading-none text-center text-[#C4C46D] font-noto-sans-jp m-0">
                   {reading.card.name}
                 </span>
-                <span
-                  style={{
-                    fontFamily: 'Noto Sans JP',
-                    fontWeight: 700,
-                    fontSize: '12px',
-                    lineHeight: '100%',
-                    letterSpacing: '0%',
-                    textAlign: 'center',
-                    color: '#C4C46D',
-                    margin: 0,
-                  }}
-                >
+                <span className="font-bold text-xs leading-none text-center text-[#C4C46D] font-noto-sans-jp m-0">
                   ({reading.is_reversed ? '逆位置' : '正位置'})
                 </span>
               </div>
@@ -100,18 +53,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({
             </div>
 
             {reading.user_comment && (
-              <p
-                style={{
-                  fontFamily: 'Noto Sans JP',
-                  fontWeight: 400,
-                  fontSize: '12px',
-                  lineHeight: '112.99999999999999%',
-                  letterSpacing: '0%',
-                  color: '#FFFFFF',
-                  marginTop: '8px',
-                  marginBottom: 0,
-                }}
-              >
+              <p className="font-normal text-xs leading-[113%] text-white font-noto-sans-jp mt-2 mb-0">
                 {reading.user_comment}
               </p>
             )}
@@ -120,13 +62,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({
       </button>
       {/* 区切り線 */}
       {showDivider && (
-        <div
-          style={{
-            borderBottom: '1px solid #73732F',
-            width: '169px',
-            margin: '0 auto',
-          }}
-        />
+        <div className="border-b border-[#73732F] w-[169px] mx-auto" />
       )}
     </div>
   );

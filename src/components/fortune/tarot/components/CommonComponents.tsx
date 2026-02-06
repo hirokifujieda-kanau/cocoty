@@ -29,29 +29,17 @@ export const DecideButton: React.FC<DecideButtonProps> = ({
   onClick,
   disabled,
 }) => {
-  const getButtonStyle = (isEnabled: boolean) => ({
-    width: '140px',
-    height: '48px',
-    borderRadius: '8px',
-    background: isEnabled
-      ? 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)'
-      : 'linear-gradient(180deg, #D0D0D0 0%, #848484 100%)',
-    border: isEnabled ? '1px solid #FFB370' : '1px solid #CECECE',
-    boxShadow: isEnabled
-      ? '0px 4px 0px 0px #5B3500'
-      : '0px 4px 0px 0px #676158',
-    fontFamily: 'Noto Sans JP',
-    fontWeight: 700,
-    fontSize: '16px',
-    lineHeight: '16px',
-    textAlign: 'center' as const,
-    color: '#FFFFFF',
-    cursor: isEnabled ? 'pointer' : 'not-allowed',
-  });
-
   return (
-    <div className="flex justify-center" style={{ marginTop: '48px' }}>
-      <button onClick={onClick} disabled={disabled} style={getButtonStyle(!disabled)}>
+    <div className="flex justify-center mt-12">
+      <button 
+        onClick={onClick} 
+        disabled={disabled}
+        className={`w-[140px] h-12 rounded-lg border font-bold text-base leading-4 text-center text-white font-noto-sans-jp ${
+          !disabled 
+            ? 'bg-gradient-to-b from-[#E3AC66] to-[#89602B] border-[#FFB370] shadow-[0_4px_0_0_#5B3500] cursor-pointer hover:opacity-90' 
+            : 'bg-gradient-to-b from-[#D0D0D0] to-[#848484] border-[#CECECE] shadow-[0_4px_0_0_#676158] cursor-not-allowed'
+        }`}
+      >
         決定
       </button>
     </div>

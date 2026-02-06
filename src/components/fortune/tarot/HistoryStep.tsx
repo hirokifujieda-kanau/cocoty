@@ -40,17 +40,7 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail,
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3
-          style={{
-            fontFamily: 'Noto Sans JP',
-            fontWeight: 700,
-            fontSize: '12px',
-            lineHeight: '20px',
-            letterSpacing: '0%',
-            textAlign: 'center',
-            color: '#FFFFFF'
-          }}
-        >
+        <h3 className="font-bold text-xs leading-5 text-center text-white font-noto-sans-jp">
           過去の占い
         </h3>
       </div>
@@ -69,7 +59,11 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail,
         </div>
       ) : (
         <>
-          <div ref={historyListRef} className="space-y-0 max-h-96 md:max-h-[600px] overflow-y-auto backdrop-blur-sm rounded-xl" style={{ width: '343px', margin: '0 auto', background: 'linear-gradient(180deg, #1B2742 0%, #0F172A 100%)' }}>
+          <div 
+            ref={historyListRef} 
+            className="space-y-0 max-h-96 md:max-h-[600px] overflow-y-auto backdrop-blur-sm rounded-xl w-[343px] mx-auto"
+            style={{ background: 'linear-gradient(180deg, #1B2742 0%, #0F172A 100%)' }}
+          >
             {readings.map((reading, index) => (
               <HistoryCard
                 key={reading.id}
@@ -82,32 +76,23 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail,
 
           {/* ページネーション */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2" style={{ width: '343px', margin: '0 auto' }}>
+            <div className="flex items-center justify-center gap-2 w-[343px] mx-auto">
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                style={{ background: 'transparent', display: 'flex', alignItems: 'center' }}
+                className="p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all bg-transparent flex items-center"
               >
-                <ChevronLeft style={{ width: '16px', height: '24px', marginRight: '-10px' }} className="text-white" />
-                <ChevronLeft style={{ width: '16px', height: '24px' }} className="text-white" />
+                <ChevronLeft className="w-4 h-6 -mr-[10px] text-white" />
+                <ChevronLeft className="w-4 h-6 text-white" />
               </button>
               
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className="w-4 h-4 flex items-center justify-center rounded transition-all"
-                  style={{
-                    background: currentPage === pageNum ? '#C4C46D' : 'transparent',
-                    color: '#FFFFFF',
-                    fontFamily: 'Noto Sans JP',
-                    fontSize: '16px',
-                    fontWeight: 500,
-                    lineHeight: '100%',
-                    letterSpacing: '0%',
-                    textAlign: 'center'
-                  }}
+                  className={`w-4 h-4 flex items-center justify-center rounded transition-all text-white font-noto-sans-jp text-base font-medium leading-none ${
+                    currentPage === pageNum ? 'bg-[#C4C46D]' : 'bg-transparent'
+                  }`}
                 >
                   {pageNum}
                 </button>
@@ -116,11 +101,10 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail,
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                style={{ background: 'transparent', display: 'flex', alignItems: 'center' }}
+                className="p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all bg-transparent flex items-center"
               >
-                <ChevronRight style={{ width: '16px', height: '24px', marginRight: '-10px' }} className="text-white" />
-                <ChevronRight style={{ width: '16px', height: '24px' }} className="text-white" />
+                <ChevronRight className="w-4 h-6 -mr-[10px] text-white" />
+                <ChevronRight className="w-4 h-6 text-white" />
               </button>
             </div>
           )}
@@ -129,8 +113,7 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail,
 
       <button
         onClick={onClose}
-        className="w-full px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all"
-        style={{ width: '343px', margin: '0 auto', display: 'block' }}
+        className="w-[343px] mx-auto block px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all"
       >
         閉じる
       </button>

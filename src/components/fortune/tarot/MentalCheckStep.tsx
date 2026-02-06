@@ -7,6 +7,44 @@ interface MentalCheckStepProps {
   onSelect: (state: MentalState) => void;
 }
 
+interface MentalCardProps {
+  state: MentalState;
+  selectedMental: MentalState | null;
+  onSelect: (state: MentalState) => void;
+  imagePath: string;
+  alt: string;
+}
+
+const MentalCard: React.FC<MentalCardProps> = ({ state, selectedMental, onSelect, imagePath, alt }) => {
+  const shouldDarken = selectedMental !== null && selectedMental !== state;
+  
+  return (
+    <button
+      onClick={() => onSelect(state)}
+      className={`transform hover:scale-105 transition-all relative overflow-visible ${
+        shouldDarken ? 'brightness-[0.4] saturate-[0.3] opacity-60' : ''
+      }`}
+    >
+      <Image
+        src={imagePath}
+        alt={alt}
+        width={130}
+        height={85}
+        className="object-contain"
+      />
+      {selectedMental === state && (
+        <div className="absolute top-1/2 left-[calc(50%-6px)] -translate-x-1/2 -translate-y-1/2 rotate-90 w-[160px] h-[230px] pointer-events-none">
+          <img 
+            src="/tarot-material/effect.svg" 
+            alt="選択エフェクト"
+            className="w-full h-full object-contain"
+          />
+        </div>
+      )}
+    </button>
+  );
+};
+
 export const MentalCheckStep: React.FC<MentalCheckStepProps> = ({ target, onSelect }) => {
   const [selectedMental, setSelectedMental] = useState<MentalState | null>(null);
 
@@ -17,202 +55,43 @@ export const MentalCheckStep: React.FC<MentalCheckStepProps> = ({ target, onSele
 
   return (
     <div className="text-center">
-      <h3 
-        style={{
-          fontFamily: 'Noto Sans JP',
-          fontWeight: 700,
-          fontSize: '12px',
-          lineHeight: '20px',
-          letterSpacing: '0%',
-          textAlign: 'center',
-          color: '#F9F9F9'
-        }}
-      >
+      <h3 className="font-bold text-xs leading-5 text-center text-[#F9F9F9] font-noto-sans-jp">
         カードを１枚選んでください
       </h3>
-      <p 
-        style={{
-          fontFamily: 'Noto Sans JP',
-          fontWeight: 700,
-          fontSize: '12px',
-          lineHeight: '20px',
-          letterSpacing: '0%',
-          textAlign: 'center',
-          color: '#C7D2FF',
-          marginBottom: '32px'
-        }}
-      >
+      <p className="font-bold text-xs leading-5 text-center text-[#C7D2FF] font-noto-sans-jp mb-8">
         {target === 'self' ? 'あなた' : '相手'}の今の心の状態を選んでください
       </p>
-      <div className="grid grid-cols-2 gap-4 mx-auto" style={{ paddingLeft: '20.5px', paddingRight: '20.5px', overflow: 'visible', width: '100%', maxWidth: '342px' }}>
-        {/* 左上: 晴れ */}
-        <button
-          onClick={() => handleSelect('sunny')}
-          className="transform hover:scale-105 transition-all relative"
-          style={{ 
-            overflow: 'visible',
-            filter: selectedMental !== null && selectedMental !== 'sunny' ? 'brightness(0.4) saturate(0.3)' : 'none',
-            opacity: selectedMental !== null && selectedMental !== 'sunny' ? 0.6 : 1
-          }}
-        >
-          <Image
-            src="/tarot-material/sunny.svg"
-            alt="晴れ"
-            width={130}
-            height={85}
-            className="object-contain"
-          />
-          {selectedMental === 'sunny' && (
-            <div 
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: 'calc(50% - 6px)',
-                transform: 'translate(-50%, -50%) rotate(90deg)',
-                width: '160px',
-                height: '230px',
-                pointerEvents: 'none'
-              }}
-            >
-              <img 
-                src="/tarot-material/effect.svg" 
-                alt="選択エフェクト"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain'
-                }}
-              />
-            </div>
-          )}
-        </button>
-        
-        {/* 右上: 曇り */}
-        <button
-          onClick={() => handleSelect('cloudy')}
-          className="transform hover:scale-105 transition-all relative"
-          style={{ 
-            overflow: 'visible',
-            filter: selectedMental !== null && selectedMental !== 'cloudy' ? 'brightness(0.4) saturate(0.3)' : 'none',
-            opacity: selectedMental !== null && selectedMental !== 'cloudy' ? 0.6 : 1
-          }}
-        >
-          <Image
-            src="/tarot-material/cloudy.svg"
-            alt="曇り"
-            width={130}
-            height={85}
-            className="object-contain"
-          />
-          {selectedMental === 'cloudy' && (
-            <div 
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: 'calc(50% - 6px)',
-                transform: 'translate(-50%, -50%) rotate(90deg)',
-                width: '160px',
-                height: '230px',
-                pointerEvents: 'none'
-              }}
-            >
-              <img 
-                src="/tarot-material/effect.svg" 
-                alt="選択エフェクト"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain'
-                }}
-              />
-            </div>
-          )}
-        </button>
-        
-        {/* 左下: 雨 */}
-        <button
-          onClick={() => handleSelect('rainy')}
-          className="transform hover:scale-105 transition-all relative"
-          style={{ 
-            overflow: 'visible',
-            filter: selectedMental !== null && selectedMental !== 'rainy' ? 'brightness(0.4) saturate(0.3)' : 'none',
-            opacity: selectedMental !== null && selectedMental !== 'rainy' ? 0.6 : 1
-          }}
-        >
-          <Image
-            src="/tarot-material/rainy.svg"
-            alt="雨"
-            width={130}
-            height={85}
-            className="object-contain"
-          />
-          {selectedMental === 'rainy' && (
-            <div 
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: 'calc(50% - 6px)',
-                transform: 'translate(-50%, -50%) rotate(90deg)',
-                width: '160px',
-                height: '230px',
-                pointerEvents: 'none'
-              }}
-            >
-              <img 
-                src="/tarot-material/effect.svg" 
-                alt="選択エフェクト"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain'
-                }}
-              />
-            </div>
-          )}
-        </button>
-        
-        {/* 右下: 大雨 */}
-        <button
-          onClick={() => handleSelect('very-rainy')}
-          className="transform hover:scale-105 transition-all relative"
-          style={{ 
-            overflow: 'visible',
-            filter: selectedMental !== null && selectedMental !== 'very-rainy' ? 'brightness(0.4) saturate(0.3)' : 'none',
-            opacity: selectedMental !== null && selectedMental !== 'very-rainy' ? 0.6 : 1
-          }}
-        >
-          <Image
-            src="/tarot-material/very-rainy.svg"
-            alt="大雨"
-            width={130}
-            height={85}
-            className="object-contain"
-          />
-          {selectedMental === 'very-rainy' && (
-            <div 
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: 'calc(50% - 6px)',
-                transform: 'translate(-50%, -50%) rotate(90deg)',
-                width: '160px',
-                height: '230px',
-                pointerEvents: 'none'
-              }}
-            >
-              <img 
-                src="/tarot-material/effect.svg" 
-                alt="選択エフェクト"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain'
-                }}
-              />
-            </div>
-          )}
-        </button>
+      <div className="grid grid-cols-2 gap-4 mx-auto px-[20.5px] overflow-visible w-full max-w-[342px]">
+        <MentalCard
+          state="sunny"
+          selectedMental={selectedMental}
+          onSelect={handleSelect}
+          imagePath="/tarot-material/sunny.svg"
+          alt="晴れ"
+        />
+        <MentalCard
+          state="cloudy"
+          selectedMental={selectedMental}
+          onSelect={handleSelect}
+          imagePath="/tarot-material/cloudy.svg"
+          alt="曇り"
+        />
+        <MentalCard
+          state="rainy"
+          selectedMental={selectedMental}
+          onSelect={handleSelect}
+          imagePath="/tarot-material/rainy.svg"
+          alt="雨"
+        />
+        <MentalCard
+          state="very-rainy"
+          selectedMental={selectedMental}
+          onSelect={handleSelect}
+          imagePath="/tarot-material/very-rainy.svg"
+          alt="大雨"
+        />
       </div>
     </div>
   );
 };
+

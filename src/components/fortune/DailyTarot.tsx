@@ -58,10 +58,10 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50" style={{ overflow: 'auto' }}>
+    <div className="fixed inset-0 z-50 overflow-auto">
       <div className={`min-h-screen ${styles.tarotBackgroundSp}`}>
         <div className="sticky top-0 z-10">
-          <div style={{ paddingInline: 'calc(var(--spacing) * 1)' }}>
+          <div className="px-[calc(var(--spacing)*1)]">
             {/* result と history ステップでは戻るボタンを表示しない */}
             {tarotState.step !== 'result' && tarotState.step !== 'history' && (
               <button 
@@ -74,15 +74,15 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
           </div>
         </div>
 
-        <div className="mx-auto" style={{ paddingBlock: 'calc(var(--spacing) * 6)', paddingInline: '16px', maxWidth: '1024px' }}>
+        <div className="mx-auto py-[calc(var(--spacing)*6)] px-4 max-w-[1024px]">
           {/* タイトルは常に表示 */}
-          <h3 className="font-bold" style={HEADING_STYLE}>タロット占い</h3>
+          <h3 className="font-bold text-[32px] leading-[130%] text-center text-white font-inter mb-6">タロット占い</h3>
           
           {/* コンテンツエリア - 高さを固定してレイアウトシフトを防ぐ */}
-          <div className="text-center" style={{ minHeight: '300px', position: 'relative' }}>
+          <div className="text-center min-h-[300px] relative">
             {tarotState.step === 'target' && (
               <>
-                <p style={SUBHEADING_STYLE}>どちらを占いますか？</p>
+                <p className="font-bold text-base leading-[130%] text-center text-white font-inter mb-6">どちらを占いますか？</p>
                 <div className="flex justify-center gap-6">
                   <TargetCard 
                     type="self" 
@@ -106,7 +106,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
 
             {tarotState.step === 'shuffle' && (
               <>
-                <p className="font-bold" style={{ ...SUBHEADING_STYLE, marginBottom: '12px' }}>
+                <p className="font-bold text-base leading-[130%] text-center text-white font-inter mb-3">
                   カードをシャッフルします
                 </p>
                 <ShuffleStep />
@@ -120,35 +120,15 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
             {tarotState.step === 'result' && tarotState.drawnCard && (
               <>
                 {/* 本日の占い結果とターゲットバッジ */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
+                <div className="flex items-center justify-center gap-2 mb-6">
                   {selectedTarget && (
-                    <div
-                      style={{
-                        fontFamily: 'Noto Sans JP',
-                        fontWeight: 700,
-                        fontSize: '12px',
-                        lineHeight: '20px',
-                        textAlign: 'center',
-                        color: '#FFFFFF',
-                        background: selectedTarget === 'self' ? '#3A84C9' : '#C93A67',
-                        padding: '0 7.5px',
-                        borderRadius: '10px'
-                      }}
-                    >
+                    <div className={`font-bold text-xs leading-5 text-center text-white font-noto-sans-jp px-[7.5px] rounded-[10px] ${
+                      selectedTarget === 'self' ? 'bg-[#3A84C9]' : 'bg-[#C93A67]'
+                    }`}>
                       {selectedTarget === 'self' ? '自分' : '相手'}
                     </div>
                   )}
-                  <p
-                    style={{
-                      fontFamily: 'Noto Sans JP',
-                      fontWeight: 700,
-                      fontSize: '12px',
-                      lineHeight: '20px',
-                      textAlign: 'center',
-                      color: '#FFFFFF',
-                      margin: 0
-                    }}
-                  >
+                  <p className="font-bold text-xs leading-5 text-center text-white font-noto-sans-jp m-0">
                     本日の占い結果
                   </p>
                 </div>
@@ -195,7 +175,7 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
             )}
 
             {/* 決定ボタンエリア - 常に同じ位置を確保 */}
-            <div className="flex justify-center" style={{ marginTop: '48px' }}>
+            <div className="flex justify-center mt-12">
               {tarotState.step === 'target' && (
                 <DecideButton onClick={handleDecide} disabled={selectedTarget === null} />
               )}
@@ -205,7 +185,10 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
               )}
               
               {tarotState.step === 'shuffle' && (
-                <button onClick={handleShuffleComplete} style={getButtonStyle(true)}>
+                <button 
+                  onClick={handleShuffleComplete}
+                  className="min-w-[200px] px-6 py-3 bg-[#C4C46D] hover:opacity-90 text-white font-bold rounded-[14px] transition-all font-noto-sans-jp text-base leading-5"
+                >
                   止める
                 </button>
               )}
