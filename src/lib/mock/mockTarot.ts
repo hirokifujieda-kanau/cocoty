@@ -225,6 +225,7 @@ export interface MockTarotReading {
   card_id: number;
   is_reversed: boolean;
   interpretation: string;
+  user_feeling?: 'good' | 'soso' | 'bad';
   user_comment?: string;
   created_at: string;
   updated_at: string;
@@ -243,6 +244,8 @@ export function generateMockReadings(count: number = 10): MockTarotReading[] {
     const target: 'self' | 'other' = Math.random() > 0.5 ? 'self' : 'other';
     const mentalStates: ('sunny' | 'cloudy' | 'rainy')[] = ['sunny', 'cloudy', 'rainy'];
     const mentalState = mentalStates[Math.floor(Math.random() * mentalStates.length)];
+    const feelings: ('good' | 'soso' | 'bad')[] = ['good', 'soso', 'bad'];
+    const feeling = i % 3 === 0 ? feelings[Math.floor(Math.random() * feelings.length)] : undefined;
     
     const date = new Date();
     date.setDate(date.getDate() - i);
@@ -255,6 +258,7 @@ export function generateMockReadings(count: number = 10): MockTarotReading[] {
       card_id: card.id,
       is_reversed: isReversed,
       interpretation: `${target === 'self' ? 'あなた' : '相手'}への今日のメッセージ。${card.description}`,
+      user_feeling: feeling,
       user_comment: i % 3 === 0 ? '当たってました！' : undefined,
       created_at: date.toISOString(),
       updated_at: date.toISOString(),

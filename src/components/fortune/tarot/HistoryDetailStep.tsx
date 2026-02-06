@@ -1,6 +1,6 @@
 import React from 'react';
+import Image from 'next/image';
 import { TarotReading } from '@/lib/api/tarot';
-import { ArrowLeft } from 'lucide-react';
 
 interface HistoryDetailStepProps {
   reading: TarotReading;
@@ -8,113 +8,161 @@ interface HistoryDetailStepProps {
 }
 
 export const HistoryDetailStep: React.FC<HistoryDetailStepProps> = ({ reading, onBack }) => {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('ja-JP', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getMentalStateLabel = (state: string) => {
-    const labels = {
-      sunny: '☀️ 晴れ',
-      cloudy: '☁️ 曇り',
-      rainy: '🌧️ 雨'
-    };
-    return labels[state as keyof typeof labels] || state;
-  };
-
   const getTargetLabel = (target: string) => {
     return target === 'self' ? '自分' : '相手';
   };
 
+  const cardName = reading.card.name || 'カード';
+  const position = reading.is_reversed ? '逆位置' : '正位置';
+
   return (
     <div className="space-y-6">
-      {/* ヘッダー */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onBack}
-          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5 text-white" />
-        </button>
-        <div>
-          <h3 className="text-xl font-bold text-white">占い結果の詳細</h3>
-          <p className="text-sm text-purple-200">{formatDate(reading.created_at)}</p>
+      {/* 対象バッジ */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
+        <div style={{ 
+          fontFamily: 'Noto Sans JP', 
+          fontWeight: 700, 
+          fontSize: '12px', 
+          lineHeight: '20px', 
+          textAlign: 'center', 
+          color: '#FFFFFF', 
+          background: '#3A84C9', 
+          padding: '0 7.5px', 
+          borderRadius: '10px' 
+        }}>
+          {getTargetLabel(reading.target)}
         </div>
+        <p style={{ 
+          fontFamily: 'Noto Sans JP', 
+          fontWeight: 700, 
+          fontSize: '12px', 
+          lineHeight: '20px', 
+          textAlign: 'center', 
+          color: '#FFFFFF', 
+          margin: 0 
+        }}>
+          本日の占い結果
+        </p>
       </div>
 
-      {/* カード情報 */}
       <div className="text-center">
-        <div className="inline-block p-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl shadow-2xl mb-4">
-          <div className="text-6xl mb-4">{reading.is_reversed ? '🔄' : '✨'}</div>
-          <h3 className="text-3xl font-bold text-white">{reading.card.name}</h3>
-          <p className="text-sm text-yellow-100 mt-2">{reading.card.name_en}</p>
-          {reading.is_reversed && (
-            <div className="mt-3 px-4 py-2 bg-white/20 rounded-lg">
-              <span className="text-sm text-white font-semibold">逆位置</span>
+        {/* カード情報表示エリア */}
+        <div 
+          className="mb-6 relative mx-auto rounded-xl overflow-hidden w-[332px] h-[301px] p-[31px_16px_23px_16px] flex mt-6"
+          style={{ 
+            backgroundImage: 'url(/tarot-material/space.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          {/* 左側: カード名 + カード画像 */}
+          <div>
+            {/* カード名と位置 */}
+            <div>
+              <h3 className="font-medium text-base text-left m-0" style={{ fontFamily: 'Inter', lineHeight: '130%', color: '#C4C46D' }}>
+                {cardName}
+              </h3>
+              <p className="font-bold text-xs text-center m-0" style={{ fontFamily: 'Noto Sans JP', lineHeight: '20px', color: '#C4C46D' }}>
+                ({position})
+              </p>
             </div>
-          )}
+
+            {/* カード画像 */}
+            <div className="flex justify-center mt-2">
+              <Image
+                alt={cardName}
+                width={114}
+                height={191}
+                src={reading.card.image_url}
+              />
+            </div>
+          </div>
+
+          {/* 右側: バッジ + タイトル + 説明 */}
+          <div className="flex-1 flex flex-col gap-2">
+            {/* バッジ */}
+            <div>
+              <div className="bg-yellow-600 text-white px-3 py-1 rounded-full text-xs inline-block">
+                {reading.is_reversed ? reading.card.reverse_meaning : reading.card.meaning}
+              </div>
+            </div>
+
+            {/* タイトル */}
+            <h4 className="font-medium text-sm text-center text-white m-0" style={{ fontFamily: 'Inter', lineHeight: '130%' }}>
+              {reading.interpretation}
+            </h4>
+
+            {/* ボーダー */}
+            <div className="mx-auto border-b w-[153px]" style={{ borderColor: '#73732F' }} />
+
+            {/* 説明文 */}
+            <p className="font-normal text-center text-white m-0" style={{ fontFamily: 'Noto Sans JP', fontSize: '10px', lineHeight: '16px' }}>
+              {reading.card.description}
+            </p>
+          </div>
+        </div>
+
+        {/* 感想セクション */}
+        <div>
+          <div className="text-center">
+            <h3 
+              className="font-bold text-xs text-center m-0 w-[343px] mx-auto rounded-t-lg py-3 px-0"
+              style={{
+                color: '#E9D9FD',
+                boxShadow: '0px 1px 1px 0px #1A1045',
+                background: '#2E206B'
+              }}
+            >
+              占い結果の感想
+            </h3>
+          </div>
+          <div
+            className="w-[343px] mx-auto rounded-b-lg p-4"
+            style={{
+              background: 'linear-gradient(180deg, rgba(145, 97, 196, 0.8) 0%, rgba(86, 76, 145, 0.8) 138.68%)'
+            }}
+          >
+            <div className="flex gap-4 items-start">
+              {/* 選択された感情アイコン */}
+              <div className="flex items-center justify-center flex-shrink-0 w-[80px] h-[63px]">
+                {reading.user_feeling && (
+                  <Image
+                    alt={reading.user_feeling === 'good' ? '良い' : reading.user_feeling === 'soso' ? '普通' : '悪い'}
+                    src={`/tarot-material/${reading.user_feeling}.svg`}
+                    width={80}
+                    height={63}
+                    className="w-[80px] h-[63px]"
+                  />
+                )}
+              </div>
+
+              {/* 感想テキスト */}
+              <div className="flex-1 rounded-xl overflow-auto p-2 h-[63px]" style={{ background: 'rgba(255, 255, 255, 0.8)' }}>
+                <p className="font-bold text-xs m-0 whitespace-pre-wrap break-words" style={{ fontFamily: 'Noto Sans JP', lineHeight: '20px', color: '#2F2B37' }}>
+                  {reading.user_comment || ''}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 過去の占い結果ボタン */}
+          <div className="flex justify-center mt-10">
+            <button
+              onClick={onBack}
+              className="font-bold text-base text-center text-white w-[140px] h-[48px] rounded-lg cursor-pointer"
+              style={{
+                fontFamily: 'Noto Sans JP',
+                lineHeight: '16px',
+                background: 'linear-gradient(180deg, #E3AC66 0%, #89602B 100%)',
+                border: '1px solid #FFB370',
+                boxShadow: '0px 4px 0px 0px #5B3500'
+              }}
+            >
+              過去の占い結果
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* 占いの状況 */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 bg-white/10 backdrop-blur-sm rounded-xl">
-          <p className="text-sm text-purple-200 mb-1">対象</p>
-          <p className="text-lg font-bold text-white">{getTargetLabel(reading.target)}</p>
-        </div>
-        <div className="p-4 bg-white/10 backdrop-blur-sm rounded-xl">
-          <p className="text-sm text-purple-200 mb-1">その時の気分</p>
-          <p className="text-lg font-bold text-white">{getMentalStateLabel(reading.mental_state)}</p>
-        </div>
-      </div>
-
-      {/* 解釈 */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-        <h4 className="text-lg font-bold text-white mb-3">🔮 当時の解釈</h4>
-        <p className="text-purple-100 leading-relaxed whitespace-pre-line">
-          {reading.interpretation}
-        </p>
-      </div>
-
-      {/* キーワード */}
-      <div className="bg-gradient-to-r from-purple-600/50 to-pink-600/50 rounded-xl p-6">
-        <h4 className="text-lg font-bold text-white mb-3">💡 キーワード</h4>
-        <p className="text-white">
-          {reading.is_reversed ? reading.card.reverse_meaning : reading.card.meaning}
-        </p>
-      </div>
-
-      {/* カードの説明 */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-        <h4 className="text-lg font-bold text-white mb-3">📖 カードの説明</h4>
-        <p className="text-purple-100 leading-relaxed">
-          {reading.card.description}
-        </p>
-      </div>
-
-      {/* ユーザーの感想 */}
-      {reading.user_comment && (
-        <div className="bg-gradient-to-r from-blue-600/50 to-indigo-600/50 rounded-xl p-6">
-          <h4 className="text-lg font-bold text-white mb-3">💭 あなたの感想</h4>
-          <p className="text-white leading-relaxed italic">
-            {reading.user_comment}
-          </p>
-        </div>
-      )}
-
-      {/* 戻るボタン */}
-      <button
-        onClick={onBack}
-        className="w-full px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all"
-      >
-        履歴一覧に戻る
-      </button>
     </div>
   );
 };
