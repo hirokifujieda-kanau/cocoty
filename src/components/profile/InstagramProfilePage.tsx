@@ -253,6 +253,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [showDailyTarot, setShowDailyTarot] = useState(false);
   const [showSeasonalDiagnosis, setShowSeasonalDiagnosis] = useState(false);
   const [showMentalStats, setShowMentalStats] = useState(false);
+  const [tarotDrawnToday, setTarotDrawnToday] = useState(false);
   
   // プロフィール機能の状態
   const [showSettings, setShowSettings] = useState(false);
@@ -264,6 +265,16 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   useEffect(() => {
     console.log('🔍 showSettings が変更されました:', showSettings);
   }, [showSettings]);
+  
+  // タロット占いの実施状況をlocalStorageから確認
+  useEffect(() => {
+    const checkTarotStatus = () => {
+      const lastDrawn = localStorage.getItem('tarot_last_drawn_date');
+      const today = new Date().toDateString();
+      setTarotDrawnToday(lastDrawn === today);
+    };
+    checkTarotStatus();
+  }, []);
   
   // 初回ユーザーの場合、自動的にプロフィール編集モーダルを開く
   useEffect(() => {
@@ -624,49 +635,31 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
               <div className="w-full flex flex-col items-center" style={{ gap: '56px' }}>
                 <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
                   {/* タロット占い - 1日1回制限（0時リセット） */}
-                  {(() => {
-                    const lastDrawn = displayUser.tarot_last_drawn_at 
-                      ? new Date(displayUser.tarot_last_drawn_at) 
-                      : null;
-                    const today = new Date();
-                    const isDrawnToday = lastDrawn && 
-                      lastDrawn.getDate() === today.getDate() &&
-                      lastDrawn.getMonth() === today.getMonth() &&
-                      lastDrawn.getFullYear() === today.getFullYear();
-
-                    return (
-                      <div className="relative">
-                        <button
-                          onClick={async () => {
-                            // モーダルを開く前に最新のプロフィールを取得
-                            await refetchProfile();
-                            setShowDailyTarot(true);
-                          }}
-                          className={`transition-all transform rounded-xl overflow-hidden flex-shrink-0 ${
-                            isDrawnToday 
-                              ? 'opacity-90 cursor-pointer hover:opacity-100 hover:scale-105' 
-                              : 'hover:opacity-80 hover:scale-105'
-                          }`}
-                          style={{ 
-                            width: 'clamp(150px, 26vw, 200px)', 
-                            height: 'clamp(56px, 10vw, 75px)',
-                            boxSizing: 'border-box'
-                          }}
-                        >
-                          <img 
-                            src="/タロット占い.svg" 
-                            alt={isDrawnToday ? "今日の結果" : "今日のタロット占い"} 
-                            className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" 
-                          />
-                        </button>
-                        {isDrawnToday && (
-                          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
-                            本日完了
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
+                  <div className="relative">
+                    <button
+                      onClick={async () => {
+                        // モーダルを開く前に最新のプロフィールを取得
+                        await refetchProfile();
+                        setShowDailyTarot(true);
+                      }}
+                      className={`transition-all transform rounded-xl overflow-hidden flex-shrink-0 ${
+                        tarotDrawnToday 
+                          ? 'opacity-90 cursor-pointer hover:opacity-100 hover:scale-105' 
+                          : 'hover:opacity-80 hover:scale-105'
+                      }`}
+                      style={{ 
+                        width: 'clamp(150px, 26vw, 200px)', 
+                        height: 'clamp(56px, 10vw, 75px)',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <img 
+                        src={tarotDrawnToday ? "/タロット占い終わり.svg" : "/タロット占い.svg"}
+                        alt={tarotDrawnToday ? "今日の結果" : "今日のタロット占い"} 
+                        className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" 
+                      />
+                    </button>
+                  </div>
 
                   {/* RPG診断 - 1回のみ（完了後は結果のみ） */}
                   {(() => {
@@ -1236,6 +1229,10 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           onClose={() => {
             console.log('🔒 [InstagramProfilePage] DailyTarot closed, refetching profile...');
             setShowDailyTarot(false);
+            // タロット占い完了をlocalStorageに記録
+            const today = new Date().toDateString();
+            localStorage.setItem('tarot_last_drawn_date', today);
+            setTarotDrawnToday(true);
             // タロット占い完了後、プロフィールを再取得
             setTimeout(() => {
               refetchProfile();
