@@ -26,29 +26,11 @@ export const HistoryDetailStep: React.FC<HistoryDetailStepProps> = ({ reading, o
   return (
     <div className="space-y-6">
       {/* 対象バッジ */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
-        <div style={{ 
-          fontFamily: 'Noto Sans JP', 
-          fontWeight: 700, 
-          fontSize: '12px', 
-          lineHeight: '20px', 
-          textAlign: 'center', 
-          color: '#FFFFFF', 
-          background: '#3A84C9', 
-          padding: '0 7.5px', 
-          borderRadius: '10px' 
-        }}>
+      <div className="flex items-center justify-center gap-2 mb-6">
+        <div className="font-noto-sans-jp font-bold text-xs leading-5 text-center text-white bg-[#3A84C9] px-[7.5px] rounded-[10px]">
           {getTargetLabel(reading.target)}
         </div>
-        <p style={{ 
-          fontFamily: 'Noto Sans JP', 
-          fontWeight: 700, 
-          fontSize: '12px', 
-          lineHeight: '20px', 
-          textAlign: 'center', 
-          color: '#FFFFFF', 
-          margin: 0 
-        }}>
+        <p className="font-noto-sans-jp font-bold text-xs leading-5 text-center text-white m-0">
           {formatDate(reading.created_at)}の占い結果
         </p>
       </div>
@@ -56,21 +38,16 @@ export const HistoryDetailStep: React.FC<HistoryDetailStepProps> = ({ reading, o
       <div className="text-center">
         {/* カード情報表示エリア */}
         <div 
-          className="mb-6 relative mx-auto rounded-xl overflow-hidden w-[332px] h-[301px] p-[31px_16px_23px_16px] flex mt-6"
-          style={{ 
-            backgroundImage: 'url(/tarot-material/space.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
+          className="mb-6 relative mx-auto rounded-xl overflow-hidden w-[332px] h-[301px] p-[31px_16px_23px_16px] flex mt-6 bg-cover bg-center bg-[url(/tarot-material/space.png)]"
         >
           {/* 左側: カード名 + カード画像 */}
           <div>
             {/* カード名と位置 */}
             <div>
-              <h3 className="font-medium text-base text-left m-0" style={{ fontFamily: 'Inter', lineHeight: '130%', color: '#C4C46D' }}>
+              <h3 className="font-medium text-base text-left m-0 font-inter leading-[130%] text-[#C4C46D]">
                 {cardName}
               </h3>
-              <p className="font-bold text-xs text-center m-0" style={{ fontFamily: 'Noto Sans JP', lineHeight: '20px', color: '#C4C46D' }}>
+              <p className="font-bold text-xs text-center m-0 font-noto-sans-jp leading-5 text-[#C4C46D]">
                 ({position})
               </p>
             </div>
@@ -96,15 +73,15 @@ export const HistoryDetailStep: React.FC<HistoryDetailStepProps> = ({ reading, o
             </div>
 
             {/* タイトル */}
-            <h4 className="font-medium text-sm text-center text-white m-0" style={{ fontFamily: 'Inter', lineHeight: '130%' }}>
+            <h4 className="font-medium text-sm text-center text-white m-0 font-inter leading-[130%]">
               {reading.interpretation}
             </h4>
 
             {/* ボーダー */}
-            <div className="mx-auto border-b w-[153px]" style={{ borderColor: '#73732F' }} />
+            <div className="mx-auto border-b w-[153px] border-[#73732F]" />
 
             {/* 説明文 */}
-            <p className="font-normal text-center text-white m-0" style={{ fontFamily: 'Noto Sans JP', fontSize: '10px', lineHeight: '16px' }}>
+            <p className="font-normal text-center text-white m-0 font-noto-sans-jp text-[10px] leading-4">
               {reading.card.description}
             </p>
           </div>
@@ -114,21 +91,13 @@ export const HistoryDetailStep: React.FC<HistoryDetailStepProps> = ({ reading, o
         <div>
           <div className="text-center">
             <h3 
-              className="font-bold text-xs text-center m-0 w-[343px] mx-auto rounded-t-lg py-3 px-0"
-              style={{
-                color: '#E9D9FD',
-                boxShadow: '0px 1px 1px 0px #1A1045',
-                background: '#2E206B'
-              }}
+              className="font-bold text-xs text-center m-0 w-[343px] mx-auto rounded-t-lg py-3 px-0 text-[#E9D9FD] shadow-[0px_1px_1px_0px_#1A1045] bg-[#2E206B]"
             >
               占い結果の感想
             </h3>
           </div>
           <div
-            className="w-[343px] mx-auto rounded-b-lg p-4"
-            style={{
-              background: 'linear-gradient(180deg, rgba(145, 97, 196, 0.8) 0%, rgba(86, 76, 145, 0.8) 138.68%)'
-            }}
+            className="w-[343px] mx-auto rounded-b-lg p-4 bg-gradient-to-b from-[rgba(145,97,196,0.8)] to-[rgba(86,76,145,0.8)]"
           >
             <div className="flex gap-4 items-start">
               {/* 選択された感情アイコン */}
@@ -145,8 +114,8 @@ export const HistoryDetailStep: React.FC<HistoryDetailStepProps> = ({ reading, o
               </div>
 
               {/* 感想テキスト */}
-              <div className="flex-1 rounded-xl overflow-auto p-2 h-[63px]" style={{ background: 'rgba(255, 255, 255, 0.8)' }}>
-                <p className="font-bold text-xs m-0 whitespace-pre-wrap break-words" style={{ fontFamily: 'Noto Sans JP', lineHeight: '20px', color: '#2F2B37' }}>
+              <div className="flex-1 rounded-xl overflow-auto p-2 h-[63px] bg-[rgba(255,255,255,0.8)]">
+                <p className="font-bold text-xs m-0 whitespace-pre-wrap break-words font-noto-sans-jp leading-5 text-[#2F2B37]">
                   {reading.user_comment || ''}
                 </p>
               </div>
