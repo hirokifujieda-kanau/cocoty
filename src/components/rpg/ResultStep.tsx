@@ -15,7 +15,7 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
   const points = labels.map((_, index) => {
     const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
     const value = values[index];
-    const radius = (value / maxValue) * 100;
+    const radius = (value / maxValue) * 105; // ラベル位置120に対して、最大値4の時105まで広がる
     const x = 150 + radius * Math.cos(angle);
     const y = 150 + radius * Math.sin(angle);
     return { x, y, value };
@@ -23,7 +23,7 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
 
   // 背景グリッドの円
   const gridCircles = [1, 2, 3, 4].map(level => {
-    const radius = (level / maxValue) * 100;
+    const radius = (level / maxValue) * 105; // ポリゴンと同じサイズに
     return radius;
   });
 
@@ -87,18 +87,34 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
         const x = 150 + 120 * Math.cos(angle);
         const y = 150 + 120 * Math.sin(angle);
         return (
-          <text
-            key={index}
-            x={x}
-            y={y}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="#fff"
-            fontSize="12"
-            fontWeight="bold"
-          >
-            {label}
-          </text>
+          <g key={index}>
+            {/* 白い縁取り（ストローク） */}
+            <text
+              x={x}
+              y={y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="3"
+              fontSize="12"
+              fontWeight="bold"
+            >
+              {label}
+            </text>
+            {/* 青いテキスト本体 */}
+            <text
+              x={x}
+              y={y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#3b82f6"
+              fontSize="12"
+              fontWeight="bold"
+            >
+              {label}
+            </text>
+          </g>
         );
       })}
     </svg>
@@ -175,122 +191,130 @@ export const ResultStep: React.FC<ResultStepProps> = ({
 
   // 因子の順序を固定（要件通り）
   const FIXED_ORDER: (keyof typeof INSTINCT_DESCRIPTIONS)[] = [
-    '狩猟本能',  // フェンサー素質
-    '警戒本能',  // シールダー素質
     '職人魂',    // ガンナー素質
+    '狩猟本能',  // フェンサー素質
     '共感本能',  // ヒーラー素質
+    '警戒本能',  // シールダー素質
     '飛躍本能',  // スキーマー素質
   ];
 
   return (
     <div className="space-y-8">
-      {/* タイトル */}
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-white mb-2">
-          🎮 あなたのRPG診断結果
-        </h2>
-        <p className="text-purple-200">
-          5つの本能から見たあなたの特性
-        </p>
-      </div>
-
-      {/* レーダーチャート */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-        <div className="max-w-md mx-auto aspect-square">
-          <RadarChart data={instinctLevels} />
-        </div>
-      </div>
-
-      {/* 5つの因子を静的に表示（固定順序） */}
-      <div className="space-y-4">
-        <h3 className="text-xl font-bold text-white text-center">📊 全本能の詳細レポート</h3>
-        <p className="text-center text-purple-200 text-sm mb-4">
-          <span className="font-semibold">名称：</span>フェンサー素質・シールダー素質・ガンナー素質・ヒーラー素質・スキーマー素質<br />
-          <span className="font-semibold">遺伝"素質"名：</span>狩猟本能・警戒本能・職人魂・共感本能・飛躍本能
-        </p>
-        {FIXED_ORDER.map((instinct) => {
-          const info = INSTINCT_DESCRIPTIONS[instinct];
-          const level = instinctLevels[instinct];
-          const isHigh = level >= 3;
-          
-          return (
-            <div
-              key={instinct}
-              className="bg-white/10 backdrop-blur-sm rounded-xl p-5 space-y-4"
-            >
-              {/* ヘッダー */}
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">{info.emoji}</span>
-                  <div>
-                    <h4 className="font-bold text-white text-lg">{instinct}</h4>
-                    <p className="text-sm text-purple-200">{info.素質名}</p>
-                    <p className="text-xs text-purple-300 mt-1">{info.description}</p>
-                  </div>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <div className="text-3xl font-bold text-white">
-                    {level}
-                  </div>
-                  <div className="text-xs text-purple-200 mt-1">
-                    レベル
-                  </div>
-                </div>
+      {/* メインコンテンツエリア（上部：レーダーチャート + スコア + キャラクター） */}
+      <div className="rounded-2xl p-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+          {/* 左：スコア表示 */}
+          <div>
+            {/* タイトル（青い六角形） */}
+            <div className="text-center mb-4">
+              <div className="inline-block bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-12 py-4 relative"
+                   style={{
+                     clipPath: 'polygon(15% 0%, 85% 0%, 92% 50%, 85% 100%, 15% 100%, 8% 50%)'
+                   }}>
+                <h2 className="text-2xl font-bold">
+                  あなたの適性診断結果
+                </h2>
               </div>
-              
-              {/* レベルバー */}
-              <div className="w-full bg-white/20 rounded-full h-2">
-                <div
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all"
-                  style={{ width: `${(level / 4) * 100}%` }}
-                />
-              </div>
-
-              {/* 詳細情報 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {/* 左列：高い場合の特徴 */}
-                <div className="space-y-3">
-                  <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg p-3 border border-blue-400/30">
-                    <div className="font-semibold text-blue-200 mb-2 text-sm">
-                      📈 レベルが高い人の特徴
-                    </div>
-                    <p className="text-white/90 text-sm mb-2">{info.高い人の特徴}</p>
-                    <div className="space-y-1">
-                      <div className="flex items-start gap-1">
-                        <span className="text-green-300 text-xs">✅</span>
-                        <p className="text-green-200 text-xs">{info.高い利点}</p>
-                      </div>
-                      <div className="flex items-start gap-1">
-                        <span className="text-orange-300 text-xs">⚠️</span>
-                        <p className="text-orange-200 text-xs">{info.高いコスト}</p>
-                      </div>
-                    </div>
+            </div>
+            
+            <div className="overflow-hidden shadow-lg border-[8px] border-blue-600">
+              {FIXED_ORDER.map((instinct, index) => {
+                const info = INSTINCT_DESCRIPTIONS[instinct];
+                const level = instinctLevels[instinct];
+                const isEven = index % 2 === 0;
+                return (
+                  <div 
+                    key={instinct} 
+                    className="flex justify-between items-center px-6 border-b-[4px] border-blue-600"
+                    style={{ 
+                      backgroundColor: isEven ? '#c3ddf5' : '#9fc5f0',
+                      paddingBlock: 'calc(var(--spacing) * 2)'
+                    }}
+                  >
+                    <span className="text-blue-600 font-bold text-lg">{instinct}</span>
+                    <span className="text-white font-bold text-2xl">{level} ポイント</span>
                   </div>
-                </div>
-
-                {/* 右列：低い場合の特徴 */}
-                <div className="space-y-3">
-                  <div className="bg-gradient-to-br from-gray-500/20 to-slate-500/20 rounded-lg p-3 border border-gray-400/30">
-                    <div className="font-semibold text-gray-200 mb-2 text-sm">
-                      📉 レベルが低い人の特徴
-                    </div>
-                    <p className="text-white/90 text-sm mb-2">{info.低い人の特徴}</p>
-                    <div className="space-y-1">
-                      <div className="flex items-start gap-1">
-                        <span className="text-green-300 text-xs">✅</span>
-                        <p className="text-green-200 text-xs">{info.低い利点}</p>
-                      </div>
-                      <div className="flex items-start gap-1">
-                        <span className="text-orange-300 text-xs">⚠️</span>
-                        <p className="text-orange-200 text-xs">{info.低いコスト}</p>
-                      </div>
-                    </div>
-                  </div>
+                );
+              })}
+              <div className="bg-cyan-500 px-6 py-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-white font-bold text-xl">トータル</span>
+                  <span className="text-3xl font-bold text-white">
+                    {Object.values(instinctLevels).reduce((a, b) => a + b, 0)}ポイント
+                  </span>
                 </div>
               </div>
             </div>
-          );
-        })}
+            <p className="text-xs text-gray-500 text-center mt-2">
+              ※ポイントの大小は、
+              <br />
+              直接的な評価や優劣を示すものではありません。
+            </p>
+          </div>
+
+          {/* 中央：レーダーチャート */}
+          <div className="flex justify-center">
+            <div className="w-80 h-80 relative">
+              <RadarChart data={instinctLevels} />
+            </div>
+          </div>
+
+          {/* 右：キャラクターイラスト + 吹き出し */}
+          <div className="flex flex-col items-center">
+            <div className="relative bg-white rounded-2xl p-4 mb-4 shadow-lg max-w-xs border-2" style={{ borderColor: '#a5b4fc' }}>
+              <p className="text-sm text-gray-700 text-center">
+                <span className="font-semibold text-blue-600">診断結果の各数値</span>と
+                <br />
+                <span className="font-semibold text-blue-600">下の表を照らし合わせる</span>と、
+                <br />
+                あなたのタイプが分かっちゃいます♪
+              </p>
+              {/* 吹き出しの三角形（下向き） - 外側のボーダー */}
+              <div className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-0 h-0 border-l-[13px] border-l-transparent border-r-[13px] border-r-transparent border-t-[13px]" style={{ borderTopColor: '#a5b4fc' }}></div>
+              {/* 吹き出しの三角形（下向き） - 内側の白 */}
+              <div className="absolute left-1/2 -translate-x-1/2 -bottom-[10px] w-0 h-0 border-l-[11px] border-l-transparent border-r-[11px] border-r-transparent border-t-[11px] border-t-white"></div>
+            </div>
+            {/* キャラクター画像（モック：紫のグラデーション） */}
+            <div className="w-48 h-48 bg-gradient-to-br from-pink-200 to-purple-300 rounded-full flex items-center justify-center shadow-xl">
+              <span className="text-6xl">👧</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 下部：5つのカード - ゲームカード風デザイン */}
+      <div className="border-2 rounded-lg p-4" style={{ borderColor: '#fed7aa' }}>
+        <div className="flex gap-6">
+          {/* 左側：項目リスト */}
+          <div className="w-32 flex-shrink-0 flex flex-col text-xs">
+            <div className="p-3 text-center font-bold" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>名称</div>
+            <div className="p-3 text-center" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>適性名</div>
+            <div className="p-12 text-center text-gray-400" style={{ backgroundColor: '#ffffff', marginBottom: '2px' }}>
+              職業イメージ
+            </div>
+            <div className="p-3 text-center font-bold" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高い人の特徴</div>
+            <div className="p-3 text-center" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高い利点</div>
+            <div className="p-3 text-center" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高いコスト</div>
+            <div className="p-3 text-center font-bold" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>低い人の特徴</div>
+            <div className="p-3 text-center" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>低い利点</div>
+            <div className="p-3 text-center" style={{ backgroundColor: '#f5e6d3' }}>低いコスト</div>
+          </div>
+          
+          {/* 右側：5つのカード */}
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            {FIXED_ORDER.map((instinct) => {
+            return (
+              <div key={instinct} className="relative">
+                <img 
+                  src={`/rpg-characters/${instinct}.png`} 
+                  alt={instinct}
+                  className="w-full h-auto object-contain"
+                />
+              </div>
+            );
+          })}
+          </div>
+        </div>
       </div>
 
       {/* アクションボタン */}

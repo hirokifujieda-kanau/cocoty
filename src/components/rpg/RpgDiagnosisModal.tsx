@@ -127,7 +127,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   }
 
   const currentQuestion = questions[currentQuestionIndex];
-  const currentAnswer = answers.find(a => a.questionId === currentQuestion.id)?.score || null;
+  const currentAnswer = answers.find(a => a.questionId === currentQuestion.id)?.score || 3;
 
   // 回答を保存
   const handleAnswer = (score: number) => {
@@ -193,7 +193,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
 
       {/* コンテンツ */}
       <div className="h-[calc(100vh-80px)] overflow-y-auto">
-        <div className="max-w-2xl mx-auto p-8">
+        <div className={`mx-auto p-8 ${showResult ? 'max-w-7xl' : 'max-w-2xl'}`}>
           {!showResult ? (
             <QuestionStep
               questionNumber={currentQuestionIndex + 1}
@@ -203,7 +203,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
               onAnswer={handleAnswer}
               onNext={handleNext}
               onBack={handleBack}
-              canGoNext={currentAnswer !== null}
+              canGoNext={true}
               canGoBack={currentQuestionIndex > 0}
             />
           ) : showResult ? (
