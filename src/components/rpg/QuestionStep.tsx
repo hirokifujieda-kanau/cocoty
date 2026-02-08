@@ -27,92 +27,130 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
 }) => {
   const scores = [1, 2, 3, 4, 5];
   const labels = ['まったく違う', '', '', '', 'まさにその通り'];
+  
+  // 質問番号を2桁にフォーマット (例: 1 -> 01, 15 -> 15)
+  const formatQuestionNumber = (num: number) => num.toString().padStart(2, '0');
 
   return (
-    <div className="space-y-8">
-      {/* 進捗表示 */}
-      <div className="text-center">
-        <p className="text-purple-200 text-sm mb-2">
-          質問 {questionNumber} / {totalQuestions}
+    <div className="space-y-0">
+      {/* 質問番号表示（上部） */}
+      <div className="text-center mb-8">
+        <p className="text-black text-lg font-semibold">
+          質問{formatQuestionNumber(questionNumber)}
         </p>
-        <div className="w-full bg-white/20 rounded-full h-2">
-          <div
-            className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(questionNumber / totalQuestions) * 100}%` }}
-          />
-        </div>
       </div>
 
       {/* 質問文 */}
-      <div className="text-center">
-        <h3 className="text-2xl font-bold text-white mb-2">
+      <div className="text-center pt-12 pb-6 px-6" style={{ backgroundColor: '#4A1515' }}>
+        <h3 className="text-lg font-bold text-white">
           {questionText}
         </h3>
-        <p className="text-purple-200 text-sm">
-          考え過ぎずに直感で回答してください
-        </p>
       </div>
 
       {/* 回答選択肢 */}
-      <div className="space-y-4">
-        <div className="flex justify-between text-xs text-purple-200 mb-2">
+      <div className="space-y-4 p-6" style={{ backgroundColor: '#4A1515' }}>
+        {/* ボタンとラベル */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+          {/* PC時: 左ラベル */}
+          <span className="hidden md:block text-xs text-white flex-shrink-0">{labels[0]}</span>
+
+          {/* 中央: 数字とボタン */}
+          <div className="flex flex-col items-center gap-2">
+            {/* スケールラベル（数字） */}
+            <div className="flex justify-center items-center text-xs text-white" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 8), calc(var(--spacing) * 12))' }}>
+              {scores.map((score) => (
+                <span key={score} className="w-6 text-center">
+                  {score}
+                </span>
+              ))}
+            </div>
+
+            {/* ボタン */}
+            <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 8), calc(var(--spacing) * 12))' }}>
+              {scores.map((score) => (
+                <button
+                  key={score}
+                  onClick={() => onAnswer(score)}
+                  className={`
+                    w-6 h-6 rounded-full transition-all border-2 flex items-center justify-center
+                    ${
+                      currentAnswer === score
+                        ? 'border-white'
+                        : 'bg-transparent border-white hover:bg-white/20'
+                    }
+                  `}
+                >
+                  {currentAnswer === score && (
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="3" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className="w-4 h-4 text-white"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* PC時: 右ラベル */}
+          <span className="hidden md:block text-xs text-white flex-shrink-0">{labels[4]}</span>
+        </div>
+
+        {/* SP時: テキストラベル */}
+        <div className="flex md:hidden justify-between text-xs text-white">
           <span>{labels[0]}</span>
           <span>{labels[4]}</span>
-        </div>
-
-        <div className="flex gap-3 justify-center">
-          {scores.map((score) => (
-            <button
-              key={score}
-              onClick={() => onAnswer(score)}
-              className={`
-                w-16 h-16 rounded-full font-bold text-lg transition-all
-                ${
-                  currentAnswer === score
-                    ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white scale-110 shadow-lg'
-                    : 'bg-white/10 text-white hover:bg-white/20'
-                }
-              `}
-            >
-              {score}
-            </button>
-          ))}
-        </div>
-
-        {/* スケールラベル */}
-        <div className="flex justify-between text-xs text-purple-300 px-2">
-          {scores.map((score) => (
-            <span key={score} className="w-16 text-center">
-              {score}
-            </span>
-          ))}
         </div>
       </div>
 
       {/* ナビゲーションボタン */}
-      <div className="flex gap-4 pt-8">
-        {canGoBack && (
-          <button
-            onClick={onBack}
-            className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all"
-          >
-            ← 戻る
-          </button>
-        )}
+      <div className="flex justify-center gap-16 pt-8">
+        <button
+          onClick={onBack}
+          disabled={!canGoBack}
+          className="w-[140px] h-12 rounded-lg font-semibold transition-all text-white border"
+          style={{
+            background: canGoBack 
+              ? 'linear-gradient(180deg, #6B7280 0%, #4B5563 100%)'
+              : 'linear-gradient(180deg, #9CA3AF 0%, #6B7280 100%)',
+            borderColor: canGoBack ? '#9CA3AF' : '#6B7280',
+            boxShadow: '0px 4px 0px 0px #374151',
+            opacity: canGoBack ? 1 : 0.5,
+            cursor: canGoBack ? 'pointer' : 'not-allowed'
+          }}
+        >
+          もどる
+        </button>
         <button
           onClick={onNext}
           disabled={!canGoNext}
-          className={`
-            flex-1 px-6 py-3 rounded-xl font-semibold transition-all
-            ${
-              canGoNext
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white'
-                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-            }
-          `}
+          className="w-[140px] h-12 rounded-lg font-semibold transition-all text-white border"
+          style={{
+            background: canGoNext
+              ? 'linear-gradient(180deg, #22D3EE 0%, #0891B2 100%)'
+              : 'linear-gradient(180deg, #6B7280 0%, #4B5563 100%)',
+            borderColor: canGoNext ? '#67E8F9' : '#6B7280',
+            boxShadow: '0px 4px 0px 0px #164E63',
+            opacity: canGoNext ? 1 : 0.5,
+            cursor: canGoNext ? 'pointer' : 'not-allowed'
+          }}
         >
-          {questionNumber === totalQuestions ? '結果を見る →' : '次へ →'}
+          {questionNumber === totalQuestions ? '結果を見る' : '次へ'}
         </button>
+      </div>
+
+      {/* 質問番号表示 */}
+      <div className="text-center pt-4">
+        <p className="text-black text-sm">
+          {formatQuestionNumber(questionNumber)}/{formatQuestionNumber(totalQuestions)}
+        </p>
       </div>
     </div>
   );

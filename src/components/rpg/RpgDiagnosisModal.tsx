@@ -100,8 +100,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   // ローディング中
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
-        <div className="bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 rounded-2xl p-8 text-center">
+      <div className="fixed inset-0 z-50 bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 flex items-center justify-center">
+        <div className="text-center">
           <Sparkles className="h-12 w-12 text-yellow-300 mx-auto mb-4 animate-spin" />
           <p className="text-white text-lg">質問を読み込んでいます...</p>
         </div>
@@ -112,12 +112,12 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   // エラー表示
   if (error && questions.length === 0) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
-        <div className="bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 rounded-2xl p-8 text-center max-w-md">
+      <div className="fixed inset-0 z-50 bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
           <p className="text-red-300 text-lg mb-4">{error}</p>
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all"
+            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-all"
           >
             閉じる
           </button>
@@ -174,26 +174,26 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const result = showResult ? calculateRpgDiagnosis(answers) : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 rounded-2xl shadow-2xl">
-        {/* ヘッダー */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-gradient-to-r from-purple-800 to-indigo-800 border-b border-purple-600">
-          <div className="flex items-center gap-3">
-            <Sparkles className="h-6 w-6 text-yellow-300" />
-            <h2 className="text-2xl font-bold text-white">
-              {showResult ? 'RPG診断結果' : 'RPG診断'}
-            </h2>
-          </div>
-          <button
-            onClick={handleClose}
-            className="text-white hover:text-gray-300 transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
+    <div className="fixed inset-0 z-[9999] bg-white">
+      {/* ヘッダー */}
+      <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center gap-3">
+          <Sparkles className="h-6 w-6 text-yellow-500" />
+          <h2 className="text-2xl font-bold text-gray-900">
+            {showResult ? 'RPG診断結果' : 'RPG診断'}
+          </h2>
         </div>
+        <button
+          onClick={handleClose}
+          className="text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <X className="h-6 w-6" />
+        </button>
+      </div>
 
-        {/* コンテンツ */}
-        <div className="p-8">
+      {/* コンテンツ */}
+      <div className="h-[calc(100vh-80px)] overflow-y-auto">
+        <div className="max-w-2xl mx-auto p-8">
           {!showResult ? (
             <QuestionStep
               questionNumber={currentQuestionIndex + 1}

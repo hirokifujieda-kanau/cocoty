@@ -689,7 +689,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                           }}
                         >
                           <img 
-                            src="/診断.svg" 
+                            src="/診断_new.svg" 
                             alt={isCompleted ? "診断結果" : "RPG診断"} 
                             className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" 
                           />
