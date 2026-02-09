@@ -5,7 +5,7 @@ import type { InstinctLevels } from '@/lib/rpg/calculator';
 import { INSTINCT_DESCRIPTIONS } from '@/lib/mock/mockRpgDiagnosis';
 import { saveRpgDiagnosis } from '@/lib/api/client';
 
-// シンプルなレーダーチャートコンポーネント
+// グラデーション背景付きレーダーチャートコンポーネント
 const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
   const labels = Object.keys(data) as (keyof InstinctLevels)[];
   const values = Object.values(data);
@@ -15,109 +15,261 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
   const points = labels.map((_, index) => {
     const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
     const value = values[index];
-    const radius = (value / maxValue) * 105; // ラベル位置120に対して、最大値4の時105まで広がる
+    const radius = (value / maxValue) * 90; // 最大値90に調整
     const x = 150 + radius * Math.cos(angle);
     const y = 150 + radius * Math.sin(angle);
     return { x, y, value };
   });
 
-  // 背景グリッドの円
-  const gridCircles = [1, 2, 3, 4].map(level => {
-    const radius = (level / maxValue) * 105; // ポリゴンと同じサイズに
-    return radius;
+  // 最大サイズの五角形（背景用）
+  const maxPolygonPoints = labels.map((_, index) => {
+    const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
+    const x = 150 + 100 * Math.cos(angle);
+    const y = 150 + 100 * Math.sin(angle);
+    return { x, y };
+  });
+
+  // グリッド用の五角形（複数サイズ）
+  const gridPentagons = [0.2, 0.4, 0.6, 0.8].map(ratio => {
+    return labels.map((_, index) => {
+      const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
+      const x = 150 + 100 * ratio * Math.cos(angle);
+      const y = 150 + 100 * ratio * Math.sin(angle);
+      return { x, y };
+    });
   });
 
   return (
-    <svg viewBox="0 0 300 300" className="w-full h-full max-w-md mx-auto">
-      {/* 背景グリッド */}
-      {gridCircles.map((radius, i) => (
-        <circle
-          key={i}
-          cx="150"
-          cy="150"
-          r={radius}
+    <div className="relative w-full max-w-md mx-auto aspect-square">
+      <svg viewBox="0 0 300 300" className="w-full h-full" style={{ display: 'block' }}>
+        <defs>
+          {/* データ領域のグラデーション（明るく光る感じ） */}
+          <linearGradient id="dataGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style={{ stopColor: '#cffafe', stopOpacity: 0.95 }} />
+            <stop offset="50%" style={{ stopColor: '#a5f3fc', stopOpacity: 0.9 }} />
+            <stop offset="100%" style={{ stopColor: '#67e8f9', stopOpacity: 0.85 }} />
+          </linearGradient>
+          
+          {/* 背景五角形のグラデーション */}
+          <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style={{ stopColor: '#1e40af', stopOpacity: 0.6 }} />
+            <stop offset="100%" style={{ stopColor: '#1e3a8a', stopOpacity: 0.8 }} />
+          </linearGradient>
+          
+          {/* 角丸フィルター */}
+          <filter id="round">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+          </filter>
+          
+          {/* 放射状の光グラデーション */}
+          <radialGradient id="lightGradient">
+            <stop offset="0%" style={{ stopColor: '#22d3ee', stopOpacity: 0.4 }} />
+            <stop offset="50%" style={{ stopColor: '#06b6d4', stopOpacity: 0.2 }} />
+            <stop offset="100%" style={{ stopColor: '#0891b2', stopOpacity: 0 }} />
+          </radialGradient>
+          
+          {/* 光のフィルター（グロー効果 - 形を保持） */}
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          
+          {/* 奥行き用のグラデーション（内側が明るく、外側が暗く） */}
+          <radialGradient id="depthGradient">
+            <stop offset="0%" style={{ stopColor: '#22d3ee', stopOpacity: 0.5 }} />
+            <stop offset="50%" style={{ stopColor: '#0891b2', stopOpacity: 0.2 }} />
+            <stop offset="100%" style={{ stopColor: '#164e63', stopOpacity: 0 }} />
+          </radialGradient>
+          
+          {/* モヤモヤエフェクト用フィルター */}
+          <filter id="mist" x="-100%" y="-100%" width="300%" height="300%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="5" result="turbulence"/>
+            <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="25" result="displacement"/>
+            <feGaussianBlur in="displacement" stdDeviation="12" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="blur"/>
+            </feMerge>
+          </filter>
+          
+          {/* 水色（内側）〜ピンク（外側）の放射グラデーション */}
+          <radialGradient id="mistGradient" cx="50%" cy="50%">
+            <stop offset="0%" style={{ stopColor: '#22d3ee', stopOpacity: 0.8 }} />
+            <stop offset="45%" style={{ stopColor: '#22d3ee', stopOpacity: 0.7 }} />
+            <stop offset="55%" style={{ stopColor: '#ec4899', stopOpacity: 0.7 }} />
+            <stop offset="100%" style={{ stopColor: '#ec4899', stopOpacity: 0.6 }} />
+          </radialGradient>
+        </defs>
+
+        {/* 中心からの奥行き感を出す放射光 */}
+        <circle cx="150" cy="150" r="90" fill="url(#depthGradient)" />
+
+        {/* モヤモヤレイヤー - 外側のピンク */}
+        <polygon
+          points={maxPolygonPoints.map(p => `${p.x},${p.y}`).join(' ')}
           fill="none"
-          stroke="rgba(255, 255, 255, 0.1)"
-          strokeWidth="1"
+          stroke="#d946ef"
+          strokeWidth="35"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          opacity="0.4"
+          filter="url(#mist)"
         />
-      ))}
+        
+        {/* モヤモヤレイヤー - 内側の水色 */}
+        <polygon
+          points={maxPolygonPoints.map(p => `${p.x},${p.y}`).join(' ')}
+          fill="none"
+          stroke="#22d3ee"
+          strokeWidth="8"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          opacity="0.5"
+          filter="url(#mist)"
+        />
 
-      {/* グリッドライン */}
-      {labels.map((_, index) => {
-        const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
-        const x = 150 + 100 * Math.cos(angle);
-        const y = 150 + 100 * Math.sin(angle);
-        return (
-          <line
-            key={index}
-            x1="150"
-            y1="150"
-            x2={x}
-            y2={y}
-            stroke="rgba(255, 255, 255, 0.1)"
-            strokeWidth="1"
-          />
-        );
-      })}
+        {/* 背景の最大五角形（フィルターで角丸） */}
+        <polygon
+          points={maxPolygonPoints.map(p => `${p.x},${p.y}`).join(' ')}
+          fill="url(#bgGradient)"
+          stroke="rgba(255, 255, 255, 0.4)"
+          strokeWidth="6"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          filter="url(#round)"
+        />
 
-      {/* データ領域 */}
-      <polygon
-        points={points.map(p => `${p.x},${p.y}`).join(' ')}
-        fill="rgba(168, 85, 247, 0.3)"
-        stroke="rgba(168, 85, 247, 1)"
-        strokeWidth="2"
-      />
+        {/* グリッドライン */}
+        {labels.map((_, index) => {
+          const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
+          const x = 150 + 100 * Math.cos(angle);
+          const y = 150 + 100 * Math.sin(angle);
+          return (
+            <line
+              key={index}
+              x1="150"
+              y1="150"
+              x2={x}
+              y2={y}
+              stroke="rgba(255, 255, 255, 0.2)"
+              strokeWidth="1"
+            />
+          );
+        })}
 
-      {/* データポイント */}
-      {points.map((point, index) => (
-        <circle
-          key={index}
-          cx={point.x}
-          cy={point.y}
-          r="4"
-          fill="rgba(236, 72, 153, 1)"
-          stroke="#fff"
+        {/* グリッド五角形（線の外側に光） */}
+        {gridPentagons.map((pentagon, i) => {
+          // 内側ほど明るく（手前に見える）
+          const innerRatio = 1 - (i / gridPentagons.length);
+          const brightness = 0.3 + innerRatio * 0.6;
+          const glowSize = 3 + innerRatio * 6;
+          
+          return (
+            <g key={i}>
+              {/* 外側に広がる光レイヤー3（最も外側・薄い） */}
+              <polygon
+                points={pentagon.map(p => `${p.x},${p.y}`).join(' ')}
+                fill="none"
+                stroke="#22d3ee"
+                strokeWidth={glowSize * 3}
+                opacity={brightness * 0.15}
+                strokeLinejoin="round"
+                filter="url(#glow)"
+              />
+              {/* 外側に広がる光レイヤー2（中間） */}
+              <polygon
+                points={pentagon.map(p => `${p.x},${p.y}`).join(' ')}
+                fill="none"
+                stroke="#06b6d4"
+                strokeWidth={glowSize * 2}
+                opacity={brightness * 0.35}
+                strokeLinejoin="round"
+                filter="url(#glow)"
+              />
+              {/* 外側に広がる光レイヤー1（コア） */}
+              <polygon
+                points={pentagon.map(p => `${p.x},${p.y}`).join(' ')}
+                fill="none"
+                stroke="#22d3ee"
+                strokeWidth={glowSize}
+                opacity={brightness * 0.6}
+                strokeLinejoin="round"
+                filter="url(#glow)"
+              />
+              {/* 線本体（細く鮮明に） */}
+              <polygon
+                points={pentagon.map(p => `${p.x},${p.y}`).join(' ')}
+                fill="none"
+                stroke={`rgba(34, 211, 238, ${0.5 + innerRatio * 0.5})`}
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+            </g>
+          );
+        })}
+
+        {/* データ領域（グラデーション） */}
+        <polygon
+          points={points.map(p => `${p.x},${p.y}`).join(' ')}
+          fill="url(#dataGradient)"
+          stroke="rgba(34, 211, 238, 0.8)"
           strokeWidth="2"
         />
-      ))}
 
-      {/* ラベル */}
-      {labels.map((label, index) => {
-        const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
-        const x = 150 + 120 * Math.cos(angle);
-        const y = 150 + 120 * Math.sin(angle);
-        return (
-          <g key={index}>
-            {/* 白い縁取り（ストローク） */}
+        {/* データポイントと数値 */}
+        {points.map((point, index) => {
+          const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
+          const labelX = 150 + 115 * Math.cos(angle);
+          const labelY = 150 + 115 * Math.sin(angle);
+          
+          return (
+            <g key={index}>
+              {/* 数値ラベル（頂点近く） */}
+              <text
+                x={labelX}
+                y={labelY - 15}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="#fff"
+                fontSize="14"
+                fontWeight="bold"
+              >
+                {point.value}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* ラベルテキスト */}
+        {labels.map((label, index) => {
+          const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
+          const x = 150 + 130 * Math.cos(angle);
+          const y = 150 + 130 * Math.sin(angle);
+          
+          return (
             <text
-              x={x}
-              y={y}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="3"
-              fontSize="12"
-              fontWeight="bold"
-            >
-              {label}
-            </text>
-            {/* 青いテキスト本体 */}
-            <text
+              key={index}
               x={x}
               y={y}
               textAnchor="middle"
               dominantBaseline="middle"
               fill="#3b82f6"
-              fontSize="12"
+              fontSize="13"
               fontWeight="bold"
             >
               {label}
             </text>
-          </g>
-        );
-      })}
-    </svg>
+          );
+        })}
+      </svg>
+    </div>
   );
 };
 
@@ -232,15 +384,19 @@ export const ResultStep: React.FC<ResultStepProps> = ({
                     }}
                   >
                     <span className="text-blue-600 font-bold text-lg">{instinct}</span>
-                    <span className="text-white font-bold text-2xl">{level} ポイント</span>
+                    <span className="font-bold text-2xl">
+                      <span className="text-blue-800">{level}</span>
+                      <span className="text-blue-700 text-base"> ポイント</span>
+                    </span>
                   </div>
                 );
               })}
               <div className="bg-cyan-500 px-6 py-4">
                 <div className="flex justify-between items-center">
                   <span className="text-white font-bold text-xl">トータル</span>
-                  <span className="text-3xl font-bold text-white">
-                    {Object.values(instinctLevels).reduce((a, b) => a + b, 0)}ポイント
+                  <span className="font-bold text-3xl">
+                    <span className="text-white">{Object.values(instinctLevels).reduce((a, b) => a + b, 0)}</span>
+                    <span className="text-white text-base">ポイント</span>
                   </span>
                 </div>
               </div>
@@ -286,10 +442,10 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       <div className="border-2 rounded-lg p-4" style={{ borderColor: '#fed7aa' }}>
         <div className="flex gap-6">
           {/* 左側：項目リスト */}
-          <div className="w-32 flex-shrink-0 flex flex-col" style={{ fontSize: '0.65rem' }}>
+          <div className="w-32 flex-shrink-0 flex flex-col text-amber-700" style={{ fontSize: '0.65rem' }}>
             <div className="py-3 px-2 text-center font-bold" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>名称</div>
             <div className="py-3 px-2 text-center" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>適性名</div>
-            <div className="text-center text-gray-400 flex items-center justify-center" style={{ backgroundColor: '#ffffff', marginBottom: '2px', writingMode: 'horizontal-tb', paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
+            <div className="text-center flex items-center justify-center" style={{ backgroundColor: '#ffffff', marginBottom: '2px', writingMode: 'horizontal-tb', paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
               職業イメージ
             </div>
             <div className="py-3 px-2 text-center font-bold" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高い人の特徴</div>
@@ -318,10 +474,16 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       </div>
 
       {/* アクションボタン */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 justify-center">
         <button
           onClick={onClose}
-          className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all"
+          className="w-[140px] h-12 rounded-lg font-semibold transition-all text-white border"
+          style={{
+            background: 'linear-gradient(rgb(34, 211, 238) 0%, rgb(8, 145, 178) 100%)',
+            borderColor: 'rgb(103, 232, 249)',
+            boxShadow: 'rgb(22, 78, 99) 0px 4px 0px 0px',
+            cursor: 'pointer'
+          }}
         >
           閉じる
         </button>

@@ -207,6 +207,12 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         if (overlay) {
           overlay.style.opacity = '0';
         }
+        
+        // フェードアウト完了後、オーバーレイを完全に削除
+        setTimeout(() => {
+          setShowWhiteOverlay(false);
+          console.log('🎬 ホワイトオーバーレイを削除しました');
+        }, 700); // transition-opacity duration-700と同じ時間
       }, 100);
     }, 300);
   };
