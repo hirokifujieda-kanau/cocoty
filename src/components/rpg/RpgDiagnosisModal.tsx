@@ -28,6 +28,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   // 動画再生用のステート
   const [showVideo, setShowVideo] = useState(false);
   const [showWhiteOverlay, setShowWhiteOverlay] = useState(false);
+  const [hideQuestion, setHideQuestion] = useState(false);  // ホワイトアウト完了後に質問を非表示
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
   // 診断完了済みかチェック
@@ -68,6 +70,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       setShowResult(false);
       setCurrentQuestionIndex(0);
       setAnswers([]);
+      setHideQuestion(false);
     } else if (isOpen && isCompleted) {
       // 完了済みの場合は結果表示モードに
       console.log('✅ 完了済み → 結果を表示します', { completedResult });
@@ -80,7 +83,31 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         setCurrentQuestionIndex(0);
         setAnswers([]);
         setQuestions([]);
+        setIsVideoLoaded(false);
+        setHideQuestion(false);
       }
+    }
+  }, [isOpen, isCompleted]);
+
+  // 動画のプリロード
+  useEffect(() => {
+    if (isOpen && !isCompleted && videoRef.current) {
+      console.log('🎬 動画のプリロード開始');
+      videoRef.current.load();
+      
+      // 動画の読み込み完了を検知
+      const handleCanPlay = () => {
+        console.log('✅ 動画のプリロード完了');
+        setIsVideoLoaded(true);
+      };
+      
+      videoRef.current.addEventListener('canplaythrough', handleCanPlay);
+      
+      return () => {
+        if (videoRef.current) {
+          videoRef.current.removeEventListener('canplaythrough', handleCanPlay);
+        }
+      };
     }
   }, [isOpen, isCompleted]);
 
@@ -159,10 +186,24 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         }
       }, 50);
       
+      // ホワイトアウト完了まで待ってから動画再生
       setTimeout(() => {
+        console.log('🎬 ホワイトアウト完了 - 質問画面を非表示に');
+        // ホワイトアウト完了後に質問画面を非表示
+        setHideQuestion(true);
+        
         console.log('🎬 動画再生開始');
         // 2. 完全に白くなったら動画再生開始
         setShowVideo(true);
+        
+        // 動画再生開始と同時にオーバーレイをフェードアウト開始
+        setTimeout(() => {
+          const overlay = document.getElementById('white-overlay');
+          if (overlay) {
+            overlay.style.opacity = '0';
+          }
+        }, 100);
+        
         setTimeout(() => {
           if (videoRef.current) {
             console.log('🎬 動画要素が存在します');
@@ -177,7 +218,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
             console.error('❌ 動画要素が見つかりません');
           }
         }, 100);
-      }, 800); // ホワイトアウトを800ms表示
+      }, 1500); // ホワイトアウトを1500ms表示（より長く、しっかり見せる）
     }
   };
 
@@ -198,23 +239,23 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     }, 50);
     
     setTimeout(() => {
-      // 結果を表示開始（白い画面から徐々に現れる）
-      setShowResult(true);
+      // 白いオーバーレイをフェードアウト開始
+      const overlay = document.getElementById('white-overlay');
+      if (overlay) {
+        overlay.style.opacity = '0';
+      }
       
-      // さらに少し遅らせて白いオーバーレイをフェードアウト
+      // フェードアウト開始と同時に結果を表示開始（白い画面から徐々に現れる）
       setTimeout(() => {
-        const overlay = document.getElementById('white-overlay');
-        if (overlay) {
-          overlay.style.opacity = '0';
-        }
-        
-        // フェードアウト完了後、オーバーレイを完全に削除
-        setTimeout(() => {
-          setShowWhiteOverlay(false);
-          console.log('🎬 ホワイトオーバーレイを削除しました');
-        }, 700); // transition-opacity duration-700と同じ時間
+        setShowResult(true);
       }, 100);
-    }, 300);
+      
+      // フェードアウト完了後、オーバーレイを完全に削除
+      setTimeout(() => {
+        setShowWhiteOverlay(false);
+        console.log('🎬 ホワイトオーバーレイを削除しました');
+      }, 1000); // transition-opacity duration-1000と同じ時間
+    }, 500); // 白い画面を少し長めに表示してからフェードアウト開始
   };
 
   // 戻る
@@ -230,6 +271,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setShowResult(false);
+    setHideQuestion(false);  // 質問を再表示
   };
 
   // モーダルを閉じる
@@ -246,28 +288,37 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
 
   return (
     <>
+      {/* 動画要素（プリロード用 - 常に存在） */}
+      <video
+        ref={videoRef}
+        className="hidden"
+        onEnded={handleVideoEnd}
+        playsInline
+        preload="auto"
+      >
+        <source src="/rpg-characters/02.職業診断デザイン-アニメー演出 (1).mp4" type="video/mp4" />
+      </video>
+
       {/* 動画再生中 */}
       {showVideo && (
         <div className="fixed inset-0 z-[10001] bg-black flex items-center justify-center">
           <video
-            ref={videoRef}
             className="max-w-full max-h-full"
-            onEnded={handleVideoEnd}
-            playsInline
+            src="/rpg-characters/02.職業診断デザイン-アニメー演出 (1).mp4"
             autoPlay
-          >
-            <source src="/rpg-characters/02.職業診断デザイン-アニメー演出 (1).mp4" type="video/mp4" />
-          </video>
+            playsInline
+            onEnded={handleVideoEnd}
+          />
         </div>
       )}
 
       {/* ホワイトアウトオーバーレイ */}
-      {showWhiteOverlay && !showVideo && (
+      {showWhiteOverlay && (
         <div
           id="white-overlay"
-          className="fixed inset-0 bg-white transition-opacity duration-700"
+          className="fixed inset-0 bg-white transition-opacity duration-1000"
           style={{ 
-            zIndex: 10000,
+            zIndex: showVideo ? 10002 : 10001,  // 常に質問画面の上に表示
             opacity: showResult ? 0 : 0  // 初期状態は0、JSで1にする
           }}
         />
@@ -293,8 +344,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       {/* コンテンツ */}
       <div className="h-[calc(100vh-80px)] overflow-y-auto">
         <div className={`mx-auto p-8 ${showResult ? 'max-w-7xl' : 'max-w-2xl'}`}>
-          {/* 動画再生中またはホワイトアウト中は何も表示しない */}
-          {!showVideo && !showResult && !showWhiteOverlay ? (
+          {/* 質問画面：動画再生中または非表示フラグが立っている場合は表示しない */}
+          {!showVideo && !showResult && !hideQuestion ? (
             <QuestionStep
               questionNumber={currentQuestionIndex + 1}
               totalQuestions={questions.length}
