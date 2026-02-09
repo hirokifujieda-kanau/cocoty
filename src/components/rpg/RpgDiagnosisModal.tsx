@@ -293,8 +293,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       {/* コンテンツ */}
       <div className="h-[calc(100vh-80px)] overflow-y-auto">
         <div className={`mx-auto p-8 ${showResult ? 'max-w-7xl' : 'max-w-2xl'}`}>
-          {/* 動画再生中は何も表示しない */}
-          {!showVideo && !showResult ? (
+          {/* 動画再生中またはホワイトアウト中は何も表示しない */}
+          {!showVideo && !showResult && !showWhiteOverlay ? (
             <QuestionStep
               questionNumber={currentQuestionIndex + 1}
               totalQuestions={questions.length}

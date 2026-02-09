@@ -53,13 +53,22 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         <div className="flex flex-col gap-4">
           {/* 中央: 数字とボタン */}
           <div className="flex flex-col items-center gap-2">
-            {/* スケールラベル（数字） */}
-            <div className="flex justify-center items-center text-xs text-white" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 8), calc(var(--spacing) * 12))' }}>
-              {scores.map((score) => (
-                <span key={score} className="w-6 text-center">
-                  {score}
-                </span>
-              ))}
+            {/* スケールラベル（数字） - ボタンと同じ幅のコンテナに配置 */}
+            <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 12)' }}>
+              {/* PC時: 左スペーサー（左ラベルと同じ幅） */}
+              <span className="hidden md:block text-xs flex-shrink-0 opacity-0">{labels[0]}</span>
+              
+              {/* 数字 */}
+              <div className="flex justify-center items-center text-xs text-white" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 8), calc(var(--spacing) * 12))' }}>
+                {scores.map((score) => (
+                  <span key={score} className="w-6 text-center">
+                    {score}
+                  </span>
+                ))}
+              </div>
+              
+              {/* PC時: 右スペーサー（右ラベルと同じ幅） */}
+              <span className="hidden md:block text-xs flex-shrink-0 opacity-0">{labels[4]}</span>
             </div>
 
             {/* ボタンと左右ラベル（PC時） */}
