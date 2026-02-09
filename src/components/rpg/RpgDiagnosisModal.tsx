@@ -171,7 +171,35 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   // 次へ
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      // 次の質問へ移動（ホワイトアウト → ホワイトイン演出）
+      console.log('📄 次の質問へ - ホワイトアウト開始');
+      setShowWhiteOverlay(true);
+      
+      // ホワイトアウト開始
+      setTimeout(() => {
+        const overlay = document.getElementById('white-overlay');
+        if (overlay) {
+          overlay.style.opacity = '1';
+        }
+      }, 50);
+      
+      // ホワイトアウト完了後、質問を切り替えてホワイトイン
+      setTimeout(() => {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+        
+        // 質問切り替え後、ホワイトイン開始
+        setTimeout(() => {
+          const overlay = document.getElementById('white-overlay');
+          if (overlay) {
+            overlay.style.opacity = '0';
+          }
+          
+          // フェードアウト完了後、オーバーレイを削除
+          setTimeout(() => {
+            setShowWhiteOverlay(false);
+          }, 500); // duration-500
+        }, 100);
+      }, 600); // ホワイトアウト表示時間
     } else {
       // 全問回答完了 → ホワイトアウト → 動画再生 → 結果表示
       console.log('🎬 ホワイトアウト開始');

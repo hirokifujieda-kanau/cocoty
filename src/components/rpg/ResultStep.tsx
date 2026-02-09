@@ -352,6 +352,16 @@ export const ResultStep: React.FC<ResultStepProps> = ({
 
   return (
     <div className="space-y-8">
+      {/* 右上：ホームに戻るリンク */}
+      <div className="flex justify-end">
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 text-base font-medium transition-colors cursor-pointer"
+        >
+          ホームに戻る
+        </button>
+      </div>
+
       {/* メインコンテンツエリア（上部：レーダーチャート + スコア + キャラクター） */}
       <div className="rounded-2xl p-8 mb-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
@@ -473,22 +483,6 @@ export const ResultStep: React.FC<ResultStepProps> = ({
         </div>
       </div>
 
-      {/* アクションボタン */}
-      <div className="flex gap-3 justify-center">
-        <button
-          onClick={onClose}
-          className="w-[140px] h-12 rounded-lg font-semibold transition-all text-white border"
-          style={{
-            background: 'linear-gradient(rgb(34, 211, 238) 0%, rgb(8, 145, 178) 100%)',
-            borderColor: 'rgb(103, 232, 249)',
-            boxShadow: 'rgb(22, 78, 99) 0px 4px 0px 0px',
-            cursor: 'pointer'
-          }}
-        >
-          閉じる
-        </button>
-      </div>
-      
       {isCompleted && (
         <p className="text-center text-purple-200 text-sm mt-4">
           この診断は完了済みです。診断は1回のみ実施可能です。
