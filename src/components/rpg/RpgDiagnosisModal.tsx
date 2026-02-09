@@ -24,6 +24,11 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const [questions, setQuestions] = useState<RpgQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // 動画再生用のステート
+  const [showVideo, setShowVideo] = useState(false);
+  const [showWhiteOverlay, setShowWhiteOverlay] = useState(false);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
 
   // 診断完了済みかチェック
   const isCompleted = !!profile?.rpg_diagnosis_completed_at;
@@ -141,9 +146,69 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // 全問回答完了 → 結果表示
-      setShowResult(true);
+      // 全問回答完了 → ホワイトアウト → 動画再生 → 結果表示
+      console.log('🎬 ホワイトアウト開始');
+      // 1. 質問15の画面を徐々に白くフェードアウト
+      setShowWhiteOverlay(true);
+      
+      // 少し遅らせてopacityを1にする（フェードイン効果）
+      setTimeout(() => {
+        const overlay = document.getElementById('white-overlay');
+        if (overlay) {
+          overlay.style.opacity = '1';
+        }
+      }, 50);
+      
+      setTimeout(() => {
+        console.log('🎬 動画再生開始');
+        // 2. 完全に白くなったら動画再生開始
+        setShowVideo(true);
+        setTimeout(() => {
+          if (videoRef.current) {
+            console.log('🎬 動画要素が存在します');
+            videoRef.current.play().catch(err => {
+              console.error('❌ 動画の再生に失敗:', err);
+              // 動画再生に失敗した場合は直接結果を表示
+              setShowVideo(false);
+              setShowResult(true);
+              setShowWhiteOverlay(false);
+            });
+          } else {
+            console.error('❌ 動画要素が見つかりません');
+          }
+        }, 100);
+      }, 800); // ホワイトアウトを800ms表示
     }
+  };
+
+  // 動画再生終了時
+  const handleVideoEnd = () => {
+    console.log('🎬 動画再生終了');
+    setShowVideo(false);
+    // 再度白い画面を表示
+    setShowWhiteOverlay(true);
+    
+    // 白い画面を一瞬表示してからフェードイン開始
+    setTimeout(() => {
+      // 白いオーバーレイをopacity: 1にする
+      const overlay = document.getElementById('white-overlay');
+      if (overlay) {
+        overlay.style.opacity = '1';
+      }
+    }, 50);
+    
+    setTimeout(() => {
+      // 結果を表示開始（白い画面から徐々に現れる）
+      setShowResult(true);
+      
+      // さらに少し遅らせて白いオーバーレイをフェードアウト
+      setTimeout(() => {
+        const overlay = document.getElementById('white-overlay');
+        if (overlay) {
+          overlay.style.opacity = '0';
+        }
+      }, 100);
+    }, 300);
   };
 
   // 戻る
@@ -174,7 +239,35 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const result = showResult ? calculateRpgDiagnosis(answers) : null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-white">
+    <>
+      {/* 動画再生中 */}
+      {showVideo && (
+        <div className="fixed inset-0 z-[10001] bg-black flex items-center justify-center">
+          <video
+            ref={videoRef}
+            className="max-w-full max-h-full"
+            onEnded={handleVideoEnd}
+            playsInline
+            autoPlay
+          >
+            <source src="/rpg-characters/02.職業診断デザイン-アニメー演出 (1).mp4" type="video/mp4" />
+          </video>
+        </div>
+      )}
+
+      {/* ホワイトアウトオーバーレイ */}
+      {showWhiteOverlay && !showVideo && (
+        <div
+          id="white-overlay"
+          className="fixed inset-0 bg-white transition-opacity duration-700"
+          style={{ 
+            zIndex: 10000,
+            opacity: showResult ? 0 : 0  // 初期状態は0、JSで1にする
+          }}
+        />
+      )}
+
+      <div className="fixed inset-0 z-[9999] bg-white">
       {/* ヘッダー */}
       <div className="flex items-center justify-between p-6 border-b border-gray-200">
         <div className="flex items-center gap-3">
@@ -194,7 +287,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       {/* コンテンツ */}
       <div className="h-[calc(100vh-80px)] overflow-y-auto">
         <div className={`mx-auto p-8 ${showResult ? 'max-w-7xl' : 'max-w-2xl'}`}>
-          {!showResult ? (
+          {/* 動画再生中は何も表示しない */}
+          {!showVideo && !showResult ? (
             <QuestionStep
               questionNumber={currentQuestionIndex + 1}
               totalQuestions={questions.length}
@@ -206,7 +300,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
               canGoNext={true}
               canGoBack={currentQuestionIndex > 0}
             />
-          ) : showResult ? (
+          ) : !showVideo && showResult ? (
             // 結果表示: 完了済みの場合と新規診断の場合を統一
             <ResultStep
               instinctLevels={completedResult || result?.instinctLevels || { 狩猟本能: 1, 共感本能: 1, 飛躍本能: 1, 職人魂: 1, 警戒本能: 1 }}
@@ -222,6 +316,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
           ) : null}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
