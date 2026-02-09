@@ -286,18 +286,18 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       <div className="border-2 rounded-lg p-4" style={{ borderColor: '#fed7aa' }}>
         <div className="flex gap-6">
           {/* 左側：項目リスト */}
-          <div className="w-32 flex-shrink-0 flex flex-col text-xs">
-            <div className="p-3 text-center font-bold" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>名称</div>
-            <div className="p-3 text-center" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>適性名</div>
-            <div className="p-12 text-center text-gray-400" style={{ backgroundColor: '#ffffff', marginBottom: '2px' }}>
+          <div className="w-32 flex-shrink-0 flex flex-col" style={{ fontSize: '0.65rem' }}>
+            <div className="py-3 px-2 text-center font-bold" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>名称</div>
+            <div className="py-3 px-2 text-center" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>適性名</div>
+            <div className="text-center text-gray-400 flex items-center justify-center" style={{ backgroundColor: '#ffffff', marginBottom: '2px', writingMode: 'horizontal-tb', paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
               職業イメージ
             </div>
-            <div className="p-3 text-center font-bold" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高い人の特徴</div>
-            <div className="p-3 text-center" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高い利点</div>
-            <div className="p-3 text-center" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高いコスト</div>
-            <div className="p-3 text-center font-bold" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>低い人の特徴</div>
-            <div className="p-3 text-center" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>低い利点</div>
-            <div className="p-3 text-center" style={{ backgroundColor: '#f5e6d3' }}>低いコスト</div>
+            <div className="py-3 px-2 text-center font-bold" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高い人の特徴</div>
+            <div className="py-3 px-2 text-center" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高い利点</div>
+            <div className="py-3 px-2 text-center" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高いコスト</div>
+            <div className="py-3 px-2 text-center font-bold" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>低い人の特徴</div>
+            <div className="py-3 px-2 text-center" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>低い利点</div>
+            <div className="py-3 px-2 text-center" style={{ backgroundColor: '#f5e6d3' }}>低いコスト</div>
           </div>
           
           {/* 右側：5つのカード */}

@@ -41,19 +41,16 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       </div>
 
       {/* 質問文 */}
-      <div className="text-center pt-12 pb-6 px-6" style={{ backgroundColor: '#4A1515' }}>
+      <div className="text-center pt-12 pb-6 px-6" style={{ backgroundColor: '#6d4040' }}>
         <h3 className="text-lg font-bold text-white">
           {questionText}
         </h3>
       </div>
 
       {/* 回答選択肢 */}
-      <div className="space-y-4 p-6" style={{ backgroundColor: '#4A1515' }}>
+      <div className="space-y-4 p-6" style={{ backgroundColor: '#6d4040' }}>
         {/* ボタンとラベル */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-          {/* PC時: 左ラベル */}
-          <span className="hidden md:block text-xs text-white flex-shrink-0">{labels[0]}</span>
-
+        <div className="flex flex-col gap-4">
           {/* 中央: 数字とボタン */}
           <div className="flex flex-col items-center gap-2">
             {/* スケールラベル（数字） */}
@@ -65,42 +62,48 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
               ))}
             </div>
 
-            {/* ボタン */}
-            <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 8), calc(var(--spacing) * 12))' }}>
-              {scores.map((score) => (
-                <button
-                  key={score}
-                  onClick={() => onAnswer(score)}
-                  className={`
-                    w-6 h-6 rounded-full transition-all border-2 flex items-center justify-center
-                    ${
-                      currentAnswer === score
-                        ? 'border-white'
-                        : 'bg-transparent border-white hover:bg-white/20'
-                    }
-                  `}
-                >
-                  {currentAnswer === score && (
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="3" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                      className="w-4 h-4 text-white"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                  )}
-                </button>
-              ))}
+            {/* ボタンと左右ラベル（PC時） */}
+            <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 12)' }}>
+              {/* PC時: 左ラベル */}
+              <span className="hidden md:block text-xs text-white flex-shrink-0">{labels[0]}</span>
+
+              {/* ボタン */}
+              <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 8), calc(var(--spacing) * 12))' }}>
+                {scores.map((score) => (
+                  <button
+                    key={score}
+                    onClick={() => onAnswer(score)}
+                    className={`
+                      w-6 h-6 rounded-full transition-all border-2 flex items-center justify-center
+                      ${
+                        currentAnswer === score
+                          ? 'border-white'
+                          : 'bg-transparent border-white hover:bg-white/20'
+                      }
+                    `}
+                  >
+                    {currentAnswer === score && (
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="3" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                        className="w-4 h-4 text-white"
+                      >
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* PC時: 右ラベル */}
+              <span className="hidden md:block text-xs text-white flex-shrink-0">{labels[4]}</span>
             </div>
           </div>
-
-          {/* PC時: 右ラベル */}
-          <span className="hidden md:block text-xs text-white flex-shrink-0">{labels[4]}</span>
         </div>
 
         {/* SP時: テキストラベル */}
@@ -111,7 +114,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       </div>
 
       {/* ナビゲーションボタン */}
-      <div className="flex justify-center gap-16 pt-8">
+      <div className="flex justify-center pt-8" style={{ gap: 'calc(var(--spacing) * 33)' }}>
         <button
           onClick={onBack}
           disabled={!canGoBack}
