@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { uploadToCloudinary, validateImageFile, type CloudinaryUploadResponse } from '@/lib/cloudinary/upload';
-import { uploadAvatarUrl } from '@/lib/api/profiles';
+import { uploadAvatar } from '@/lib/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface UseAvatarUploadReturn {
@@ -57,10 +57,14 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
       setUploadProgress(70); // Cloudinary完了で70%
 
       // Rails APIに保存
-      console.log('💾 Saving avatar URL to Rails API');
+      console.log('💾 Saving avatar URL to Rails API with profileId:', profileId);
+      
+      if (!profileId) {
+        throw new Error('プロフィールIDが指定されていません');
+      }
       
       try {
-        await uploadAvatarUrl(cloudinaryResponse.secure_url);
+        await uploadAvatar(profileId, cloudinaryResponse.secure_url);
         console.log('✅ Avatar URL saved to Rails API successfully');
         setUploadProgress(100);
       } catch (apiError: any) {

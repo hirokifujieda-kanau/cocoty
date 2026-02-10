@@ -24,7 +24,7 @@ export interface InstinctLevels {
   共感本能: number;
   飛躍本能: number;
   職人魂: number;
-  警戒本能: number;
+  防衛本能: number;
 }
 
 export const reverseScore = (score: number): number => {
@@ -80,7 +80,7 @@ export const calculateInstinctLevels = (factorScores: FactorScores, gender?: str
     共感本能: calculateHealerLevel(factorScores.healer, gender),
     飛躍本能: calculateInstinctLevel(factorScores.schemer, 'schemer'),
     職人魂: calculateInstinctLevel(factorScores.gunner, 'gunner'),
-    警戒本能: calculateInstinctLevel(factorScores.shielder, 'shielder'),
+    防衛本能: calculateInstinctLevel(factorScores.shielder, 'shielder'),
   };
 };
 

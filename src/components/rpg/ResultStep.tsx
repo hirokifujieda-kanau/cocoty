@@ -2,7 +2,7 @@
 
 import React from 'react';
 import type { InstinctLevels } from '@/lib/rpg/calculator';
-import { INSTINCT_DESCRIPTIONS } from '@/lib/mock/mockRpgDiagnosis';
+import { INSTINCT_DESCRIPTIONS } from '@/lib/rpg/constants';
 import { saveRpgDiagnosis } from '@/lib/api/client';
 
 // シンプルなレーダーチャートコンポーネント
@@ -128,13 +128,9 @@ export const ResultStep: React.FC<ResultStepProps> = ({
   React.useEffect(() => {
     // 既に保存を試行済み、または完了済み、または既に保存済みならスキップ
     if (hasAttemptedSave.current || isCompleted || isSaved) {
-      if (isCompleted) {
-        console.log('✅ 診断は既に完了済みです。保存処理はスキップします。');
-      }
       return;
     }
 
-    console.log('🔄 自動保存を実行します...');
     hasAttemptedSave.current = true;
     handleSave();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -143,7 +139,6 @@ export const ResultStep: React.FC<ResultStepProps> = ({
   const handleSave = async () => {
     // 完了済みの場合は保存処理をスキップ
     if (isCompleted) {
-      console.log('✅ 診断は既に完了しています。保存処理をスキップします。');
       return;
     }
 
@@ -152,7 +147,7 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       // 診断結果をAPI形式に変換
       const diagnosisData = {
         fencer: instinctLevels['狩猟本能'],
-        shielder: instinctLevels['警戒本能'],
+        shielder: instinctLevels['防衛本能'],
         gunner: instinctLevels['職人魂'],
         healer: instinctLevels['共感本能'],
         schemer: instinctLevels['飛躍本能'],
@@ -163,7 +158,6 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       
       setIsSaved(true);
       onSave?.(true);
-      console.log('✅ 診断結果を自動保存しました');
     } catch (error) {
       console.error('❌ RPG診断の保存に失敗:', error);
       onSave?.(false);
@@ -176,7 +170,7 @@ export const ResultStep: React.FC<ResultStepProps> = ({
   // 因子の順序を固定（要件通り）
   const FIXED_ORDER: (keyof typeof INSTINCT_DESCRIPTIONS)[] = [
     '狩猟本能',  // フェンサー素質
-    '警戒本能',  // シールダー素質
+    '防衛本能',  // シールダー素質
     '職人魂',    // ガンナー素質
     '共感本能',  // ヒーラー素質
     '飛躍本能',  // スキーマー素質
@@ -206,7 +200,7 @@ export const ResultStep: React.FC<ResultStepProps> = ({
         <h3 className="text-xl font-bold text-white text-center">📊 全本能の詳細レポート</h3>
         <p className="text-center text-purple-200 text-sm mb-4">
           <span className="font-semibold">名称：</span>フェンサー素質・シールダー素質・ガンナー素質・ヒーラー素質・スキーマー素質<br />
-          <span className="font-semibold">遺伝"素質"名：</span>狩猟本能・警戒本能・職人魂・共感本能・飛躍本能
+          <span className="font-semibold">遺伝"素質"名：</span>狩猟本能・防衛本能・職人魂・共感本能・飛躍本能
         </p>
         {FIXED_ORDER.map((instinct) => {
           const info = INSTINCT_DESCRIPTIONS[instinct];

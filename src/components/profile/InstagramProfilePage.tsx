@@ -32,13 +32,15 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [error, setError] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+  const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   
   // propsからuserIdを取得、なければURLパラメータを確認
   const userIdFromUrl = searchParams.get('userId');
   const userId = userIdProp || userIdFromUrl;
   
-  // URLパラメータがない場合は自分のプロフィール（オーナー）として扱う
-  const isOwner = !userId;
+  // 自分のプロフィールかどうかを判定
+  // userId指定がないか、displayUserのIDが自分のプロフィールIDと一致する場合はオーナー
+  const isOwner = !userId || (!!displayUser && !!currentUserProfile && displayUser.id === currentUserProfile.id);
   
   // プロフィールデータを再取得する関数
   const refetchProfile = async () => {
@@ -52,17 +54,22 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       setLoading(true);
       setError(null);
 
-      if (isOwner) {
-        // 自分のプロフィールを取得
-        const response = await getCurrentUser();
-        console.log('📥 [InstagramProfilePage] API Response:', response);
+      // まず自分のプロフィールを取得
+      const currentUserResponse = await getCurrentUser();
+      if (currentUserResponse.profile) {
+        setCurrentUserProfile(currentUserResponse.profile);
+      }
+
+      if (!userId) {
+        // userIdが指定されていない場合は自分のプロフィールを表示
+        console.log('📥 [InstagramProfilePage] API Response:', currentUserResponse);
         
-        if (response.profile) {
+        if (currentUserResponse.profile) {
           console.log('📋 [InstagramProfilePage] Profile data:', {
-            rpg_diagnosis_completed_at: response.profile.rpg_diagnosis_completed_at,
-            tarot_last_drawn_at: response.profile.tarot_last_drawn_at,
+            rpg_diagnosis_completed_at: currentUserResponse.profile.rpg_diagnosis_completed_at,
+            tarot_last_drawn_at: currentUserResponse.profile.tarot_last_drawn_at,
           });
-          setDisplayUser(response.profile);
+          setDisplayUser(currentUserResponse.profile);
           setIsFirstTimeUser(false);
         } else {
           // プロフィールがない場合、初回ユーザーとして扱い、ダミープロフィールを作成
@@ -95,7 +102,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           });
           setError(null);
         }
-      } else if (userId) {
+      } else {
         // 他のユーザーのプロフィールを取得
         const profile = await getProfile(Number(userId));
         setDisplayUser(profile);
@@ -146,22 +153,18 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         setLoading(true);
         setError(null);
 
-        if (isOwner) {
-          // 自分のプロフィールを取得
-          console.log('🔍 プロフィール取得開始...');
-          console.log('🔍 user:', user);
-          console.log('🔍 user.uid:', user?.uid);
-          console.log('🔍 user.email:', user?.email);
+        // まず自分のプロフィールを取得（isOwner判定に必要）
+        const currentUserResponse = await getCurrentUser();
+        if (currentUserResponse.profile) {
+          setCurrentUserProfile(currentUserResponse.profile);
+        }
+
+        if (!userId) {
+          // userIdが指定されていない場合は自分のプロフィールを表示
+          console.log('🔍 プロフィール取得開始（自分）...');
           
-          const response = await getCurrentUser();
-          
-          console.log('✅ getCurrentUser() レスポンス:', response);
-          console.log('✅ response.user:', response.user);
-          console.log('✅ response.profile:', response.profile);
-          console.log('✅ レスポンス全体 (JSON):', JSON.stringify(response, null, 2));
-          
-          if (response.profile) {
-            setDisplayUser(response.profile);
+          if (currentUserResponse.profile) {
+            setDisplayUser(currentUserResponse.profile);
             setIsFirstTimeUser(false);
             console.log('✅ プロフィール設定完了');
           } else {
@@ -170,8 +173,9 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             setIsFirstTimeUser(true);
             setError(null);
           }
-        } else if (userId) {
-          // 他のユーザーのプロフィールを取得
+        } else {
+          // userIdが指定されている場合は他のユーザーのプロフィールを取得
+          console.log('🔍 プロフィール取得開始（他のユーザー）:', userId);
           const profile = await getProfile(Number(userId));
           setDisplayUser(profile);
         }
@@ -197,14 +201,24 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     };
 
     fetchProfile();
-  }, [user, userId, isOwner]);
+  }, [user, userId]);
   
   // アバターアップロード処理
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user || !displayUser) return;
+    if (!file || !user || !displayUser) {
+      console.log('❌ Avatar upload cancelled:', { file: !!file, user: !!user, displayUser: !!displayUser });
+      return;
+    }
 
     try {
+      console.log('📤 Starting avatar upload...', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        profileId: displayUser.id
+      });
+      
       setUploadingAvatar(true);
 
       // Cloudinaryにアップロード
@@ -213,6 +227,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default');
       formData.append('public_id', `${user.uid}_avatar_${Date.now()}`);
 
+      console.log('☁️ Uploading to Cloudinary...');
       const cloudinaryResponse = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
         {
@@ -222,21 +237,28 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       );
 
       if (!cloudinaryResponse.ok) {
-        throw new Error('Cloudinary upload failed');
+        const errorText = await cloudinaryResponse.text();
+        console.error('❌ Cloudinary upload failed:', errorText);
+        throw new Error(`Cloudinary upload failed: ${cloudinaryResponse.status}`);
       }
 
       const cloudinaryData = await cloudinaryResponse.json();
       const avatarUrl = cloudinaryData.secure_url;
+      console.log('✅ Cloudinary upload success:', avatarUrl);
 
       // プロフィールを更新
+      console.log('💾 Updating profile with avatar URL...');
       await updateProfile(displayUser.id, { avatar_url: avatarUrl });
+      console.log('✅ Profile updated successfully');
 
       // プロフィールを再読み込み
+      console.log('🔄 Refetching profile...');
       await refetchProfile();
 
       alert('プロフィール画像を更新しました！');
-    } catch {
-      alert('画像のアップロードに失敗しました');
+    } catch (error: any) {
+      console.error('❌ Avatar upload error:', error);
+      alert(`画像のアップロードに失敗しました: ${error.message || '不明なエラー'}`);
     } finally {
       setUploadingAvatar(false);
     }
