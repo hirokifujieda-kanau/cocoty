@@ -34,38 +34,19 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     共感本能: profile.rpg_healer || 1,
     飛躍本能: profile.rpg_schemer || 1,
     職人魂: profile.rpg_gunner || 1,
-    警戒本能: profile.rpg_shielder || 1,
+    防衛本能: profile.rpg_shielder || 1,
   } : null;
-
-  // デバッグログ
-  useEffect(() => {
-    console.log('🔍 RpgDiagnosisModal - Profile:', {
-      profile,
-      isCompleted,
-      rpg_diagnosis_completed_at: profile?.rpg_diagnosis_completed_at,
-      completedResult,
-    });
-  }, [profile, isCompleted, completedResult]);
 
   // 質問データをAPIから取得
   useEffect(() => {
-    console.log('🔍 RpgDiagnosisModal - useEffect:', { 
-      isOpen, 
-      isCompleted, 
-      showResult,
-      hasCompletedResult: !!completedResult,
-      completedResult 
-    });
     if (isOpen && !isCompleted) {
       // 未完了の場合は質問を読み込む
-      console.log('📝 未完了 → 質問を読み込みます');
       loadQuestions();
       setShowResult(false);
       setCurrentQuestionIndex(0);
       setAnswers([]);
     } else if (isOpen && isCompleted) {
       // 完了済みの場合は結果表示モードに
-      console.log('✅ 完了済み → 結果を表示します', { completedResult });
       setShowResult(true);
       setIsLoading(false);
     } else if (!isOpen) {
@@ -209,14 +190,10 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
           ) : showResult ? (
             // 結果表示: 完了済みの場合と新規診断の場合を統一
             <ResultStep
-              instinctLevels={completedResult || result?.instinctLevels || { 狩猟本能: 1, 共感本能: 1, 飛躍本能: 1, 職人魂: 1, 警戒本能: 1 }}
+              instinctLevels={completedResult || result?.instinctLevels || { 狩猟本能: 1, 共感本能: 1, 飛躍本能: 1, 職人魂: 1, 防衛本能: 1 }}
               onClose={handleClose}
               onRetry={handleRetry}
-              onSave={(saved) => {
-                if (saved) {
-                  console.log('RPG診断結果が保存されました');
-                }
-              }}
+              onSave={() => {}}
               isCompleted={isCompleted}  // 完了済みフラグで判定
             />
           ) : null}
