@@ -80,7 +80,7 @@ const MandalaGallery: React.FC<MandalaGalleryProps> = ({ userId, isOwner }) => {
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`w-[343px] h-[231px] rounded-xl cursor-pointer transition-all ${
+          className={`w-[343px] h-[231px] rounded-b-xl cursor-pointer transition-all ${
             isDragging
               ? 'bg-purple-100'
               : 'bg-gray-100'
@@ -107,58 +107,36 @@ const MandalaGallery: React.FC<MandalaGalleryProps> = ({ userId, isOwner }) => {
 
       {/* 画像表示 */}
       {images.length > 0 && (
-        <div className="relative" style={{ width: 'clamp(343px, 60vw, 472px)' }}>
-          <div 
-            className="w-full px-10 py-3 bg-yellow-400 rounded-t-lg text-center shadow-md"
-            style={{ 
-              height: '40px',
-              backgroundColor: '#FFBA48',
-              paddingTop: '12px',
-              paddingBottom: '12px',
-              paddingLeft: '40px',
-              paddingRight: '40px',
-              boxShadow: '0px 1px 1px 0px #F0AC3C',
-              fontFamily: 'Noto Sans JP',
-              fontWeight: 700,
-              fontSize: '16px',
-              lineHeight: '16px',
-              letterSpacing: '0%',
-              color: '#FFFFFF'
+        <div
+          className="relative flex items-center justify-center group cursor-pointer rounded-b-xl overflow-hidden shadow-md"
+          style={{ 
+            width: '343px',
+            height: '231px',
+            backgroundColor: '#F9F9F9'
+          }}
+          onClick={() => setSelectedImage(images[0].url)}
+        >
+          <img
+            src={images[0].url}
+            alt="Mandala art"
+            style={{
+              width: '251px',
+              height: '187px',
+              objectFit: 'cover'
             }}
-          >
-            マンダラチャート
-          </div>
-          <div
-            className="relative flex items-center justify-center group cursor-pointer rounded-b-xl overflow-hidden shadow-md"
-            style={{ 
-              width: 'clamp(343px, 60vw, 472px)',
-              height: 'clamp(231px, 40vw, 243px)',
-              backgroundColor: '#F9F9F9'
-            }}
-            onClick={() => setSelectedImage(images[0].url)}
-          >
-            <img
-              src={images[0].url}
-              alt="Mandala art"
-              style={{
-                width: '251px',
-                height: '187px',
-                objectFit: 'cover'
+          />
+          {isOwner && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(images[0].id);
               }}
-            />
-            {isOwner && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(images[0].id);
-                }}
-                className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all" />
-          </div>
+              className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all" />
         </div>
       )}
 
