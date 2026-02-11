@@ -7,8 +7,17 @@ import { saveRpgDiagnosis } from '@/lib/api/client';
 
 // シンプルなレーダーチャートコンポーネント
 const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
-  const labels = Object.keys(data) as (keyof InstinctLevels)[];
-  const values = Object.values(data);
+  // 順序を固定（時計回り）
+  const CHART_ORDER: (keyof InstinctLevels)[] = [
+    '職人魂',
+    '狩猟本能',
+    '共感本能',
+    '防衛本能',
+    '飛躍本能',
+  ];
+  
+  const labels = CHART_ORDER;
+  const values = CHART_ORDER.map(key => data[key]);
   const maxValue = 4;
   
   // 五角形の頂点を計算
@@ -167,12 +176,12 @@ export const ResultStep: React.FC<ResultStepProps> = ({
     }
   };
 
-  // 因子の順序を固定（要件通り）
+  // 因子の順序を固定（要件通り：時計回り）
   const FIXED_ORDER: (keyof typeof INSTINCT_DESCRIPTIONS)[] = [
-    '狩猟本能',  // フェンサー素質
-    '防衛本能',  // シールダー素質
     '職人魂',    // ガンナー素質
+    '狩猟本能',  // フェンサー素質
     '共感本能',  // ヒーラー素質
+    '防衛本能',  // シールダー素質
     '飛躍本能',  // スキーマー素質
   ];
 
@@ -199,8 +208,8 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       <div className="space-y-4">
         <h3 className="text-xl font-bold text-white text-center">📊 全本能の詳細レポート</h3>
         <p className="text-center text-purple-200 text-sm mb-4">
-          <span className="font-semibold">名称：</span>フェンサー素質・シールダー素質・ガンナー素質・ヒーラー素質・スキーマー素質<br />
-          <span className="font-semibold">遺伝"素質"名：</span>狩猟本能・防衛本能・職人魂・共感本能・飛躍本能
+          <span className="font-semibold">名称：</span>ガンナー素質・フェンサー素質・ヒーラー素質・シールダー素質・スキーマー素質<br />
+          <span className="font-semibold">遺伝"素質"名：</span>職人魂・狩猟本能・共感本能・防衛本能・飛躍本能
         </p>
         {FIXED_ORDER.map((instinct) => {
           const info = INSTINCT_DESCRIPTIONS[instinct];
@@ -288,13 +297,21 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       </div>
 
       {/* アクションボタン */}
-      <div className="flex gap-3">
-        <button
-          onClick={onClose}
-          className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all"
-        >
-          閉じる
-        </button>
+      <div className="space-y-3">
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all"
+          >
+            閉じる
+          </button>
+          <button
+            onClick={() => window.location.href = '/rpg/users'}
+            className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold rounded-xl transition-all"
+          >
+            📊 全員の診断結果を見る
+          </button>
+        </div>
       </div>
       
       {isCompleted && (

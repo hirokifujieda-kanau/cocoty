@@ -24,6 +24,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const [questions, setQuestions] = useState<RpgQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showGenderSelect, setShowGenderSelect] = useState(true);
+  const [gender, setGender] = useState<'男性' | '女性' | undefined>(undefined);
 
   // 診断完了済みかチェック
   const isCompleted = !!profile?.rpg_diagnosis_completed_at;
@@ -40,22 +42,27 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   // 質問データをAPIから取得
   useEffect(() => {
     if (isOpen && !isCompleted) {
-      // 未完了の場合は質問を読み込む
+      // 未完了の場合は性別選択から開始
       loadQuestions();
       setShowResult(false);
+      setShowGenderSelect(true);
       setCurrentQuestionIndex(0);
       setAnswers([]);
+      setGender(undefined);
     } else if (isOpen && isCompleted) {
       // 完了済みの場合は結果表示モードに
       setShowResult(true);
+      setShowGenderSelect(false);
       setIsLoading(false);
     } else if (!isOpen) {
       // モーダルが閉じられたときは、完了済みでない場合のみリセット
       if (!isCompleted) {
         setShowResult(false);
+        setShowGenderSelect(true);
         setCurrentQuestionIndex(0);
         setAnswers([]);
         setQuestions([]);
+        setGender(undefined);
       }
     }
   }, [isOpen, isCompleted]);
@@ -140,6 +147,14 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setShowResult(false);
+    setShowGenderSelect(true);
+    setGender(undefined);
+  };
+
+  // 性別選択後の処理
+  const handleGenderSelect = (selectedGender: '男性' | '女性') => {
+    setGender(selectedGender);
+    setShowGenderSelect(false);
   };
 
   // モーダルを閉じる
@@ -151,8 +166,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     onClose();
   };
 
-  // 診断結果を計算
-  const result = showResult ? calculateRpgDiagnosis(answers) : null;
+  // 診断結果を計算（性別を含める）
+  const result = showResult && gender ? calculateRpgDiagnosis(answers, gender) : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
@@ -175,7 +190,29 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
 
         {/* コンテンツ */}
         <div className="p-8">
-          {!showResult ? (
+          {showGenderSelect ? (
+            // 性別選択画面
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-white mb-3">性別を選択してください</h3>
+                <p className="text-purple-200">診断結果の計算に使用します</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => handleGenderSelect('男性')}
+                  className="p-8 bg-blue-600 hover:bg-blue-700 rounded-xl text-white font-bold text-xl transition-all transform hover:scale-105"
+                >
+                  👨 男性
+                </button>
+                <button
+                  onClick={() => handleGenderSelect('女性')}
+                  className="p-8 bg-pink-600 hover:bg-pink-700 rounded-xl text-white font-bold text-xl transition-all transform hover:scale-105"
+                >
+                  👩 女性
+                </button>
+              </div>
+            </div>
+          ) : !showResult ? (
             <QuestionStep
               questionNumber={currentQuestionIndex + 1}
               totalQuestions={questions.length}
