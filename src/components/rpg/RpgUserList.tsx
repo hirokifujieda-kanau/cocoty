@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { getRpgDiagnosedUsers, searchRpgUsers, type RpgUser } from '@/lib/api/rpg';
 import { CustomRadarChart } from './CustomRadarChart';
 import RpgExportButton from './RpgExportButton';
+import CommonHeader from '@/components/layout/CommonHeader';
 
 export default function RpgUserList() {
   const router = useRouter();
@@ -46,8 +48,15 @@ export default function RpgUserList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+      {/* ヘッダー */}
+      <CommonHeader 
+        showSearch={false}
+        showSettings={false}
+        showRpgLink={false}
+      />
+
+      <div className="max-w-7xl mx-auto p-6">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
