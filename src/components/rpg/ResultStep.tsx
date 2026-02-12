@@ -544,19 +544,29 @@ export const ResultStep: React.FC<ResultStepProps> = ({
             const score = instinctLevels[instinct];
             
             return (
-              <div key={instinct} className="relative flex flex-col">
+              <div key={instinct} className="relative flex flex-col h-full">
                 <img 
                   src={jobImageMap[instinct]}
                   alt={instinct}
                   className="w-full h-auto object-contain"
                 />
-                <div className="flex flex-col text-black border-2 border-t-4" style={{ fontSize: '0.65rem', borderColor: borderColorMap[instinct] }}>
-                  <div className="py-1 px-2 text-center font-bold border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderColor: borderColorMap[instinct] }}>{desc['高い人の特徴']}</div>
-                  <div className="py-1 px-2 text-center border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderColor: borderColorMap[instinct] }}>{desc['高い利点']}</div>
-                  <div className="py-1 px-2 text-center border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderColor: borderColorMap[instinct] }}>{desc['高いコスト']}</div>
-                  <div className="py-1 px-2 text-center font-bold border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderColor: borderColorMap[instinct] }}>{desc['低い人の特徴']}</div>
-                  <div className="py-1 px-2 text-center border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderColor: borderColorMap[instinct] }}>{desc['低い利点']}</div>
-                  <div className="py-1 px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct] }}>{desc['低いコスト']}</div>
+                <div className="flex flex-col text-black border-2 border-t-4 flex-1" style={{ fontSize: '0.65rem', borderColor: borderColorMap[instinct] }}>
+                  <div className="py-1 px-2 text-center font-bold border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderColor: borderColorMap[instinct], minHeight: '3rem', whiteSpace: 'pre-line' }}>
+                    {instinct === '防衛本能' && desc['高い人の特徴'] === '危機察知性が高く、高ストレス・心配性の傾向' 
+                      ? '危機察知性が高く、\n高ストレス・心配性の傾向'
+                      : instinct === '飛躍本能' && desc['高い人の特徴'] === '独創的・創造力に富む・エキセントリック'
+                      ? '独創的・想像力に富む\nエキセントリック'
+                      : desc['高い人の特徴']}
+                  </div>
+                  <div className="py-1 px-2 text-center border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderColor: borderColorMap[instinct], minHeight: '3rem', whiteSpace: 'pre-line' }}>
+                    {instinct === '防衛本能' && desc['高い利点'] === 'ミスを回避、事前努力が苦なくできる'
+                      ? 'ミスを回避、事前努力が\n苦なくできる'
+                      : desc['高い利点']}
+                  </div>
+                  <div className="py-1 px-2 text-center border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderColor: borderColorMap[instinct], minHeight: '3rem' }}>{desc['高いコスト']}</div>
+                  <div className="py-1 px-2 text-center font-bold border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderColor: borderColorMap[instinct], minHeight: '3rem' }}>{desc['低い人の特徴']}</div>
+                  <div className="py-1 px-2 text-center border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderColor: borderColorMap[instinct], minHeight: '3rem' }}>{desc['低い利点']}</div>
+                  <div className="py-1 px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], minHeight: '3rem' }}>{desc['低いコスト']}</div>
                 </div>
               </div>
             );
