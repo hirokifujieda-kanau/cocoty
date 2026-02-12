@@ -92,7 +92,7 @@ export const FACTOR_TO_INSTINCT = {
   healer: '共感本能',
   schemer: '飛躍本能',
   gunner: '職人魂',
-  shielder: '警戒本能',
+  shielder: '防衛本能',
 } as const;
 
 // 本能レベルの説明
@@ -116,7 +116,7 @@ export const INSTINCT_DESCRIPTIONS = {
     低い利点: '浮動性が低く安定・熟慮できる',
     低いコスト: 'チャンスを逃しがち',
   },
-  警戒本能: {
+  防衛本能: {
     emoji: '�️',
     素質名: 'シールダー素質',
     description: 'リスクを察知し、慎重に判断する力',

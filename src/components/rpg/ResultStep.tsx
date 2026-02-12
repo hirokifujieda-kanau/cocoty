@@ -2,31 +2,31 @@
 
 import React from 'react';
 import type { InstinctLevels } from '@/lib/rpg/calculator';
-import { INSTINCT_DESCRIPTIONS } from '@/lib/mock/mockRpgDiagnosis';
+import { INSTINCT_DESCRIPTIONS } from '@/lib/rpg/constants';
 import { saveRpgDiagnosis } from '@/lib/api/client';
 
 // グラデーション背景付きレーダーチャートコンポーネント
 const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
-  // 表示順序を固定（上から時計回り）
-  const displayOrder: (keyof InstinctLevels)[] = [
-    '職人魂',    // 上
-    '狩猟本能',  // 右上
-    '共感本能',  // 右下
-    '警戒本能',  // 左下（表示は「防御本能」）
-    '飛躍本能',  // 左上
+  // 順序を固定（時計回り）
+  const CHART_ORDER: (keyof InstinctLevels)[] = [
+    '職人魂',
+    '狩猟本能',
+    '共感本能',
+    '防衛本能',
+    '飛躍本能',
   ];
   
-  const labels = displayOrder;
-  const values = displayOrder.map(key => data[key]);
+  const labels = CHART_ORDER;
+  const values = CHART_ORDER.map(key => data[key]);
   const maxValue = 4;
   
-  // 表示名のマッピング（警戒本能 → 防御本能）
+  // 表示名のマッピング
   const labelDisplayNames: Record<keyof InstinctLevels, string> = {
     '狩猟本能': '狩猟本能',
     '共感本能': '共感本能',
     '飛躍本能': '飛躍本能',
     '職人魂': '職人魂',
-    '警戒本能': '防御本能',
+    '防衛本能': '防御本能',
   };
   
   // アイコン画像のマッピング
@@ -34,7 +34,7 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
     '職人魂': '/rpg-images/Icon_tamashii.png',
     '狩猟本能': '/rpg-images/Icon_syuryou.png',
     '共感本能': '/rpg-images/Icon_kyoukan.png',
-    '警戒本能': '/rpg-images/Icon_bougyo.png',
+    '防衛本能': '/rpg-images/Icon_bougyo.png',
     '飛躍本能': '/rpg-images/Icon_hiyaku.png',
   };
   
@@ -67,7 +67,7 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
   });
 
   return (
-    <div className="relative w-full max-w-md mx-auto aspect-square">
+    <div className="relative w-full h-full">
       <svg viewBox="-50 -50 400 400" className="w-full h-full" style={{ display: 'block' }}>
         <defs>
           {/* データ領域のグラデーション（明るく光る感じ） */}
@@ -281,7 +281,7 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
           let y = 150 + 130 * Math.sin(angle);
           
           // 個別調整：防御本能を左に、共感本能を右に
-          if (label === '警戒本能') { // 防御本能
+          if (label === '防衛本能') {
             x -= 25;
             y -= 30;
           } else if (label === '共感本能') {
@@ -342,13 +342,9 @@ export const ResultStep: React.FC<ResultStepProps> = ({
   React.useEffect(() => {
     // 既に保存を試行済み、または完了済み、または既に保存済みならスキップ
     if (hasAttemptedSave.current || isCompleted || isSaved) {
-      if (isCompleted) {
-        console.log('✅ 診断は既に完了済みです。保存処理はスキップします。');
-      }
       return;
     }
 
-    console.log('🔄 自動保存を実行します...');
     hasAttemptedSave.current = true;
     handleSave();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -357,7 +353,6 @@ export const ResultStep: React.FC<ResultStepProps> = ({
   const handleSave = async () => {
     // 完了済みの場合は保存処理をスキップ
     if (isCompleted) {
-      console.log('✅ 診断は既に完了しています。保存処理をスキップします。');
       return;
     }
 
@@ -366,7 +361,7 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       // 診断結果をAPI形式に変換
       const diagnosisData = {
         fencer: instinctLevels['狩猟本能'],
-        shielder: instinctLevels['警戒本能'],
+        shielder: instinctLevels['防衛本能'],
         gunner: instinctLevels['職人魂'],
         healer: instinctLevels['共感本能'],
         schemer: instinctLevels['飛躍本能'],
@@ -377,7 +372,6 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       
       setIsSaved(true);
       onSave?.(true);
-      console.log('✅ 診断結果を自動保存しました');
     } catch (error) {
       console.error('❌ RPG診断の保存に失敗:', error);
       onSave?.(false);
@@ -387,13 +381,13 @@ export const ResultStep: React.FC<ResultStepProps> = ({
     }
   };
 
-  // 因子の順序を固定（上から時計回り：職人魂、狩猟本能、共感本能、警戒本能、飛躍本能）
+  // 因子の順序を固定（時計回り）
   const FIXED_ORDER: (keyof typeof INSTINCT_DESCRIPTIONS)[] = [
-    '職人魂',    // 上
-    '狩猟本能',  // 右上
-    '共感本能',  // 右下
-    '警戒本能',  // 左下（表示は「防衛本能」）
-    '飛躍本能',  // 左上
+    '職人魂',
+    '狩猟本能',
+    '共感本能',
+    '防衛本能',
+    '飛躍本能',
   ];
 
   return (
