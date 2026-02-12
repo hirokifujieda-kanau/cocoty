@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Sparkles } from 'lucide-react';
 import { calculateRpgDiagnosis, type RpgAnswer, type InstinctLevels } from '@/lib/rpg/calculator';
 import { getRpgQuestions, type RpgQuestion, type Profile } from '@/lib/api/client';
+import { StartStep } from './StartStep';
 import { QuestionStep } from './QuestionStep';
 import { ResultStep } from './ResultStep';
 
@@ -21,6 +22,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<RpgAnswer[]>([]);
   const [showResult, setShowResult] = useState(false);
+  const [showStart, setShowStart] = useState(true);  // スタート画面表示フラグ
   const [questions, setQuestions] = useState<RpgQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +70,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       console.log('📝 未完了 → 質問を読み込みます');
       loadQuestions();
       setShowResult(false);
+      setShowStart(true);  // スタート画面を表示
       setCurrentQuestionIndex(0);
       setAnswers([]);
       setHideQuestion(false);
@@ -75,11 +78,13 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       // 完了済みの場合は結果表示モードに
       console.log('✅ 完了済み → 結果を表示します', { completedResult });
       setShowResult(true);
+      setShowStart(false);
       setIsLoading(false);
     } else if (!isOpen) {
       // モーダルが閉じられたときは、完了済みでない場合のみリセット
       if (!isCompleted) {
         setShowResult(false);
+        setShowStart(true);
         setCurrentQuestionIndex(0);
         setAnswers([]);
         setQuestions([]);
@@ -290,7 +295,20 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
+    } else {
+      // 質問1の場合はスタート画面に戻る
+      handleBackToStart();
     }
+  };
+
+  // スタート画面から診断開始
+  const handleStart = () => {
+    setShowStart(false);
+  };
+
+  // スタート画面に戻る
+  const handleBackToStart = () => {
+    setShowStart(true);
   };
 
   // やり直し（完了済みの場合は不可）
@@ -299,6 +317,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setShowResult(false);
+    setShowStart(true);  // スタート画面に戻る
     setHideQuestion(false);  // 質問を再表示
   };
 
@@ -371,9 +390,15 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
 
       {/* コンテンツ */}
       <div className="h-[calc(100vh-80px)] overflow-y-auto">
-        <div className={`mx-auto p-8 ${showResult ? 'max-w-7xl' : 'max-w-2xl'}`}>
-          {/* 質問画面：動画再生中または非表示フラグが立っている場合は表示しない */}
-          {!showVideo && !showResult && !hideQuestion ? (
+        <div className={`mx-auto p-8 ${showResult ? 'max-w-7xl' : showStart ? '' : 'max-w-2xl'}`}>
+          {/* スタート画面 */}
+          {showStart && !showResult ? (
+            <StartStep
+              onStart={handleStart}
+              onBack={onClose}
+            />
+          ) : !showVideo && !showResult && !hideQuestion && !showStart ? (
+            // 質問画面：動画再生中または非表示フラグが立っている場合は表示しない
             <QuestionStep
               questionNumber={currentQuestionIndex + 1}
               totalQuestions={questions.length}
@@ -383,7 +408,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
               onNext={handleNext}
               onBack={handleBack}
               canGoNext={true}
-              canGoBack={currentQuestionIndex > 0}
+              canGoBack={true}
             />
           ) : !showVideo && showResult ? (
             // 結果表示: 完了済みの場合と新規診断の場合を統一

@@ -7,9 +7,36 @@ import { saveRpgDiagnosis } from '@/lib/api/client';
 
 // グラデーション背景付きレーダーチャートコンポーネント
 const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
-  const labels = Object.keys(data) as (keyof InstinctLevels)[];
-  const values = Object.values(data);
+  // 表示順序を固定（上から時計回り）
+  const displayOrder: (keyof InstinctLevels)[] = [
+    '職人魂',    // 上
+    '狩猟本能',  // 右上
+    '共感本能',  // 右下
+    '警戒本能',  // 左下（表示は「防御本能」）
+    '飛躍本能',  // 左上
+  ];
+  
+  const labels = displayOrder;
+  const values = displayOrder.map(key => data[key]);
   const maxValue = 4;
+  
+  // 表示名のマッピング（警戒本能 → 防御本能）
+  const labelDisplayNames: Record<keyof InstinctLevels, string> = {
+    '狩猟本能': '狩猟本能',
+    '共感本能': '共感本能',
+    '飛躍本能': '飛躍本能',
+    '職人魂': '職人魂',
+    '警戒本能': '防御本能',
+  };
+  
+  // アイコン画像のマッピング
+  const iconPaths: Record<keyof InstinctLevels, string> = {
+    '職人魂': '/rpg-images/Icon_tamashii.png',
+    '狩猟本能': '/rpg-images/Icon_syuryou.png',
+    '共感本能': '/rpg-images/Icon_kyoukan.png',
+    '警戒本能': '/rpg-images/Icon_bougyo.png',
+    '飛躍本能': '/rpg-images/Icon_hiyaku.png',
+  };
   
   // 五角形の頂点を計算
   const points = labels.map((_, index) => {
@@ -41,7 +68,7 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
 
   return (
     <div className="relative w-full max-w-md mx-auto aspect-square">
-      <svg viewBox="0 0 300 300" className="w-full h-full" style={{ display: 'block' }}>
+      <svg viewBox="-50 -50 400 400" className="w-full h-full" style={{ display: 'block' }}>
         <defs>
           {/* データ領域のグラデーション（明るく光る感じ） */}
           <linearGradient id="dataGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -247,25 +274,44 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
           );
         })}
 
-        {/* ラベルテキスト */}
+        {/* アイコンとラベルテキスト */}
         {labels.map((label, index) => {
           const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
-          const x = 150 + 130 * Math.cos(angle);
-          const y = 150 + 130 * Math.sin(angle);
+          let x = 150 + 130 * Math.cos(angle);
+          let y = 150 + 130 * Math.sin(angle);
+          
+          // 個別調整：防御本能を左に、共感本能を右に
+          if (label === '警戒本能') { // 防御本能
+            x -= 25;
+            y -= 30;
+          } else if (label === '共感本能') {
+            x += 25;
+            y -= 30;
+          }
           
           return (
-            <text
-              key={index}
-              x={x}
-              y={y}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="#3b82f6"
-              fontSize="13"
-              fontWeight="bold"
-            >
-              {label}
-            </text>
+            <g key={index}>
+              {/* アイコン画像 */}
+              <image
+                href={iconPaths[label]}
+                x={x - 25}
+                y={y - 40}
+                width="50"
+                height="50"
+              />
+              {/* ラベルテキスト */}
+              <text
+                x={x}
+                y={y + 20}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="#3b82f6"
+                fontSize="13"
+                fontWeight="bold"
+              >
+                {labelDisplayNames[label]}
+              </text>
+            </g>
           );
         })}
       </svg>
@@ -341,13 +387,13 @@ export const ResultStep: React.FC<ResultStepProps> = ({
     }
   };
 
-  // 因子の順序を固定（要件通り）
+  // 因子の順序を固定（上から時計回り：職人魂、狩猟本能、共感本能、警戒本能、飛躍本能）
   const FIXED_ORDER: (keyof typeof INSTINCT_DESCRIPTIONS)[] = [
-    '職人魂',    // ガンナー素質
-    '狩猟本能',  // フェンサー素質
-    '共感本能',  // ヒーラー素質
-    '警戒本能',  // シールダー素質
-    '飛躍本能',  // スキーマー素質
+    '職人魂',    // 上
+    '狩猟本能',  // 右上
+    '共感本能',  // 右下
+    '警戒本能',  // 左下（表示は「防衛本能」）
+    '飛躍本能',  // 左上
   ];
 
   return (
@@ -427,23 +473,18 @@ export const ResultStep: React.FC<ResultStepProps> = ({
 
           {/* 右：キャラクターイラスト + 吹き出し */}
           <div className="flex flex-col items-center">
-            <div className="relative bg-white rounded-2xl p-4 mb-4 shadow-lg max-w-xs border-2" style={{ borderColor: '#a5b4fc' }}>
-              <p className="text-sm text-gray-700 text-center">
-                <span className="font-semibold text-blue-600">診断結果の各数値</span>と
-                <br />
-                <span className="font-semibold text-blue-600">下の表を照らし合わせる</span>と、
-                <br />
-                あなたのタイプが分かっちゃいます♪
-              </p>
-              {/* 吹き出しの三角形（下向き） - 外側のボーダー */}
-              <div className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-0 h-0 border-l-[13px] border-l-transparent border-r-[13px] border-r-transparent border-t-[13px]" style={{ borderTopColor: '#a5b4fc' }}></div>
-              {/* 吹き出しの三角形（下向き） - 内側の白 */}
-              <div className="absolute left-1/2 -translate-x-1/2 -bottom-[10px] w-0 h-0 border-l-[11px] border-l-transparent border-r-[11px] border-r-transparent border-t-[11px] border-t-white"></div>
-            </div>
-            {/* キャラクター画像（モック：紫のグラデーション） */}
-            <div className="w-48 h-48 bg-gradient-to-br from-pink-200 to-purple-300 rounded-full flex items-center justify-center shadow-xl">
-              <span className="text-6xl">👧</span>
-            </div>
+            {/* 吹き出し画像 */}
+            <img 
+              src="/rpg-images/Fukidashi_01.png" 
+              alt="診断結果の説明" 
+              className="w-64 h-auto"
+            />
+            {/* キャラクター画像 */}
+            <img 
+              src="/rpg-images/Healer_Girl.png" 
+              alt="キャラクター" 
+              className="w-48 h-auto"
+            />
           </div>
         </div>
       </div>
