@@ -151,11 +151,13 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const currentAnswer = answers.find(a => a.questionId === currentQuestion.id)?.score || 3;
+  // 質問1は性別選択なので、currentQuestionIndexが0の場合はnullを返す
+  const currentQuestion = currentQuestionIndex === 0 ? null : questions[currentQuestionIndex - 1];
+  const currentAnswer = currentQuestion ? (answers.find(a => a.questionId === currentQuestion.id)?.score || 3) : 3;
 
   // 回答を保存
   const handleAnswer = (score: number) => {
+    if (!currentQuestion) return;
     const newAnswers = answers.filter(a => a.questionId !== currentQuestion.id);
     newAnswers.push({ questionId: currentQuestion.id, score });
     setAnswers(newAnswers);
@@ -163,7 +165,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
 
   // 次へ
   const handleNext = () => {
-    if (currentQuestionIndex < questions.length - 1) {
+    // 質問1（性別選択）+ questions.length なので、最後は questions.length
+    if (currentQuestionIndex < questions.length) {
       // 次の質問へ移動（ホワイトアウト → ホワイトイン演出）
       setShowWhiteOverlay(true);
       
@@ -278,16 +281,20 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     }
   };
 
-  // スタート画面から性別選択へ
+  // スタート画面から質問1（性別選択）へ
   const handleStart = () => {
     setShowStart(false);
-    setShowGenderSelect(true);
+    setShowGenderSelect(false);
+    setCurrentQuestionIndex(0); // 質問1から開始
   };
 
   // スタート画面に戻る
   const handleBackToStart = () => {
     setShowStart(true);
     setShowGenderSelect(false);
+    setCurrentQuestionIndex(0);
+    setAnswers([]);
+    setGender(undefined);
   };
 
   // やり直し（完了済みの場合は不可）
@@ -300,12 +307,6 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     setShowGenderSelect(false);
     setHideQuestion(false);
     setGender(undefined);
-  };
-
-  // 性別選択後の処理
-  const handleGenderSelect = (selectedGender: '男性' | '女性') => {
-    setGender(selectedGender);
-    setShowGenderSelect(false);
   };
 
   // モーダルを閉じる
@@ -385,44 +386,192 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                 onBack={onClose}
               />
             )}
-            
-            {/* 性別選択画面 */}
-            {!showStart && showGenderSelect && !showResult && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">性別を選択してください</h3>
-                  <p className="text-gray-600">診断結果の計算に使用します</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={() => handleGenderSelect('男性')}
-                    className="p-8 bg-blue-600 hover:bg-blue-700 rounded-xl text-white font-bold text-xl transition-all transform hover:scale-105"
-                  >
-                    👨 男性
-                  </button>
-                  <button
-                    onClick={() => handleGenderSelect('女性')}
-                    className="p-8 bg-pink-600 hover:bg-pink-700 rounded-xl text-white font-bold text-xl transition-all transform hover:scale-105"
-                  >
-                    👩 女性
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* 質問画面：動画再生中または非表示フラグが立っている場合は表示しない */}
             {!showVideo && !showResult && !hideQuestion && !showStart && !showGenderSelect && (
-              <QuestionStep
-                questionNumber={currentQuestionIndex + 1}
-                totalQuestions={questions.length}
-                questionText={currentQuestion.text}
-                currentAnswer={currentAnswer}
-                onAnswer={handleAnswer}
-                onNext={handleNext}
-                onBack={handleBack}
-                canGoNext={true}
-                canGoBack={true}
-              />
+              <>
+                {currentQuestionIndex === 0 ? (
+                  /* 質問1: 性別選択 */
+                  <div className="space-y-0">
+                    {/* 質問番号表示（上部） */}
+                    <div className="text-center mb-8">
+                      <p className="text-black text-lg font-semibold">
+                        質問01
+                      </p>
+                    </div>
+
+                    {/* 質問文 */}
+                    <div className="text-center pt-12 pb-6 px-6" style={{ backgroundColor: '#6d4040' }}>
+                      <h3 className="text-lg font-bold text-white">
+                        性別を選択してください
+                      </h3>
+                    </div>
+
+                    {/* 性別選択 */}
+                    <div className="space-y-4 p-6" style={{ backgroundColor: '#6d4040' }}>
+                      {/* ボタンとラベル */}
+                      <div className="flex flex-col gap-4">
+                        {/* ボタンと左右ラベル（PC時） */}
+                        <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 12)' }}>
+                          {/* PC時: 左ラベル */}
+                          <span className="hidden md:block text-xs text-white flex-shrink-0">男</span>
+
+                          {/* ボタン */}
+                          <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(8rem, calc(var(--spacing) * 40), calc(var(--spacing) * 50))' }}>
+                            {/* 男性ボタン */}
+                            <button
+                              onClick={() => setGender('男性')}
+                              className={`
+                                w-6 h-6 rounded-full transition-all border-2 flex items-center justify-center
+                                ${
+                                  gender === '男性'
+                                    ? 'border-white'
+                                    : 'bg-transparent border-white hover:bg-white/20'
+                                }
+                              `}
+                            >
+                              {gender === '男性' && (
+                                <svg 
+                                  xmlns="http://www.w3.org/2000/svg" 
+                                  viewBox="0 0 24 24" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  strokeWidth="3" 
+                                  strokeLinecap="round" 
+                                  strokeLinejoin="round"
+                                  className="w-4 h-4 text-white"
+                                >
+                                  <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                              )}
+                            </button>
+
+                            {/* 女性ボタン */}
+                            <button
+                              onClick={() => setGender('女性')}
+                              className={`
+                                w-6 h-6 rounded-full transition-all border-2 flex items-center justify-center
+                                ${
+                                  gender === '女性'
+                                    ? 'border-white'
+                                    : 'bg-transparent border-white hover:bg-white/20'
+                                }
+                              `}
+                            >
+                              {gender === '女性' && (
+                                <svg 
+                                  xmlns="http://www.w3.org/2000/svg" 
+                                  viewBox="0 0 24 24" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  strokeWidth="3" 
+                                  strokeLinecap="round" 
+                                  strokeLinejoin="round"
+                                  className="w-4 h-4 text-white"
+                                >
+                                  <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                              )}
+                            </button>
+                          </div>
+
+                          {/* PC時: 右ラベル */}
+                          <span className="hidden md:block text-xs text-white flex-shrink-0">女</span>
+                        </div>
+                      </div>
+
+                      {/* SP時: テキストラベル */}
+                      <div className="flex md:hidden justify-between text-xs text-white">
+                        <span>男</span>
+                        <span>女</span>
+                      </div>
+                    </div>
+
+                    {/* ナビゲーションボタン */}
+                    <div className="flex justify-center pt-8" style={{ gap: 'calc(var(--spacing) * 33)' }}>
+                      <button
+                        onClick={handleBackToStart}
+                        className="w-[140px] h-12 rounded-lg font-semibold transition-all text-white border"
+                        style={{
+                          background: 'linear-gradient(180deg, #6B7280 0%, #4B5563 100%)',
+                          borderColor: '#9CA3AF',
+                          boxShadow: '0px 4px 0px 0px #374151',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        もどる
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (gender) {
+                            // ホワイトアウト → ホワイトイン演出
+                            setShowWhiteOverlay(true);
+                            
+                            // ホワイトアウト開始
+                            setTimeout(() => {
+                              const overlay = document.getElementById('white-overlay');
+                              if (overlay) {
+                                overlay.style.opacity = '1';
+                              }
+                            }, 50);
+                            
+                            // ホワイトアウト完了後、質問を切り替えてホワイトイン
+                            setTimeout(() => {
+                              setCurrentQuestionIndex(1);
+                              
+                              // 質問切り替え後、ホワイトイン開始
+                              setTimeout(() => {
+                                const overlay = document.getElementById('white-overlay');
+                                if (overlay) {
+                                  overlay.style.opacity = '0';
+                                }
+                                
+                                // フェードアウト完了後、オーバーレイを削除
+                                setTimeout(() => {
+                                  setShowWhiteOverlay(false);
+                                }, 500);
+                              }, 100);
+                            }, 600);
+                          }
+                        }}
+                        disabled={!gender}
+                        className="w-[140px] h-12 rounded-lg font-semibold transition-all text-white border"
+                        style={{
+                          background: gender
+                            ? 'linear-gradient(180deg, #22D3EE 0%, #0891B2 100%)'
+                            : 'linear-gradient(180deg, #6B7280 0%, #4B5563 100%)',
+                          borderColor: gender ? '#67E8F9' : '#6B7280',
+                          boxShadow: '0px 4px 0px 0px #164E63',
+                          opacity: gender ? 1 : 0.5,
+                          cursor: gender ? 'pointer' : 'not-allowed'
+                        }}
+                      >
+                        次へ
+                      </button>
+                    </div>
+
+                    {/* 質問番号表示 */}
+                    <div className="text-center pt-4">
+                      <p className="text-black text-sm">
+                        01/{(questions.length + 1).toString().padStart(2, '0')}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  /* 質問2以降: 通常の質問 */
+                  <QuestionStep
+                    questionNumber={currentQuestionIndex + 1}
+                    totalQuestions={questions.length + 1}
+                    questionText={currentQuestion!.text}
+                    currentAnswer={currentAnswer}
+                    onAnswer={handleAnswer}
+                    onNext={handleNext}
+                    onBack={handleBack}
+                    canGoNext={true}
+                    canGoBack={true}
+                  />
+                )}
+              </>
             )}
 
             {/* 結果表示 */}
