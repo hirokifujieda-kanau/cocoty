@@ -393,9 +393,31 @@ export interface RpgQuestionsResponse {
  * RPG診断の質問一覧を取得
  */
 export async function getRpgQuestions(): Promise<RpgQuestionsResponse> {
-  return apiRequest<RpgQuestionsResponse>('/rpg_questions', {
-    requireAuth: false,
+  // 🚧 モックデータ（テスト用 - 本番では削除）
+  return Promise.resolve({
+    questions: [
+      { id: 1, text: "知らない人とすぐに会話ができる", factor: "fencer", is_reversed: false, order: 1 },
+      { id: 2, text: "困っている人を見かけたら？", factor: "healer", is_reversed: false, order: 2 },
+      { id: 3, text: "リスクを取ることについてどう思いますか？", factor: "schemer", is_reversed: false, order: 3 },
+      { id: 4, text: "作業をする時、どちらを大切にしますか？", factor: "gunner", is_reversed: false, order: 4 },
+      { id: 5, text: "新しい環境に入る時の心境は？", factor: "shielder", is_reversed: false, order: 5 },
+      { id: 6, text: "目標達成のために何を優先しますか？", factor: "fencer", is_reversed: true, order: 6 },
+      { id: 7, text: "他人の気持ちをどう考えますか？", factor: "healer", is_reversed: true, order: 7 },
+      { id: 8, text: "計画を立てる時の考え方は？", factor: "schemer", is_reversed: true, order: 8 },
+      { id: 9, text: "品質と速度、どちらを重視しますか？", factor: "gunner", is_reversed: true, order: 9 },
+      { id: 10, text: "知らない場所に行く時は？", factor: "shielder", is_reversed: true, order: 10 },
+      { id: 11, text: "グループで意見が対立した時は？", factor: "fencer", is_reversed: false, order: 11 },
+      { id: 12, text: "人助けをすることについてどう思いますか？", factor: "healer", is_reversed: false, order: 12 },
+      { id: 13, text: "戦略を立てる時の重視点は？", factor: "schemer", is_reversed: false, order: 13 },
+      { id: 14, text: "細部へのこだわりについてどう考えますか？", factor: "gunner", is_reversed: false, order: 14 },
+      { id: 15, text: "予期せぬ変化が起きた時の対応は？", factor: "shielder", is_reversed: false, order: 15 },
+    ]
   });
+  
+  // 本番用コード（コメントアウト）
+  // return apiRequest<RpgQuestionsResponse>('/rpg_questions', {
+  //   requireAuth: false,
+  // });
 }
 
 export interface RpgDiagnosisData {
@@ -416,11 +438,18 @@ export interface RpgDiagnosisResponse {
  * 認証されたユーザーのプロフィールに自動的に保存されます
  */
 export async function saveRpgDiagnosis(diagnosisData: RpgDiagnosisData): Promise<RpgDiagnosisResponse> {
-  return apiRequest<RpgDiagnosisResponse>('/rpg_diagnoses', {
-    method: 'POST',
-    requireAuth: true,
-    body: JSON.stringify({ rpg_diagnosis: diagnosisData }),
+  // 🚧 モック: バックエンド実装までは保存をスキップ（本番では削除）
+  return Promise.resolve({
+    rpg_diagnosis: diagnosisData,
+    message: '診断結果を保存しました（モック）',
   });
+
+  // 本番用コード（コメントアウト）
+  // return apiRequest<RpgDiagnosisResponse>('/rpg_diagnoses', {
+  //   method: 'POST',
+  //   requireAuth: true,
+  //   body: JSON.stringify({ rpg_diagnosis: diagnosisData }),
+  // });
 }
 
 // ========================================
