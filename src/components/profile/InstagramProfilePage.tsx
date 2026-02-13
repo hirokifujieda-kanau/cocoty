@@ -51,7 +51,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     }
 
     try {
-      console.log('🔄 [InstagramProfilePage] refetchProfile called');
       setLoading(true);
       setError(null);
 
@@ -63,13 +62,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
       if (!userId) {
         // userIdが指定されていない場合は自分のプロフィールを表示
-        console.log('📥 [InstagramProfilePage] API Response:', currentUserResponse);
-        
         if (currentUserResponse.profile) {
-          console.log('📋 [InstagramProfilePage] Profile data:', {
-            rpg_diagnosis_completed_at: currentUserResponse.profile.rpg_diagnosis_completed_at,
-            tarot_last_drawn_at: currentUserResponse.profile.tarot_last_drawn_at,
-          });
           setDisplayUser(currentUserResponse.profile);
           setIsFirstTimeUser(false);
         } else {
@@ -129,19 +122,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     }
   };
   
-  // displayUserの変更を監視してログ出力
-  useEffect(() => {
-    if (displayUser) {
-      console.log('🎨 [InstagramProfilePage] displayUser updated:', {
-        name: displayUser.name,
-        tarot_last_drawn_at: displayUser.tarot_last_drawn_at,
-        rpg_diagnosis_completed_at: displayUser.rpg_diagnosis_completed_at,
-        mandala_thumbnail_url: displayUser.mandala_thumbnail_url,
-        mandala_detail_url: displayUser.mandala_detail_url,
-      });
-    }
-  }, [displayUser]);
-  
   // プロフィールデータ取得
   useEffect(() => {
     const fetchProfile = async () => {
@@ -162,21 +142,16 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
         if (!userId) {
           // userIdが指定されていない場合は自分のプロフィールを表示
-          console.log('🔍 プロフィール取得開始（自分）...');
-          
           if (currentUserResponse.profile) {
             setDisplayUser(currentUserResponse.profile);
             setIsFirstTimeUser(false);
-            console.log('✅ プロフィール設定完了');
           } else {
             // プロフィールがない場合、初回ユーザーとして扱う
-            console.log('⚠️ プロフィールが見つかりません。初回ユーザーとして扱います。');
             setIsFirstTimeUser(true);
             setError(null);
           }
         } else {
           // userIdが指定されている場合は他のユーザーのプロフィールを取得
-          console.log('🔍 プロフィール取得開始（他のユーザー）:', userId);
           const profile = await getProfile(Number(userId));
           setDisplayUser(profile);
         }
@@ -208,18 +183,10 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user || !displayUser) {
-      console.log('❌ Avatar upload cancelled:', { file: !!file, user: !!user, displayUser: !!displayUser });
       return;
     }
 
     try {
-      console.log('📤 Starting avatar upload...', {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-        profileId: displayUser.id
-      });
-      
       setUploadingAvatar(true);
 
       // Cloudinaryにアップロード
@@ -228,7 +195,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default');
       formData.append('public_id', `${user.uid}_avatar_${Date.now()}`);
 
-      console.log('☁️ Uploading to Cloudinary...');
       const cloudinaryResponse = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
         {
@@ -245,15 +211,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
       const cloudinaryData = await cloudinaryResponse.json();
       const avatarUrl = cloudinaryData.secure_url;
-      console.log('✅ Cloudinary upload success:', avatarUrl);
 
       // プロフィールを更新
-      console.log('💾 Updating profile with avatar URL...');
       await updateProfile(displayUser.id, { avatar_url: avatarUrl });
-      console.log('✅ Profile updated successfully');
 
       // プロフィールを再読み込み
-      console.log('🔄 Refetching profile...');
       await refetchProfile();
 
       alert('プロフィール画像を更新しました！');
@@ -267,11 +229,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   
   const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'fortune'>('fortune');
   
-  // activeTab変更を監視
-  useEffect(() => {
-    console.log('🎯 [InstagramProfilePage] activeTab changed:', activeTab);
-  }, [activeTab]);
-  
   // Fortune機能の状態
   const [showDailyTarot, setShowDailyTarot] = useState(false);
   const [showSeasonalDiagnosis, setShowSeasonalDiagnosis] = useState(false);
@@ -282,11 +239,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showShareProfile, setShowShareProfile] = useState(false);
   const [showRpgDiagnosis, setShowRpgDiagnosis] = useState(false);
-  
-  // デバッグ用: showSettingsの変更を監視
-  useEffect(() => {
-    console.log('🔍 showSettings が変更されました:', showSettings);
-  }, [showSettings]);
   
   // 初回ユーザーの場合、自動的にプロフィール編集モーダルを開く
   useEffect(() => {
@@ -913,10 +865,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         <div className="border-t border-gray-200">
           <div className="flex">
             <button
-              onClick={() => {
-                console.log('🔘 [InstagramProfilePage] 占い・診断タブクリック');
-                setActiveTab('fortune');
-              }}
+              onClick={() => setActiveTab('fortune')}
               className={`flex-1 flex items-center justify-center gap-2 py-3 border-t-2 transition-colors ${
                 activeTab === 'fortune'
                   ? 'border-black text-black'
@@ -1230,7 +1179,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         <DailyTarot 
           isOpen={showDailyTarot}
           onClose={() => {
-            console.log('🔒 [InstagramProfilePage] DailyTarot closed, refetching profile...');
             setShowDailyTarot(false);
             // タロット占い完了後、プロフィールを再取得
             setTimeout(() => {
@@ -1281,7 +1229,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       <RpgDiagnosisModal
         isOpen={showRpgDiagnosis}
         onClose={() => {
-          console.log('🔒 [InstagramProfilePage] RpgDiagnosis closed, refetching profile...');
           setShowRpgDiagnosis(false);
           // 診断完了後、プロフィールを再取得
           setTimeout(() => {

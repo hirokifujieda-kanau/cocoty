@@ -60,15 +60,9 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
   const [showHistoryDetail, setShowHistoryDetail] = useState(false);
   const [todayReading, setTodayReading] = useState<TarotReading | null>(null);
 
-  // stepの変更をログ出力
-  useEffect(() => {
-    console.log('🎴 [DailyTarot] step changed:', step);
-  }, [step]);
-
   // 初期化：タロットカードマスタデータを取得 & 今日占いができるかチェック
   useEffect(() => {
     if (isOpen && step === 'check') {
-      console.log('🔄 [DailyTarot] 初期化開始');
       const initialize = async () => {
         try {
           setLoading(true);
@@ -84,14 +78,11 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
             const { can_read } = await canReadTarotToday();
             
             if (!can_read) {
-              console.log('🚫 今日はすでにタロット占いを実行済みです');
-              
               // 今日の占い結果を取得
               try {
                 const { readings } = await getTarotReadings(1, 1);
                 if (readings && readings.length > 0) {
                   setTodayReading(readings[0]);
-                  console.log('✅ 今日の占い結果を取得しました:', readings[0]);
                 }
               } catch (err) {
                 console.error('今日の占い結果取得エラー:', err);
@@ -99,7 +90,6 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
               
               setStep('alreadyDrawn');
             } else {
-              console.log('✅ タロット占い実行可能');
               setStep('target');
             }
           } catch (apiErr) {
@@ -114,15 +104,12 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
                 lastDrawn.getFullYear() === today.getFullYear();
               
               if (isDrawnToday) {
-                console.log('🚫 [Fallback] 今日はすでにタロット占いを実行済みです（フロントエンド判定）');
                 setStep('alreadyDrawn');
               } else {
-                console.log('✅ [Fallback] タロット占い実行可能（フロントエンド判定）');
                 setStep('target');
               }
             } else {
               // プロフィール情報がない場合は実行可能とする
-              console.log('⚠️ [Fallback] プロフィール情報なし、タロット実行可能');
               setStep('target');
             }
           }
@@ -209,7 +196,6 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
             interpretation: generatedInterpretation,
             user_comment: undefined // 初回は感想なし
           });
-          console.log('✅ Tarot reading auto-saved to backend');
         } catch (err) {
           console.error('❌ Failed to auto-save tarot reading:', err);
           setError('占い結果の自動保存に失敗しました');
@@ -242,7 +228,6 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
         user_comment: userComment
       });
 
-      console.log('✅ Tarot reading comment updated');
       alert('✅ 感想を保存しました！\n\nあなたの記録が残りました。\n履歴からいつでも振り返ることができます。');
       
       // モーダルを閉じる

@@ -137,12 +137,9 @@ const SignupPage: React.FC = () => {
 
     try {
       // 1️⃣ Firebase認証で新規登録
-      console.log('🔐 Firebaseで新規登録中:', formData.email);
       await signup(formData.email, formData.password);
-      console.log('✅ Firebase認証成功！');
       
       // 2️⃣ すぐにプロフィール作成APIを呼ぶ（必須）
-      console.log('📝 プロフィール作成中...');
       
       // 生年月日を YYYY-MM-DD 形式に変換
       let birthday = '';
@@ -160,15 +157,11 @@ const SignupPage: React.FC = () => {
         }
       };
       
-      console.log('📤 送信するプロフィールデータ:', JSON.stringify(profilePayload, null, 2));
-      
       const setupProfileResponse = await apiRequest('/auth/setup_profile', {
         method: 'POST',
         requireAuth: true,
         body: JSON.stringify(profilePayload)
       });
-      
-      console.log('✅ プロフィール作成レスポンス:', setupProfileResponse);
       
       // 3️⃣ プロフィールページにリダイレクト
       router.push('/profile');

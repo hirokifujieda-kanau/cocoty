@@ -151,9 +151,6 @@ export default function RpgUserList() {
                         </span>
                       )}
                     </div>
-                    <div className="text-gray-400 text-sm">
-                      プロフィールを見る →
-                    </div>
                   </div>
 
                   <div className="mb-6">

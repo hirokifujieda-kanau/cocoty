@@ -13,20 +13,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/a
 async function getIdToken(): Promise<string | null> {
   const user = auth.currentUser;
   
-  console.log('🔑 getIdToken() 呼び出し');
-  console.log('🔑 auth.currentUser:', user);
-  console.log('🔑 user?.uid:', user?.uid);
-  console.log('🔑 user?.email:', user?.email);
-  
   if (!user) {
     console.error('❌ auth.currentUser が null です！');
     return null;
   }
   
   try {
-    console.log('🔑 getIdToken(true) を実行中...');
     const token = await user.getIdToken(true); // 強制的に最新のトークンを取得
-    console.log('✅ ID Token取得成功:', token.substring(0, 50) + '...');
     
     // localStorage に保存（バックエンドの確認用）
     if (typeof window !== 'undefined') {
@@ -43,25 +36,36 @@ async function getIdToken(): Promise<string | null> {
 /**
  * APIリクエストのヘッダーを生成
  */
-async function getHeaders(requireAuth: boolean = false): Promise<HeadersInit> {
+async function getHeaders(
+  requireAuth: boolean = false,
+  requireBasicAuth: boolean = false
+): Promise<HeadersInit> {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
   
-  console.log('📋 getHeaders() 呼び出し, requireAuth:', requireAuth);
-  
   if (requireAuth) {
     const token = await getIdToken();
     
-    console.log('📋 取得したtoken:', token ? `${token.substring(0, 30)}...` : 'null');
-    
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log('✅ Authorization ヘッダー設定完了');
     } else {
       console.error('❌ Token が null のため、認証エラーをスロー');
       throw new Error('Firebase authentication required. Please log in again.');
     }
+  }
+  
+  // Basic認証（RPG診断管理画面用）
+  if (requireBasicAuth) {
+    const username = process.env.NEXT_PUBLIC_ADMIN_USERNAME || '';
+    const password = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || '';
+    
+    if (!username || !password) {
+      console.error('❌ Basic認証の環境変数が設定されていません');
+    }
+    
+    const authHeader = btoa(`${username}:${password}`);
+    headers['Authorization'] = `Basic ${authHeader}`;
   }
   
   return headers;
@@ -72,14 +76,12 @@ async function getHeaders(requireAuth: boolean = false): Promise<HeadersInit> {
  */
 export async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit & { requireAuth?: boolean } = {}
+  options: RequestInit & { requireAuth?: boolean; requireBasicAuth?: boolean } = {}
 ): Promise<T> {
-  const { requireAuth = false, ...fetchOptions } = options;
+  const { requireAuth = false, requireBasicAuth = false, ...fetchOptions } = options;
   
-  const headers = await getHeaders(requireAuth);
+  const headers = await getHeaders(requireAuth, requireBasicAuth);
   const url = `${API_BASE_URL}${endpoint}`;
-  
-  console.log(`🌐 [API] ${fetchOptions.method || 'GET'} ${url}`);
   
   try {
     const response = await fetch(url, {
@@ -97,7 +99,6 @@ export async function apiRequest<T>(
     }
     
     const data = await response.json();
-    console.log(`✅ [API] Response from ${endpoint}:`, data);
     return data;
   } catch (error: any) {
     // ネットワークエラーの場合
