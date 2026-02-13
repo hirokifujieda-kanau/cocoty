@@ -362,7 +362,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       <CommonHeader 
         showSearch={true}
         showSettings={true}
-        showRpgLink={true}
         onSettingsClick={() => setShowSettings(true)}
       />
 

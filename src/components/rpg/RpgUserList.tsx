@@ -53,7 +53,6 @@ export default function RpgUserList() {
       <CommonHeader 
         showSearch={false}
         showSettings={false}
-        showRpgLink={false}
       />
 
       <div className="max-w-7xl mx-auto p-6">
