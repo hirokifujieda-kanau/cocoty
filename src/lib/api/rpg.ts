@@ -96,8 +96,7 @@ export async function getRpgDiagnosedUsers(
     `/rpg_diagnoses?page=${page}&per_page=${perPage}&sort_by=${sortBy}&order=${order}`,
     {
       method: 'GET',
-      requireAuth: false,
-      requireBasicAuth: true, // Basic認証を使用
+      requireAuth: false, // 認証不要
     }
   );
 }
@@ -110,8 +109,7 @@ export async function searchRpgUsers(name: string): Promise<RpgUsersResponse> {
     `/rpg_diagnoses/search?name=${encodeURIComponent(name)}`,
     {
       method: 'GET',
-      requireAuth: false,
-      requireBasicAuth: true, // Basic認証を使用
+      requireAuth: false, // 認証不要
     }
   );
 }
@@ -132,7 +130,6 @@ export async function getMyRpgResult(): Promise<MyRpgResultResponse> {
 export async function getRpgUserDetail(id: number): Promise<RpgUserDetailResponse> {
   return apiRequest<RpgUserDetailResponse>(`/rpg_diagnoses/${id}`, {
     method: 'GET',
-    requireAuth: false,
-    requireBasicAuth: true, // Basic認証を使用
+    requireAuth: false, // 認証不要
   });
 }

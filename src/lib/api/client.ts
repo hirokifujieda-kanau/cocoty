@@ -36,10 +36,7 @@ async function getIdToken(): Promise<string | null> {
 /**
  * APIリクエストのヘッダーを生成
  */
-async function getHeaders(
-  requireAuth: boolean = false,
-  requireBasicAuth: boolean = false
-): Promise<HeadersInit> {
+async function getHeaders(requireAuth: boolean = false): Promise<HeadersInit> {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
@@ -55,19 +52,6 @@ async function getHeaders(
     }
   }
   
-  // Basic認証（RPG診断管理画面用）
-  if (requireBasicAuth) {
-    const username = process.env.NEXT_PUBLIC_ADMIN_USERNAME || '';
-    const password = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || '';
-    
-    if (!username || !password) {
-      console.error('❌ Basic認証の環境変数が設定されていません');
-    }
-    
-    const authHeader = btoa(`${username}:${password}`);
-    headers['Authorization'] = `Basic ${authHeader}`;
-  }
-  
   return headers;
 }
 
@@ -76,11 +60,11 @@ async function getHeaders(
  */
 export async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit & { requireAuth?: boolean; requireBasicAuth?: boolean } = {}
+  options: RequestInit & { requireAuth?: boolean } = {}
 ): Promise<T> {
-  const { requireAuth = false, requireBasicAuth = false, ...fetchOptions } = options;
+  const { requireAuth = false, ...fetchOptions } = options;
   
-  const headers = await getHeaders(requireAuth, requireBasicAuth);
+  const headers = await getHeaders(requireAuth);
   const url = `${API_BASE_URL}${endpoint}`;
   
   try {
