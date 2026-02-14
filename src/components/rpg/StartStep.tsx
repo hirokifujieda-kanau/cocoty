@@ -9,25 +9,22 @@ interface StartStepProps {
 
 export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack }) => {
   return (
-    <div className="flex items-center justify-center min-h-[600px] gap-[176px]">
+    <div className="flex flex-col lg:flex-row items-center justify-start lg:justify-center min-h-screen lg:min-h-[600px] gap-6 lg:gap-[176px] px-4 pt-8 pb-4 lg:py-0 font-noto-sans-jp">
       <img 
         src="/rpg-images/TOP.png" 
         alt="RPG診断" 
-        className="w-[400px] h-auto object-contain"
+        className="w-[250px] sm:w-[300px] lg:w-[400px] h-auto object-contain"
       />
       
-      <div className="flex flex-col h-[500px] justify-between">
-        <div className="mt-20 space-y-6">
+      <div className="flex flex-col space-y-6 lg:space-y-0 lg:h-[500px] lg:justify-between w-full max-w-md lg:max-w-none">
+        <div className="lg:mt-20 space-y-6">
           {/* タイトル */}
           <div className="text-center">
-            <h2 
-              className="text-3xl font-bold text-gray-600"
-              style={{ fontFamily: "'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif" }}
-            >
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-600">
               さぁ！あなたの適性を<br />
               診断してみましょう！
             </h2>
-            <p className="text-base text-gray-600 mt-2">
+            <p className="text-sm lg:text-base text-gray-600 mt-2">
               (15の質問が出題されます)
             </p>
           </div>
@@ -58,7 +55,7 @@ export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack }) => {
         </div>
 
         {/* 注意書き */}
-        <div className="text-left text-sm text-gray-500 space-y-1">
+        <div className="text-left text-xs lg:text-sm text-gray-500 space-y-1">
           <p>※この診断は一度しか行えません。</p>
           <p>やり直しが必要な場合は、こちらから管理者承認が必要となります</p>
         </div>

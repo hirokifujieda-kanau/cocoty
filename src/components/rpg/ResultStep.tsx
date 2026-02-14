@@ -68,7 +68,7 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
 
   return (
     <div className="relative w-full h-full">
-      <svg viewBox="-30 -30 360 360" className="w-full h-full" style={{ display: 'block' }}>
+      <svg viewBox="-30 -60 360 390" className="w-full h-full" style={{ display: 'block' }}>
         <defs>
           {/* データ領域のグラデーション（明るく光る感じ） */}
           <linearGradient id="dataGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -253,20 +253,32 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
         {/* データポイントと数値 */}
         {points.map((point, index) => {
           const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
-          const labelX = 150 + 115 * Math.cos(angle);
-          const labelY = 150 + 115 * Math.sin(angle);
+          // 一番外側の五角形の少し内側に配置(半径80付近)
+          const labelX = 150 + 80 * Math.cos(angle);
+          const labelY = 150 + 80 * Math.sin(angle);
+          
+          // 数値に応じて色を変更
+          let numberColor = '#f59e0b'; // デフォルトはオレンジ(2-4用)
+          if (point.value === 1) {
+            numberColor = '#9ca3af'; // グレー
+          } else if (point.value === 5) {
+            numberColor = '#dc2626'; // 赤
+          }
           
           return (
             <g key={index}>
-              {/* 数値ラベル（頂点近く） */}
+              {/* 数値ラベル（五角形の内側） */}
               <text
                 x={labelX}
-                y={labelY - 15}
+                y={labelY}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fill="#fff"
+                fill={numberColor}
+                stroke="#fff"
+                strokeWidth="3"
                 fontSize="14"
                 fontWeight="bold"
+                paintOrder="stroke"
               >
                 {point.value}
               </text>
@@ -403,20 +415,17 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       </div>
 
       {/* メインコンテンツエリア（上部：レーダーチャート + スコア + キャラクター） */}
-      <div className="rounded-2xl p-8 mb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+      <div className="rounded-2xl mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* 左：スコア表示 */}
           <div>
-            {/* タイトル（青い六角形） */}
+            {/* タイトル画像 */}
             <div className="text-center mb-4">
-              <div className="inline-block bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-12 py-4 relative whitespace-nowrap"
-                   style={{
-                     clipPath: 'polygon(15% 0%, 85% 0%, 92% 50%, 85% 100%, 15% 100%, 8% 50%)'
-                   }}>
-                <h2 className="text-2xl font-bold">
-                  あなたの適性診断結果
-                </h2>
-              </div>
+              <img 
+                src="/tarot-images/result.png" 
+                alt="あなたの適性診断結果" 
+                className="mx-auto"
+              />
             </div>
             
             <div className="overflow-hidden shadow-lg border-[6px] border-blue-600 max-w-[280px] mx-auto">
@@ -427,26 +436,26 @@ export const ResultStep: React.FC<ResultStepProps> = ({
                 return (
                   <div 
                     key={instinct} 
-                    className="flex justify-between items-center px-4 border-b-[3px] border-blue-600"
+                    className="flex justify-between items-center px-3 border-b-[3px] border-blue-600 gap-2"
                     style={{ 
                       backgroundColor: isEven ? '#c3ddf5' : '#9fc5f0',
-                      paddingBlock: 'calc(var(--spacing) * 1.5)'
+                      paddingBlock: 'calc(var(--spacing) * 1)'
                     }}
                   >
-                    <span className="text-blue-600 font-bold text-base">{instinct}</span>
-                    <span className="font-bold text-xl">
+                    <span className="text-blue-600 font-bold text-sm">{instinct}</span>
+                    <span className="font-bold text-lg">
                       <span className="text-blue-800">{level}</span>
-                      <span className="text-blue-700 text-sm"> ポイント</span>
+                      <span className="text-blue-700 text-xs"> ポイント</span>
                     </span>
                   </div>
                 );
               })}
-              <div className="bg-cyan-500 px-4 py-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-white font-bold text-lg">トータル</span>
-                  <span className="font-bold text-2xl">
+              <div className="bg-cyan-500 px-3 py-2">
+                <div className="flex justify-between items-center gap-2">
+                  <span className="text-white font-bold text-base">トータル</span>
+                  <span className="font-bold text-xl">
                     <span className="text-white">{Object.values(instinctLevels).reduce((a, b) => a + b, 0)}</span>
-                    <span className="text-white text-sm">ポイント</span>
+                    <span className="text-white text-xs">ポイント</span>
                   </span>
                 </div>
               </div>
@@ -459,14 +468,14 @@ export const ResultStep: React.FC<ResultStepProps> = ({
           </div>
 
           {/* 中央：レーダーチャート */}
-          <div className="flex justify-center items-center mt-8">
-            <div className="w-[450px] h-[450px] relative">
+          <div className="flex justify-center items-center">
+            <div className="w-full max-w-[450px] aspect-square relative">
               <RadarChart data={instinctLevels} />
             </div>
           </div>
 
           {/* 右：キャラクターイラスト + 吹き出し */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center mt-8">
             {/* 吹き出し画像 */}
             <img 
               src="/rpg-images/Fukidashi_01.png" 
@@ -490,15 +499,15 @@ export const ResultStep: React.FC<ResultStepProps> = ({
           <div className="flex-shrink-0 flex flex-col text-amber-700" style={{ fontSize: '0.65rem' }}>
             <div className="py-1 px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>名称</div>
             <div className="py-1 px-2 text-center whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>適性名</div>
-            <div className="text-center flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#ffffff', marginBottom: '2px', writingMode: 'horizontal-tb', paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
+            <div className="text-center flex flex-1 items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#ffffff', marginBottom: '2px', writingMode: 'horizontal-tb', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
               職業イメージ
             </div>
-            <div className="py-1 px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高い人の特徴</div>
-            <div className="py-1 px-2 text-center whitespace-nowrap" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高い利点</div>
-            <div className="py-1 px-2 text-center whitespace-nowrap" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px' }}>高いコスト</div>
-            <div className="py-1 px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>低い人の特徴</div>
-            <div className="py-1 px-2 text-center whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>低い利点</div>
-            <div className="py-1 px-2 text-center whitespace-nowrap" style={{ backgroundColor: '#f5e6d3' }}>低いコスト</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い人の特徴</div>
+            <div className="text-center flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い利点</div>
+            <div className="text-center flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高いコスト</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低い人の特徴</div>
+            <div className="text-center flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低い利点</div>
+            <div className="text-center flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低いコスト</div>
           </div>
           
           {/* 右側：5つのカード */}
@@ -544,29 +553,33 @@ export const ResultStep: React.FC<ResultStepProps> = ({
             const score = instinctLevels[instinct];
             
             return (
-              <div key={instinct} className="relative flex flex-col h-full">
-                <img 
-                  src={jobImageMap[instinct]}
-                  alt={instinct}
-                  className="w-full h-auto object-contain"
-                />
-                <div className="flex flex-col text-black border-2 border-t-4 flex-1" style={{ fontSize: '0.65rem', borderColor: borderColorMap[instinct] }}>
-                  <div className="py-1 px-2 text-center font-bold border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderColor: borderColorMap[instinct], minHeight: '3rem', whiteSpace: 'pre-line' }}>
+              <div key={instinct} className="relative flex flex-col h-full border-2 rounded-lg" style={{ borderColor: borderColorMap[instinct] }}>
+                <div className="p-0.5 rounded-t-md" style={{ backgroundColor: borderColorMap[instinct] }}>
+                  <img 
+                    src={jobImageMap[instinct]}
+                    alt={instinct}
+                    className="w-full h-auto object-contain rounded-t-md"
+                  />
+                </div>
+                <div className="flex flex-col text-black flex-1 font-noto-sans-jp" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>
                     {instinct === '防衛本能' && desc['高い人の特徴'] === '危機察知性が高く、高ストレス・心配性の傾向' 
                       ? '危機察知性が高く、\n高ストレス・心配性の傾向'
                       : instinct === '飛躍本能' && desc['高い人の特徴'] === '独創的・創造力に富む・エキセントリック'
                       ? '独創的・想像力に富む\nエキセントリック'
                       : desc['高い人の特徴']}
                   </div>
-                  <div className="py-1 px-2 text-center border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderColor: borderColorMap[instinct], minHeight: '3rem', whiteSpace: 'pre-line' }}>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>
                     {instinct === '防衛本能' && desc['高い利点'] === 'ミスを回避、事前努力が苦なくできる'
                       ? 'ミスを回避、事前努力が\n苦なくできる'
+                      : instinct === '狩猟本能' && desc['高い利点'] === '金銭・快楽の成功を得やすい → 行動が積極的'
+                      ? '金銭・快楽の成功を得やすい\n→ 行動が積極的'
                       : desc['高い利点']}
                   </div>
-                  <div className="py-1 px-2 text-center border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderColor: borderColorMap[instinct], minHeight: '3rem' }}>{desc['高いコスト']}</div>
-                  <div className="py-1 px-2 text-center font-bold border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderColor: borderColorMap[instinct], minHeight: '3rem' }}>{desc['低い人の特徴']}</div>
-                  <div className="py-1 px-2 text-center border-b-2 flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderColor: borderColorMap[instinct], minHeight: '3rem' }}>{desc['低い利点']}</div>
-                  <div className="py-1 px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], minHeight: '3rem' }}>{desc['低いコスト']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['高いコスト']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低い人の特徴']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低い利点']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低いコスト']}</div>
                 </div>
               </div>
             );
@@ -578,12 +591,6 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       {isCompleted && (
         <p className="text-center text-purple-200 text-sm mt-4">
           この診断は完了済みです。診断は1回のみ実施可能です。
-        </p>
-      )}
-      
-      {!isCompleted && (
-        <p className="text-center text-purple-200 text-sm mt-4">
-          結果は自動的に保存されました
         </p>
       )}
     </div>

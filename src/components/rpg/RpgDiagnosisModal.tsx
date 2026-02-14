@@ -411,13 +411,25 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                     <div className="space-y-4 p-6" style={{ backgroundColor: '#6d4040' }}>
                       {/* ボタンとラベル */}
                       <div className="flex flex-col gap-4">
-                        {/* ボタンと左右ラベル（PC時） */}
-                        <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 12)' }}>
-                          {/* PC時: 左ラベル */}
-                          <span className="hidden md:block text-xs text-white flex-shrink-0">男</span>
+                        {/* 中央: 数字とボタン */}
+                        <div className="flex flex-col items-center gap-2">
+                          {/* スペーサー（他の質問の数字行と同じ高さを確保） */}
+                          <div className="flex justify-center items-center w-full h-[18px]" style={{ gap: 'calc(var(--spacing) * 12)' }}>
+                            <span className="hidden md:block text-xs flex-shrink-0 opacity-0 font-noto-sans-jp">男</span>
+                            <div className="flex justify-center items-center text-xs text-white opacity-0" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 8), calc(var(--spacing) * 12))' }}>
+                              <span className="w-6 text-center">1</span>
+                              <span className="w-6 text-center">2</span>
+                            </div>
+                            <span className="hidden md:block text-xs flex-shrink-0 opacity-0 font-noto-sans-jp">女</span>
+                          </div>
 
-                          {/* ボタン */}
-                          <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(8rem, calc(var(--spacing) * 40), calc(var(--spacing) * 50))' }}>
+                          {/* ボタンと左右ラベル（PC時） */}
+                          <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 12)' }}>
+                            {/* PC時: 左ラベル */}
+                            <span className="hidden md:block text-xs text-white flex-shrink-0 font-noto-sans-jp">男</span>
+
+                            {/* ボタン */}
+                            <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(8rem, calc(var(--spacing) * 40), calc(var(--spacing) * 50))' }}>
                             {/* 男性ボタン */}
                             <button
                               onClick={() => setGender('男性')}
@@ -473,17 +485,18 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                                 </svg>
                               )}
                             </button>
-                          </div>
+                            </div>
 
-                          {/* PC時: 右ラベル */}
-                          <span className="hidden md:block text-xs text-white flex-shrink-0">女</span>
+                            {/* PC時: 右ラベル */}
+                            <span className="hidden md:block text-xs text-white flex-shrink-0 font-noto-sans-jp">女</span>
+                          </div>
                         </div>
                       </div>
 
                       {/* SP時: テキストラベル */}
                       <div className="flex md:hidden justify-between text-xs text-white">
-                        <span>男</span>
-                        <span>女</span>
+                        <span className="font-noto-sans-jp">男</span>
+                        <span className="font-noto-sans-jp">女</span>
                       </div>
                     </div>
 
