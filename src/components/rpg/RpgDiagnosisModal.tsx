@@ -50,6 +50,14 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     防衛本能: profile.rpg_shielder || 1,
   } : null;
 
+  // 音声再生用のヘルパー関数
+  const playSound = (soundPath: string) => {
+    const audio = new Audio(soundPath);
+    audio.play().catch(() => {
+      // 音声再生エラーは無視
+    });
+  };
+
   // 質問データをAPIから取得
   useEffect(() => {
     if (isOpen && !isCompleted) {
@@ -197,6 +205,9 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       }, 600);
     } else {
       // 全問回答完了 → ホワイトアウト → 動画再生 → 結果表示
+      // 診断結果へボタン音を再生
+      playSound('/rpg-characters/診断結果へボタン音.mp3');
+      
       setShowWhiteOverlay(true);
       
       // 少し遅らせてopacityを1にする
@@ -225,6 +236,14 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         
         setTimeout(() => {
           if (videoRef.current) {
+            // 動画の終了少し前に音声を再生
+            videoRef.current.addEventListener('timeupdate', function checkTime() {
+              if (videoRef.current && videoRef.current.duration - videoRef.current.currentTime < 1.0) {
+                playSound('/rpg-characters/演出から診断結果表示.mp3');
+                videoRef.current.removeEventListener('timeupdate', checkTime);
+              }
+            });
+            
             videoRef.current.play().catch(err => {
               // 動画再生に失敗した場合は直接結果を表示
               setShowVideo(false);
@@ -267,8 +286,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       // フェードアウト完了後、オーバーレイを完全に削除
       setTimeout(() => {
         setShowWhiteOverlay(false);
-      }, 1000);
-    }, 500);
+      }, 2000); // 1000ms → 2000ms にしてゆっくりに
+    }, 1000); // 500ms → 1000ms にしてゆっくりに
   };
 
   // 戻る
@@ -331,15 +350,15 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         playsInline
         preload="auto"
       >
-        <source src="/rpg-characters/02.職業診断デザイン-アニメー演出 (1).mp4" type="video/mp4" />
+        <source src="/rpg-characters/RPG職業診断アニメ演出 リサイズ版イエロー.mp4" type="video/mp4" />
       </video>
 
       {/* 動画再生中 */}
       {showVideo && (
         <div className="fixed inset-0 z-[10001] bg-black flex items-center justify-center">
           <video
-            className="max-w-full max-h-full"
-            src="/rpg-characters/02.職業診断デザイン-アニメー演出 (1).mp4"
+            className="w-full h-full object-cover"
+            src="/rpg-characters/RPG職業診断アニメ演出 リサイズ版イエロー.mp4"
             autoPlay
             playsInline
             onEnded={handleVideoEnd}
@@ -360,25 +379,9 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       )}
 
       <div className="fixed inset-0 z-[9999] bg-white">
-        {/* ヘッダー */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <Sparkles className="h-6 w-6 text-yellow-500" />
-            <h2 className="text-2xl font-bold text-gray-900">
-              {showResult ? 'RPG診断結果' : 'RPG診断'}
-            </h2>
-          </div>
-          <button
-            onClick={handleClose}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-
         {/* コンテンツ */}
-        <div className="h-[calc(100vh-80px)] overflow-y-auto">
-          <div className={`mx-auto p-8 ${showResult ? 'max-w-7xl' : (showStart || showGenderSelect) ? '' : 'max-w-2xl'}`}>
+        <div className="h-screen overflow-y-auto flex items-center justify-center">
+          <div className={`mx-auto p-8 ${showResult ? 'max-w-7xl' : ''}`}>
             {/* スタート画面 */}
             {showStart && !showResult && (
               <StartStep
@@ -400,33 +403,49 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                       </p>
                     </div>
 
-                    {/* 質問文 */}
-                    <div className="text-center pt-12 pb-6 px-6" style={{ backgroundColor: '#6d4040' }}>
-                      <h3 className="text-lg font-bold text-white">
-                        性別を選択してください
-                      </h3>
-                    </div>
+                    {/* 質問セクション全体（背景色付き） */}
+                    <div className="w-full max-w-3xl mx-auto" style={{ backgroundColor: '#6d4040' }}>
+                      {/* 質問文 */}
+                      <div className="text-center pt-12 pb-6 px-6">
+                        <div className="flex items-center justify-center w-full" style={{ gap: 'calc(var(--spacing) * 4)', paddingInline: 'calc(var(--spacing) * 24)' }}>
+                          <img 
+                            src="/tarot-question/Question_01.png" 
+                            alt="質問アイコン" 
+                            className="w-24 h-24 lg:w-32 lg:h-32 object-contain flex-shrink-0"
+                          />
+                          <h3 className="text-lg font-bold text-white flex-1 whitespace-nowrap">
+                            性別を選択してください
+                          </h3>
+                          {/* 右側のスペーサー（画像と同じサイズ） */}
+                          <div className="w-24 h-24 lg:w-32 lg:h-32 flex-shrink-0 opacity-0" aria-hidden="true"></div>
+                        </div>
+                      </div>
 
-                    {/* 性別選択 */}
-                    <div className="space-y-4 p-6" style={{ backgroundColor: '#6d4040' }}>
+                      {/* 性別選択 */}
+                      <div className="space-y-4 pb-6 w-full px-8">
                       {/* ボタンとラベル */}
                       <div className="flex flex-col gap-4">
                         {/* 中央: 数字とボタン */}
                         <div className="flex flex-col items-center gap-2">
-                          {/* スペーサー（他の質問の数字行と同じ高さを確保） */}
-                          <div className="flex justify-center items-center w-full h-[18px]" style={{ gap: 'calc(var(--spacing) * 12)' }}>
+                          {/* スケールラベル（数字） - ボタンと同じ幅のコンテナに配置 */}
+                          <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 12)' }}>
+                            {/* PC時: 左スペーサー（左ラベルと同じ幅） */}
                             <span className="hidden md:block text-xs flex-shrink-0 opacity-0 font-noto-sans-jp">男</span>
-                            <div className="flex justify-center items-center text-xs text-white opacity-0" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 8), calc(var(--spacing) * 12))' }}>
+                            
+                            {/* 数字 */}
+                            <div className="flex justify-center items-center text-xs text-white" style={{ gap: 'clamp(8rem, calc(var(--spacing) * 40), calc(var(--spacing) * 50))' }}>
                               <span className="w-6 text-center">1</span>
                               <span className="w-6 text-center">2</span>
                             </div>
+                            
+                            {/* PC時: 右スペーサー（右ラベルと同じ幅） */}
                             <span className="hidden md:block text-xs flex-shrink-0 opacity-0 font-noto-sans-jp">女</span>
                           </div>
 
                           {/* ボタンと左右ラベル（PC時） */}
                           <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 12)' }}>
                             {/* PC時: 左ラベル */}
-                            <span className="hidden md:block text-xs text-white flex-shrink-0 font-noto-sans-jp">男</span>
+                            <span className="hidden md:block text-sm text-white flex-shrink-0 font-noto-sans-jp">男</span>
 
                             {/* ボタン */}
                             <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(8rem, calc(var(--spacing) * 40), calc(var(--spacing) * 50))' }}>
@@ -488,15 +507,16 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                             </div>
 
                             {/* PC時: 右ラベル */}
-                            <span className="hidden md:block text-xs text-white flex-shrink-0 font-noto-sans-jp">女</span>
+                            <span className="hidden md:block text-sm text-white flex-shrink-0 font-noto-sans-jp">女</span>
                           </div>
                         </div>
                       </div>
 
                       {/* SP時: テキストラベル */}
-                      <div className="flex md:hidden justify-between text-xs text-white">
+                      <div className="flex md:hidden justify-between text-sm text-white">
                         <span className="font-noto-sans-jp">男</span>
                         <span className="font-noto-sans-jp">女</span>
+                      </div>
                       </div>
                     </div>
 
