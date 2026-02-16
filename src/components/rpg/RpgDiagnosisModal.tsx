@@ -381,7 +381,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       <div className="fixed inset-0 z-[9999] bg-white">
         {/* コンテンツ */}
         <div className="h-screen overflow-y-auto flex items-center justify-center">
-          <div className={`mx-auto p-8 ${showResult ? 'max-w-7xl' : ''}`}>
+          <div className={`mx-auto ${showResult ? 'max-w-7xl' : 'p-8'}`}>
             {/* スタート画面 */}
             {showStart && !showResult && (
               <StartStep
