@@ -50,6 +50,57 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Input fields - スマホでのテキスト色を強制的に黒に */
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  color: #1a1a1a !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+}
+
+/* プレースホルダーは灰色に（全ブラウザ対応） */
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="text"]::placeholder {
+  color: #9ca3af !important;
+  -webkit-text-fill-color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+input[type="email"]::-webkit-input-placeholder,
+input[type="password"]::-webkit-input-placeholder,
+input[type="text"]::-webkit-input-placeholder {
+  color: #9ca3af !important;
+  -webkit-text-fill-color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+input[type="email"]::-moz-placeholder,
+input[type="password"]::-moz-placeholder,
+input[type="text"]::-moz-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+input[type="email"]:-ms-input-placeholder,
+input[type="password"]:-ms-input-placeholder,
+input[type="text"]:-ms-input-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+/* 自動補完時のスタイルも上書き */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #1a1a1a !important;
+  -webkit-box-shadow: 0 0 0 30px #e5e7eb inset !important;
+  color: #1a1a1a !important;
+  background-color: #e5e7eb !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 /* SafeArea対応（iPhoneのノッチなど） */
 @supports (padding: env(safe-area-inset-top)) {
   body {

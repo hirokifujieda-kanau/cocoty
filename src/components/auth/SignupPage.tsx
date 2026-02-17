@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/api/client';
 import styles from './SignupPage.module.css';
@@ -231,12 +230,6 @@ const SignupPage: React.FC = () => {
       {/* Header */}
       <div className="sticky top-0 bg-white py-8 px-4">
         <div className="flex items-center justify-center gap-4 relative">
-          <button
-            onClick={() => router.back()}
-            className="absolute left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ChevronLeft className="h-6 w-6 text-gray-900" />
-          </button>
           <h1
             className="font-['Noto_Sans_JP'] font-bold text-[20px] leading-[20px] text-center align-middle text-[#1A1A1A]"
           >
@@ -337,7 +330,8 @@ const SignupPage: React.FC = () => {
                   placeholder="1"
                 />
                 <span className="font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#5C5C5C]">日</span>
-                <label className="flex items-center gap-2 ml-auto cursor-pointer relative">
+                {/* 公開/非公開トグル - 一時的にコメントアウト */}
+                {/* <label className="flex items-center gap-2 ml-auto cursor-pointer relative">
                   <span className="font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#1A1A1A]">
                     {formData.isPrivate ? '公開' : '非公開'}
                   </span>
@@ -360,7 +354,7 @@ const SignupPage: React.FC = () => {
                       }`}
                     />
                   </div>
-                </label>
+                </label> */}
               </div>
               {birthdayError && (
                 <p className="text-red-600 text-[12px] font-['Noto_Sans_JP'] mb-[14px]">
@@ -489,7 +483,8 @@ const SignupPage: React.FC = () => {
             <span className="font-['Noto_Sans_JP'] text-[14px] text-gray-600">アカウントをお持ちの方は</span>{' '}
             <button
               onClick={() => router.push('/login')}
-              className="font-['Noto_Sans_JP'] font-semibold text-[14px] text-purple-600 hover:text-purple-700 transition-colors"
+              className="font-['Noto_Sans_JP'] font-semibold text-[14px] transition-colors"
+              style={{ color: '#FFBA48' }}
             >
               ログイン
             </button>

@@ -5,6 +5,11 @@ import { ChevronLeft } from 'lucide-react';
 import styles from './InstagramProfilePage.module.css';
 import { PasswordResetPage } from './index';
 
+// 全角数字を半角数字に変換する関数
+const toHalfWidth = (str: string): string => {
+  return str.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+};
+
 interface ChangePasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,43 +30,40 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
 
   if (!isOpen) return null;
 
-  // 英数字混合をチェック
-  const hasAlphabetAndNumbers = (password: string) => {
-    const hasAlpha = /[a-zA-Z]/.test(password);
-    const hasNum = /[0-9]/.test(password);
-    return hasAlpha && hasNum;
-  };
-
   // 各フィールドのバリデーション
   const validateFields = () => {
     const newFieldErrors: { [key: string]: string[] } = {};
 
-    // 新しいパスワードフィールドのバリデーション
+    // 新しいパスワードフィールドのバリデーション（一致チェックは除外）
     if (newPassword) {
       const errors: string[] = [];
-      if (newPassword.length < 8) {
-        errors.push('8文字以上である必要があります');
-      }
-      if (!hasAlphabetAndNumbers(newPassword)) {
+      
+      // パスワードの文字種チェックのみ
+      const hasNumber = /[0-9]/.test(newPassword);
+      const hasLetter = /[a-zA-Z]/.test(newPassword);
+
+      if (!hasNumber && !hasLetter) {
+        errors.push('パスワードには英数字を使用してください');
+      } else if (!hasNumber) {
+        errors.push('パスワードには数字も使用してください');
+      } else if (!hasLetter) {
         errors.push('パスワードには英語も使用してください');
       }
+      
       if (errors.length > 0) {
         newFieldErrors['newPassword'] = errors;
       }
     }
 
-    // パスワード再入力フィールドのバリデーション
+    // パスワード再入力フィールドのバリデーション（一致チェックのみ）
     if (confirmPassword) {
       const errors: string[] = [];
-      if (confirmPassword !== newPassword) {
+      
+      // パスワード一致チェック
+      if (newPassword && confirmPassword !== newPassword) {
         errors.push('パスワードが一致しません');
       }
-      if (confirmPassword.length < 8) {
-        errors.push('8文字以上である必要があります');
-      }
-      if (!hasAlphabetAndNumbers(confirmPassword)) {
-        errors.push('パスワードには英語も使用してください');
-      }
+      
       if (errors.length > 0) {
         newFieldErrors['confirmPassword'] = errors;
       }
@@ -163,7 +165,10 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
               <input
                 type={showCurrentPassword ? 'text' : 'password'}
                 value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                onChange={(e) => {
+                  const halfWidth = toHalfWidth(e.target.value);
+                  setCurrentPassword(halfWidth);
+                }}
                 placeholder=""
                 className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
               />
@@ -192,7 +197,17 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
               <input
                 type={showNewPassword ? 'text' : 'password'}
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => {
+                  const halfWidth = toHalfWidth(e.target.value);
+                  setNewPassword(halfWidth);
+                  // 入力時にバリデーションをクリア
+                  setFieldErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors['newPassword'];
+                    return newErrors;
+                  });
+                }}
+                onBlur={validateFields}
                 placeholder=""
                 className={`w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${fieldErrors['newPassword'] ? 'border border-[#FF0000]' : ''}`}
               />
@@ -229,7 +244,17 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  const halfWidth = toHalfWidth(e.target.value);
+                  setConfirmPassword(halfWidth);
+                  // 入力時にバリデーションをクリア
+                  setFieldErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors['confirmPassword'];
+                    return newErrors;
+                  });
+                }}
+                onBlur={validateFields}
                 placeholder=""
                 className={`w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${fieldErrors['confirmPassword'] ? 'border border-[#FF0000]' : ''}`}
               />
