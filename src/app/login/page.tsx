@@ -63,7 +63,7 @@ export default function LoginPage() {
       {/* ヘッダー */}
       <div className="sticky top-0 bg-white py-8 px-4">
         <div className="flex items-center justify-center gap-4 relative">
-          <h1 className="font-['Noto_Sans_JP'] font-bold text-[20px] leading-[20px] text-center align-middle text-[#1A1A1A]">
+          <h1 className="font-noto-sans-jp font-bold text-[20px] leading-[20px] text-center align-middle text-[#1A1A1A]">
             ログイン
           </h1>
         </div>
@@ -83,7 +83,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="email"
-              className="block font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
+              className="block font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
             >
               メールアドレス
             </label>
@@ -93,7 +93,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(toHalfWidth(e.target.value))}
               required
-              className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 h-[28px] mb-[14px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
+              className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 h-[28px] mb-[14px] px-2 font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
               placeholder=""
             />
           </div>
@@ -102,7 +102,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="password"
-              className="block font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
+              className="block font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
             >
               パスワード
             </label>
@@ -113,7 +113,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(toHalfWidth(e.target.value))}
                 required
-                className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
+                className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
                 placeholder=""
                 minLength={6}
               />
@@ -135,7 +135,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={!isFormValid || loading}
-            className="w-[calc(100%-161px)] ml-[80.5px] mr-[80.5px] gap-2 rounded-[12px] border-none mt-[32px] font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300"
+            className="w-[calc(100%-161px)] ml-[80.5px] mr-[80.5px] gap-2 rounded-[12px] border-none mt-[32px] font-inter-sans font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300"
             style={{
               backgroundColor: (isFormValid && !loading) ? '#FFBA48' : '#F8E8AA',
               cursor: (isFormValid && !loading) ? 'pointer' : 'not-allowed',
@@ -148,10 +148,10 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <span className="font-['Noto_Sans_JP'] text-[14px] text-gray-600">アカウントをお持ちでない方は</span>{' '}
+          <span className="font-noto-sans-jp text-[14px] text-gray-600">アカウントをお持ちでない方は</span>{' '}
           <button
             onClick={() => router.push('/signup')}
-            className="font-['Noto_Sans_JP'] font-semibold text-[14px] transition-colors"
+            className="font-noto-sans-jp font-semibold text-[14px] transition-colors"
             style={{ color: '#FFBA48' }}
           >
             アカウント作成

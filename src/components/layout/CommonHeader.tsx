@@ -47,12 +47,9 @@ export default function CommonHeader({
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
           )}
-          <button
-            onClick={() => router.push('/profile')}
-            className="font-noto text-base font-medium text-white leading-none hover:opacity-80 transition-opacity"
-          >
+          <div className="font-noto text-base font-medium text-white leading-none">
             ここてぃ
-          </button>
+          </div>
         </div>
         
         {/* Search & Settings */}

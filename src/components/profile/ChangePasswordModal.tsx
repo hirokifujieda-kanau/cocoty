@@ -170,7 +170,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
                   setCurrentPassword(halfWidth);
                 }}
                 placeholder=""
-                className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
+                className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
               />
               <button
                 type="button"
@@ -209,7 +209,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
                 }}
                 onBlur={validateFields}
                 placeholder=""
-                className={`w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${fieldErrors['newPassword'] ? 'border border-[#FF0000]' : ''}`}
+                className={`w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${fieldErrors['newPassword'] ? 'border border-[#FF0000]' : ''}`}
               />
               <button
                 type="button"
@@ -256,7 +256,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
                 }}
                 onBlur={validateFields}
                 placeholder=""
-                className={`w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${fieldErrors['confirmPassword'] ? 'border border-[#FF0000]' : ''}`}
+                className={`w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${fieldErrors['confirmPassword'] ? 'border border-[#FF0000]' : ''}`}
               />
               <button
                 type="button"
@@ -290,7 +290,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
               type="submit"
               onClick={handleSave}
               disabled={loading || currentPassword.length < 8 || newPassword.length < 8 || confirmPassword.length < 8}
-              className="w-full gap-2 rounded-[12px] border-none font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300"
+              className="w-full gap-2 rounded-[12px] border-none font-inter-sans font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300"
               style={{
                 backgroundColor: currentPassword.length >= 8 && newPassword.length >= 8 && confirmPassword.length >= 8 ? '#FFBA48' : '#F8E8AA',
                 cursor: loading || currentPassword.length < 8 || newPassword.length < 8 || confirmPassword.length < 8 ? 'not-allowed' : 'pointer',
