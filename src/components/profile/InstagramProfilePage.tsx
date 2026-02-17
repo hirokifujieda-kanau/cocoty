@@ -163,7 +163,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         
         // 404エラー（プロフィール未作成）の場合は初回ユーザーとして扱う
         if (err.message?.includes('404')) {
-          console.log('ℹ️ プロフィールが存在しないため、初回ユーザーとして扱います');
           setIsFirstTimeUser(true);
           setError(null); // エラーメッセージをクリア
         } 

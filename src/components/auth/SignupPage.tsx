@@ -124,15 +124,6 @@ const SignupPage: React.FC = () => {
 
     const errors: string[] = [];
     
-    console.log('🔍 パスワード検証:', {
-      password: formData.password,
-      confirmPassword: formData.confirmPassword,
-      passwordHasNumber: /[0-9]/.test(formData.password),
-      passwordHasLetter: /[a-zA-Z]/.test(formData.password),
-      confirmHasNumber: /[0-9]/.test(formData.confirmPassword),
-      confirmHasLetter: /[a-zA-Z]/.test(formData.confirmPassword)
-    });
-    
     // パスワード一致チェック
     if (formData.password !== formData.confirmPassword) {
       errors.push('パスワードが一致しません');
