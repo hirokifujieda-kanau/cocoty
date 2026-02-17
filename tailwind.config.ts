@@ -13,8 +13,10 @@ export default {
         foreground: "var(--foreground)",
       },
       fontFamily: {
-        inter: ['var(--font-inter)', 'sans-serif'],
-        noto: ['Noto Sans JP', 'sans-serif'],
+        inter: ['var(--font-inter)', 'Inter', 'sans-serif'],
+        noto: ['var(--font-noto-sans-jp)', 'Noto Sans JP', 'sans-serif'],
+        'noto-sans-jp': ['var(--font-noto-sans-jp)', 'Noto Sans JP', 'sans-serif'],
+        'inter-sans': ['var(--font-inter)', 'Inter', 'sans-serif'],
       },
     },
   },

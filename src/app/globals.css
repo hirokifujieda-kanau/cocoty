@@ -53,15 +53,25 @@ body {
 /* Input fields - スマホでのテキスト色を強制的に黒に */
 input[type="email"],
 input[type="password"],
-input[type="text"] {
+input[type="text"],
+input[type="date"],
+input[type="number"],
+select,
+textarea {
   color: #1a1a1a !important;
   -webkit-text-fill-color: #1a1a1a !important;
+}
+
+/* Select optionの色も設定 */
+select option {
+  color: #1a1a1a !important;
 }
 
 /* プレースホルダーは灰色に（全ブラウザ対応） */
 input[type="email"]::placeholder,
 input[type="password"]::placeholder,
-input[type="text"]::placeholder {
+input[type="text"]::placeholder,
+textarea::placeholder {
   color: #9ca3af !important;
   -webkit-text-fill-color: #9ca3af !important;
   opacity: 1 !important;
@@ -69,7 +79,8 @@ input[type="text"]::placeholder {
 
 input[type="email"]::-webkit-input-placeholder,
 input[type="password"]::-webkit-input-placeholder,
-input[type="text"]::-webkit-input-placeholder {
+input[type="text"]::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
   color: #9ca3af !important;
   -webkit-text-fill-color: #9ca3af !important;
   opacity: 1 !important;
@@ -77,16 +88,29 @@ input[type="text"]::-webkit-input-placeholder {
 
 input[type="email"]::-moz-placeholder,
 input[type="password"]::-moz-placeholder,
-input[type="text"]::-moz-placeholder {
+input[type="text"]::-moz-placeholder,
+textarea::-moz-placeholder {
   color: #9ca3af !important;
   opacity: 1 !important;
 }
 
 input[type="email"]:-ms-input-placeholder,
 input[type="password"]:-ms-input-placeholder,
-input[type="text"]:-ms-input-placeholder {
+input[type="text"]:-ms-input-placeholder,
+textarea:-ms-input-placeholder {
   color: #9ca3af !important;
   opacity: 1 !important;
+}
+
+/* フォントファミリーの定義 */
+.font-\[\'Noto_Sans_JP\'\],
+.font-\[\"Noto_Sans_JP\"\] {
+  font-family: var(--font-noto-sans-jp), 'Noto Sans JP', sans-serif !important;
+}
+
+.font-\[\'Inter\'\],
+.font-\[\"Inter\"\] {
+  font-family: var(--font-inter), 'Inter', sans-serif !important;
 }
 
 /* 自動補完時のスタイルも上書き */
