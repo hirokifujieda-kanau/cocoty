@@ -93,8 +93,18 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
       {/* ラベル */}
       {labels.map((label, index) => {
         const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
-        const x = 150 + 120 * Math.cos(angle);
+        let x = 150 + 120 * Math.cos(angle);
         const y = 150 + 120 * Math.sin(angle);
+        
+        // 狩猟本能（右上）のラベルを右に移動
+        if (label === '狩猟本能') {
+          x += 12;
+        }
+        // 飛躍本能（左上）のラベルを左に移動
+        if (label === '飛躍本能') {
+          x -= 12;
+        }
+        
         return (
           <text
             key={index}
