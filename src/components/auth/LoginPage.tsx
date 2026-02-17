@@ -22,11 +22,21 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // デモ用: user-1でログイン
-      login('user-1');
+      await login(formData.email, formData.password);
       router.push('/');
-    } catch (err) {
-      setError('ログインエラーが発生しました');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      if (err.code === 'auth/invalid-credential') {
+        setError('メールアドレスまたはパスワードが正しくありません');
+      } else if (err.code === 'auth/user-not-found') {
+        setError('ユーザーが見つかりません');
+      } else if (err.code === 'auth/wrong-password') {
+        setError('パスワードが正しくありません');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('ログイン試行回数が多すぎます。しばらくしてから再試行してください');
+      } else {
+        setError('ログインエラーが発生しました');
+      }
     } finally {
       setIsLoading(false);
     }

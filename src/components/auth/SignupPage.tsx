@@ -7,6 +7,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/api/client';
 import styles from './SignupPage.module.css';
 
+// 全角数字を半角数字に変換する関数
+const toHalfWidth = (str: string): string => {
+  return str.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+};
+
 // 生年月日のバリデーション関数
 const validateBirthday = (year: string, month: string, day: string): { isValid: boolean; errorMessage?: string } => {
   // 入力値をチェック
@@ -120,11 +125,29 @@ const SignupPage: React.FC = () => {
 
     const errors: string[] = [];
     
+    console.log('🔍 パスワード検証:', {
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+      passwordHasNumber: /[0-9]/.test(formData.password),
+      passwordHasLetter: /[a-zA-Z]/.test(formData.password),
+      confirmHasNumber: /[0-9]/.test(formData.confirmPassword),
+      confirmHasLetter: /[a-zA-Z]/.test(formData.confirmPassword)
+    });
+    
+    // パスワード一致チェック
     if (formData.password !== formData.confirmPassword) {
       errors.push('パスワードが一致しません');
     }
 
-    if (!/[0-9]/.test(formData.password) || !/[a-zA-Z]/.test(formData.password)) {
+    // パスワードの文字種チェック（最初のパスワード欄を基準にチェック）
+    const hasNumber = /[0-9]/.test(formData.password);
+    const hasLetter = /[a-zA-Z]/.test(formData.password);
+
+    if (!hasNumber && !hasLetter) {
+      errors.push('パスワードには英数字を使用してください');
+    } else if (!hasNumber) {
+      errors.push('パスワードには数字も使用してください');
+    } else if (!hasLetter) {
       errors.push('パスワードには英語も使用してください');
     }
 
@@ -258,28 +281,40 @@ const SignupPage: React.FC = () => {
               </label>
               <div className="flex items-center mb-[14px] gap-1">
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   min="1900"
                   max="2024"
                   value={formData.year}
-                  onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                  onChange={(e) => {
+                    const halfWidth = toHalfWidth(e.target.value).replace(/[^0-9]/g, '');
+                    setFormData({ ...formData, year: halfWidth });
+                  }}
+                  onFocus={(e) => {
+                    if (!e.target.value) {
+                      setFormData({ ...formData, year: '1999' });
+                    }
+                  }}
                   className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-center placeholder-gray-400 w-[60px] h-[28px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
                   placeholder="1999"
                 />
                 <span className="font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#5C5C5C]">年</span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   min="1"
                   max="12"
                   value={formData.month}
                   onChange={(e) => {
-                    const newMonth = e.target.value;
-                    setFormData({ ...formData, month: newMonth });
+                    const halfWidth = toHalfWidth(e.target.value).replace(/[^0-9]/g, '');
+                    setFormData({ ...formData, month: halfWidth });
                     // 月が変わった時に日を検証
-                    if (newMonth && formData.year && formData.day) {
-                      const maxDay = getMaxDayInMonth(formData.year, newMonth);
+                    if (halfWidth && formData.year && formData.day) {
+                      const maxDay = getMaxDayInMonth(formData.year, halfWidth);
                       if (parseInt(formData.day, 10) > maxDay) {
-                        setFormData(prev => ({ ...prev, month: newMonth, day: '' }));
+                        setFormData(prev => ({ ...prev, month: halfWidth, day: '' }));
                       }
                     }
                   }}
@@ -288,11 +323,16 @@ const SignupPage: React.FC = () => {
                 />
                 <span className="font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#5C5C5C]">月</span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   min="1"
                   max={getMaxDayInMonth(formData.year, formData.month)}
                   value={formData.day}
-                  onChange={(e) => setFormData({ ...formData, day: e.target.value })}
+                  onChange={(e) => {
+                    const halfWidth = toHalfWidth(e.target.value).replace(/[^0-9]/g, '');
+                    setFormData({ ...formData, day: halfWidth });
+                  }}
                   className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
                   placeholder="1"
                 />
@@ -357,7 +397,10 @@ const SignupPage: React.FC = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) => {
+                    const halfWidth = toHalfWidth(e.target.value);
+                    setFormData({ ...formData, password: halfWidth });
+                  }}
                   className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
                   placeholder=""
                   required
@@ -388,7 +431,8 @@ const SignupPage: React.FC = () => {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => {
-                    setFormData({ ...formData, confirmPassword: e.target.value });
+                    const halfWidth = toHalfWidth(e.target.value);
+                    setFormData({ ...formData, confirmPassword: halfWidth });
                     setPasswordErrors([]);
                   }}
                   className={`w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${passwordErrors.length > 0 ? 'border border-[#FF0000]' : ''}`}

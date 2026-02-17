@@ -6,6 +6,7 @@ import { ChevronLeft } from 'lucide-react';
 import { getProfiles } from '@/lib/api/client';
 import type { Profile } from '@/lib/api/client';
 import { Pagination } from './Pagination';
+import CommonHeader from '@/components/layout/CommonHeader';
 
 interface ProfilesResponse {
   profiles: Profile[];
@@ -87,40 +88,17 @@ export function UserListPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 bg-[#FFD26A] h-[30px] z-50 flex items-center">
-        <div className="mx-auto flex items-center justify-between w-full max-w-[750px] px-[clamp(26px,8vw,106px)]">
-          <h1 className="font-noto text-base font-medium text-white leading-none">
-            ここてぃ
-          </h1>
-          <div className="flex gap-2 items-center">
-            <div className="relative flex items-center">
-              <img 
-                src="/人物アイコン　チーム 1.svg" 
-                alt="search" 
-                className="absolute left-2 w-5 h-5 pointer-events-none"
-              />
-              <input
-                type="text"
-                placeholder="ユーザー一覧"
-                className="w-[clamp(120px,30vw,200px)] h-5 pl-8 pr-3 text-[10px] font-noto font-medium bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer shadow-sm placeholder:text-[#5C5C5C] placeholder:font-medium placeholder:text-[10px]"
-                readOnly
-              />
-            </div>
-            <button
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              title="設定"
-            >
-              <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <CommonHeader 
+        showSearch={true}
+        showSettings={true}
+        showBackButton={false}
+      />
 
       {/* Page Title Header */}
       <div className="sticky top-[30px] bg-white py-8 px-4 border-b border-gray-200">
         <div className="flex items-center justify-center gap-4 relative">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/profile')}
             className="absolute left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ChevronLeft className="h-6 w-6 text-gray-900" />

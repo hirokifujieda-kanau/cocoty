@@ -161,14 +161,22 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         console.error('❌ エラーメッセージ:', err.message);
         console.error('❌ エラー全体:', JSON.stringify(err, null, 2));
         
-        // ユーザーに分かりやすいエラーメッセージを表示
-        if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
+        // 404エラー（プロフィール未作成）の場合は初回ユーザーとして扱う
+        if (err.message?.includes('404')) {
+          console.log('ℹ️ プロフィールが存在しないため、初回ユーザーとして扱います');
+          setIsFirstTimeUser(true);
+          setError(null); // エラーメッセージをクリア
+        } 
+        // ネットワークエラー
+        else if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
           setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
-        } else if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
+        } 
+        // 認証エラー
+        else if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
           setError('認証エラー: ログインし直してください');
-        } else if (err.message?.includes('404')) {
-          setError('プロフィールが見つかりません');
-        } else {
+        } 
+        // その他のエラー
+        else {
           setError(`プロフィールの読み込みに失敗しました: ${err.message || '不明なエラー'}`);
         }
       } finally {
@@ -362,6 +370,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       <CommonHeader 
         showSearch={true}
         showSettings={true}
+        showBackButton={!isOwner}
+        backButtonPath="/users"
         onSettingsClick={() => setShowSettings(true)}
       />
 
