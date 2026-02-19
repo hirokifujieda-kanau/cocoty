@@ -501,17 +501,17 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       <div className="border-2 rounded-lg" style={{ borderColor: '#e7d4b6', padding: 'calc(var(--spacing) * 2)' }}>
         <div className="flex gap-6">
           {/* 左側：項目リスト */}
-          <div className="flex-shrink-0 flex flex-col font-noto-sans-jp font-demilight" style={{ fontSize: '0.65rem', color: '#9c773e' }}>
-            <div className="px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', marginBottom: '2px', paddingBlock: 'calc(var(--spacing) * 2)' }}>名称</div>
-            <div className="px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', marginBottom: '2px', paddingBlock: 'calc(var(--spacing) * 2)' }}>適性名</div>
-            <div className="text-center font-bold flex flex-1 items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#ffffff', marginBottom: '2px', writingMode: 'horizontal-tb', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
+          <div className="flex-shrink-0 flex flex-col gap-0.5 font-noto-sans-jp font-demilight" style={{ fontSize: '0.65rem', color: '#9c773e' }}>
+            <div className="px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', paddingBlock: 'calc(var(--spacing) * 2)' }}>名称</div>
+            <div className="px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', paddingBlock: 'calc(var(--spacing) * 2)' }}>適性名</div>
+            <div className="text-center font-bold flex flex-1 items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#ffffff', writingMode: 'horizontal-tb', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
               職業イメージ
             </div>
-            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い人の特徴</div>
-            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い利点</div>
-            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高いコスト</div>
-            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低い人の特徴</div>
-            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低い利点</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い人の特徴</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い利点</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高いコスト</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', marginTop: '1px' }}>低い人の特徴</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低い利点</div>
             <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低いコスト</div>
           </div>
           
@@ -568,7 +568,7 @@ export const ResultStep: React.FC<ResultStepProps> = ({
             
             return (
               <div key={instinct} className="relative flex flex-col h-full rounded-lg" style={{ border: '4px solid ' + borderColorMap[instinct] }}>
-                <div className="p-0.5 rounded-t-md" style={{ backgroundColor: borderColorMap[instinct] }}>
+                <div className="p-0.5" style={{ backgroundColor: borderColorMap[instinct] }}>
                   <img 
                     src={jobImageMap[instinct]}
                     alt={instinct}
@@ -591,7 +591,7 @@ export const ResultStep: React.FC<ResultStepProps> = ({
                       : desc['高い利点']}
                   </div>
                   <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, borderBottom: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>{desc['高いコスト']}</div>
-                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', marginTop: '0.25rem' }}>{desc['低い人の特徴']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', marginTop: '2px' }}>{desc['低い人の特徴']}</div>
                   <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低い利点']}</div>
                   <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, borderBottom: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低いコスト']}</div>
                 </div>
