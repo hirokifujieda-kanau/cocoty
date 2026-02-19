@@ -529,62 +529,71 @@ export const ResultStep: React.FC<ResultStepProps> = ({
             
             // 本能名から枠線の色へのマッピング
             const borderColorMap: Record<keyof InstinctLevels, string> = {
-              '狩猟本能': '#dc2626', // 赤（フェンサー）
-              '防衛本能': '#2563eb', // 青（シールダー）
-              '職人魂': '#f59e0b', // オレンジ（ガンナー）
-              '共感本能': '#10b981', // 緑（ヒーラー）
-              '飛躍本能': '#8b5cf6', // 紫（スキーマー）
+              '狩猟本能': '#d2537d', // ピンク（フェンサー）
+              '防衛本能': '#536bd2', // 青（シールダー）
+              '職人魂': '#ffa760', // オレンジ（ガンナー）
+              '共感本能': '#3cbc6c', // 緑（ヒーラー）
+              '飛躍本能': '#903cbc', // 紫（スキーマー）
             };
             
             // 高い人の特徴用の薄い背景色
             const lightBgColorMap: Record<keyof InstinctLevels, string> = {
-              '狩猟本能': '#fee2e2', // 薄い赤
-              '防衛本能': '#dbeafe', // 薄い青
-              '職人魂': '#fed7aa', // 薄いオレンジ
-              '共感本能': '#d1fae5', // 薄い緑
-              '飛躍本能': '#ede9fe', // 薄い紫
+              '狩猟本能': '#fee7ef', // 薄いピンク
+              '防衛本能': '#e7f7fe', // 薄い青
+              '職人魂': '#fef6de', // 薄いベージュ
+              '共感本能': '#ddfce0', // 薄い緑
+              '飛躍本能': '#f8eaff', // 薄い紫
             };
             
             // 低い人の特徴用の濃い背景色
             const darkBgColorMap: Record<keyof InstinctLevels, string> = {
-              '狩猟本能': '#fecaca', // 濃い赤
-              '防衛本能': '#bfdbfe', // 濃い青
-              '職人魂': '#fdba74', // 濃いオレンジ
-              '共感本能': '#a7f3d0', // 濃い緑
-              '飛躍本能': '#ddd6fe', // 濃い紫
+              '狩猟本能': '#ecccd6', // 濃いピンク
+              '防衛本能': '#d1d9ea', // 濃い青
+              '職人魂': '#eadec2', // 濃いベージュ
+              '共感本能': '#c1e7cb', // 濃い緑
+              '飛躍本能': '#e4d1ee', // 濃い紫
+            };
+            
+            // セル間のボーダー色
+            const cellBorderColorMap: Record<keyof InstinctLevels, string> = {
+              '狩猟本能': '#611818', // 暗い赤
+              '防衛本能': '#183261', // 暗い青
+              '職人魂': '#613b18', // 茶色
+              '共感本能': '#186143', // 暗い緑
+              '飛躍本能': '#431861', // 暗い紫
             };
             
             const desc = INSTINCT_DESCRIPTIONS[instinct];
             const score = instinctLevels[instinct];
             
             return (
-              <div key={instinct} className="relative flex flex-col h-full border-2 rounded-lg" style={{ borderColor: borderColorMap[instinct] }}>
+              <div key={instinct} className="relative flex flex-col h-full rounded-lg" style={{ border: '4px solid ' + borderColorMap[instinct] }}>
                 <div className="p-0.5 rounded-t-md" style={{ backgroundColor: borderColorMap[instinct] }}>
                   <img 
                     src={jobImageMap[instinct]}
                     alt={instinct}
-                    className="w-full h-auto object-contain rounded-t-md"
+                    className="w-full h-auto object-contain"
                   />
                 </div>
-                <div className="flex flex-col flex-1 font-noto-sans-jp font-demilight" style={{ fontSize: '0.8rem', color: '#000000' }}>
-                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>
+                <div className="flex flex-col flex-1 font-noto-sans-jp font-demilight" style={{ fontSize: '0.8rem', color: '#000000', backgroundColor: borderColorMap[instinct] }}>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>
                     {instinct === '防衛本能' && desc['高い人の特徴'] === '危機察知性が高く、高ストレス・心配性の傾向' 
                       ? '危機察知性が高く、\n高ストレス・心配性の傾向'
                       : instinct === '飛躍本能' && desc['高い人の特徴'] === '独創的・創造力に富む・エキセントリック'
                       ? '独創的・想像力に富む\nエキセントリック'
                       : desc['高い人の特徴']}
                   </div>
-                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>
                     {instinct === '防衛本能' && desc['高い利点'] === 'ミスを回避、事前努力が苦なくできる'
                       ? 'ミスを回避、事前努力が\n苦なくできる'
                       : instinct === '狩猟本能' && desc['高い利点'] === '金銭・快楽の成功を得やすい → 行動が積極的'
                       ? '金銭・快楽の成功を得やすい\n→ 行動が積極的'
                       : desc['高い利点']}
                   </div>
-                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['高いコスト']}</div>
-                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低い人の特徴']}</div>
-                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低い利点']}</div>
-                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低いコスト']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, borderBottom: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>{desc['高いコスト']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', marginTop: '0.25rem' }}>{desc['低い人の特徴']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低い利点']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, borderBottom: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低いコスト']}</div>
                 </div>
               </div>
             );
