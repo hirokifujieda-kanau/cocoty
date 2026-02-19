@@ -498,25 +498,25 @@ export const ResultStep: React.FC<ResultStepProps> = ({
       </div>
 
       {/* 下部：5つのカード - ゲームカード風デザイン */}
-      <div className="border-2 rounded-lg p-4" style={{ borderColor: '#fed7aa' }}>
+      <div className="border-2 rounded-lg" style={{ borderColor: '#e7d4b6', padding: 'calc(var(--spacing) * 2)' }}>
         <div className="flex gap-6">
           {/* 左側：項目リスト */}
-          <div className="flex-shrink-0 flex flex-col text-amber-700" style={{ fontSize: '0.65rem' }}>
-            <div className="py-1 px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>名称</div>
-            <div className="py-1 px-2 text-center whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px' }}>適性名</div>
-            <div className="text-center flex flex-1 items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#ffffff', marginBottom: '2px', writingMode: 'horizontal-tb', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
+          <div className="flex-shrink-0 flex flex-col font-noto-sans-jp font-demilight" style={{ fontSize: '0.65rem', color: '#9c773e' }}>
+            <div className="px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', marginBottom: '2px', paddingBlock: 'calc(var(--spacing) * 2)' }}>名称</div>
+            <div className="px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', marginBottom: '2px', paddingBlock: 'calc(var(--spacing) * 2)' }}>適性名</div>
+            <div className="text-center font-bold flex flex-1 items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#ffffff', marginBottom: '2px', writingMode: 'horizontal-tb', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
               職業イメージ
             </div>
-            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い人の特徴</div>
-            <div className="text-center flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い利点</div>
-            <div className="text-center flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e8d4b8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高いコスト</div>
-            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低い人の特徴</div>
-            <div className="text-center flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低い利点</div>
-            <div className="text-center flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f5e6d3', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低いコスト</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い人の特徴</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い利点</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高いコスト</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低い人の特徴</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', marginBottom: '2px', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低い利点</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低いコスト</div>
           </div>
           
           {/* 右側：5つのカード */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5" style={{ gap: 'calc(var(--spacing) * 3)' }}>
             {FIXED_ORDER.map((instinct) => {
             // 本能名から職業画像へのマッピング
             const jobImageMap: Record<keyof InstinctLevels, string> = {
@@ -566,7 +566,7 @@ export const ResultStep: React.FC<ResultStepProps> = ({
                     className="w-full h-auto object-contain rounded-t-md"
                   />
                 </div>
-                <div className="flex flex-col text-black flex-1 font-noto-sans-jp" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                <div className="flex flex-col flex-1 font-noto-sans-jp font-demilight" style={{ fontSize: '0.8rem', color: '#000000' }}>
                   <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderBottom: `3px solid ${borderColorMap[instinct]}`, borderLeft: `3px solid ${borderColorMap[instinct]}`, borderRight: `3px solid ${borderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>
                     {instinct === '防衛本能' && desc['高い人の特徴'] === '危機察知性が高く、高ストレス・心配性の傾向' 
                       ? '危機察知性が高く、\n高ストレス・心配性の傾向'
