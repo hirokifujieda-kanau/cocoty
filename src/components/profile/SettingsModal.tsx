@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import ChangePasswordModal from './ChangePasswordModal';
+import { getCurrentUser } from '@/lib/api/client';
 import styles from './InstagramProfilePage.module.css';
 
 interface SettingsModalProps {
@@ -13,10 +13,28 @@ interface SettingsModalProps {
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // 管理者チェック
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) return;
+      
+      try {
+        const data = await getCurrentUser();
+        setIsAdmin(data.user.admin || false);
+      } catch (error) {
+        console.error('Failed to check admin status:', error);
+      }
+    };
+
+    if (isOpen && user) {
+      checkAdmin();
+    }
+  }, [isOpen, user]);
 
   if (!isOpen) return null;
 
@@ -34,9 +52,22 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   };
 
   const menuItems = [
+    ...(isAdmin ? [{
+      label: 'ユーザー管理（管理者）',
+      onClick: () => {
+        router.push('/admin/users');
+        onClose();
+      },
+      hasArrow: true,
+      isDanger: false,
+      isAdmin: true,
+    }] : []),
     {
       label: 'パスワードの変更',
-      onClick: () => setShowChangePassword(true),
+      onClick: () => {
+        router.push('/profile/change-password');
+        onClose();
+      },
       hasArrow: true,
       isDanger: false,
     },
@@ -88,11 +119,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               onClick={item.onClick}
               disabled={loading && item.isDanger}
               className={`w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                item.isDanger ? 'text-red-600' : 'text-gray-900'
+                item.isDanger ? 'text-red-600' : item.isAdmin ? 'text-purple-600 font-semibold' : 'text-gray-900'
               }`}
             >
               <div className="flex items-center gap-3">
-                <span style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: '14px', lineHeight: '130%', color: '#1A1A1A' }}>{item.label}</span>
+                {item.isAdmin && <span className="text-lg">👤</span>}
+                <span style={{ fontFamily: 'Inter', fontWeight: item.isAdmin ? 600 : 500, fontSize: '14px', lineHeight: '130%' }}>{item.label}</span>
               </div>
               {item.hasArrow && (
                 <ChevronLeft className="h-5 w-5 rotate-180 text-gray-400" />
@@ -101,13 +133,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
           ))}
         </div>
       </div>
-
-      {/* Change Password Modal */}
-      <ChangePasswordModal
-        isOpen={showChangePassword}
-        onClose={onClose}
-        onBack={() => setShowChangePassword(false)}
-      />
     </div>
   );
 };
