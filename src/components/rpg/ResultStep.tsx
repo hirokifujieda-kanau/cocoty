@@ -317,9 +317,13 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
                 y={y + 20}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fill="#3b82f6"
+                fill="#395d9f"
+                stroke="#ffffff"
+                strokeWidth="3"
                 fontSize="13"
-                fontWeight="bold"
+                fontWeight="500"
+                fontFamily="Noto Sans JP"
+                paintOrder="stroke"
               >
                 {labelDisplayNames[label]}
               </text>
@@ -395,10 +399,10 @@ export const ResultStep: React.FC<ResultStepProps> = ({
 
   // 因子の順序を固定（時計回り）
   const FIXED_ORDER: (keyof typeof INSTINCT_DESCRIPTIONS)[] = [
-    '狩猟本能',
-    '防衛本能',
     '職人魂',
+    '狩猟本能',
     '共感本能',
+    '防衛本能',
     '飛躍本能',
   ];
 
@@ -428,7 +432,7 @@ export const ResultStep: React.FC<ResultStepProps> = ({
               />
             </div>
             
-            <div className="overflow-hidden shadow-lg border-[6px] border-blue-600 max-w-[280px] mx-auto">
+            <div className="overflow-hidden shadow-lg border-[6px] max-w-[280px] mx-auto" style={{ borderColor: '#4d97da' }}>
               {FIXED_ORDER.map((instinct, index) => {
                 const info = INSTINCT_DESCRIPTIONS[instinct];
                 const level = instinctLevels[instinct];
@@ -436,31 +440,32 @@ export const ResultStep: React.FC<ResultStepProps> = ({
                 return (
                   <div 
                     key={instinct} 
-                    className="flex justify-between items-center px-3 border-b-[3px] border-blue-600 gap-2"
+                    className="flex justify-between items-center px-3 border-b-[3px] gap-2"
                     style={{ 
-                      backgroundColor: isEven ? '#c3ddf5' : '#9fc5f0',
+                      backgroundColor: isEven ? '#e0efff' : '#c3d6fc',
+                      borderColor: '#4d97da',
                       paddingBlock: 'calc(var(--spacing) * 1)'
                     }}
                   >
-                    <span className="text-blue-600 font-bold text-sm">{instinct}</span>
-                    <span className="font-bold text-lg">
-                      <span className="text-blue-800">{level}</span>
-                      <span className="text-blue-700 text-xs"> ポイント</span>
+                    <span className="text-sm font-noto-sans-jp font-light" style={{ color: '#3567a5' }}>{instinct}</span>
+                    <span className="text-lg">
+                      <span className="font-noto-sans-jp font-light" style={{ color: '#3567a5' }}>{level}</span>
+                      <span className="text-xs font-noto-sans-jp font-light" style={{ color: '#3567a5' }}> ポイント</span>
                     </span>
                   </div>
                 );
               })}
-              <div className="bg-cyan-500 px-3 py-2">
+              <div className="px-3 py-2" style={{ backgroundColor: '#4eb8ef' }}>
                 <div className="flex justify-between items-center gap-2">
-                  <span className="text-white font-bold text-base">トータル</span>
-                  <span className="font-bold text-xl">
-                    <span className="text-white">{Object.values(instinctLevels).reduce((a, b) => a + b, 0)}</span>
-                    <span className="text-white text-xs">ポイント</span>
+                  <span className="text-base font-noto-sans-jp font-light" style={{ color: '#ffffff' }}>トータル</span>
+                  <span className="text-xl font-noto-sans-jp font-light">
+                    <span style={{ color: '#ffffff' }}>{Object.values(instinctLevels).reduce((a, b) => a + b, 0)}</span>
+                    <span className="text-xs" style={{ color: '#ffffff' }}>ポイント</span>
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-xs text-gray-500 text-center mt-2">
+            <p className="text-xs text-center mt-2 font-noto-sans-jp font-light" style={{ color: '#555555' }}>
               ※ポイントの大小は、
               <br />
               直接的な評価や優劣を示すものではありません。

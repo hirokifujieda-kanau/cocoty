@@ -17,6 +17,9 @@ export default {
         noto: ['Noto Sans JP', 'sans-serif'],
         'noto-sans-jp': ['var(--font-noto-sans-jp)', 'sans-serif'],
       },
+      fontWeight: {
+        demilight: '350',
+      },
     },
   },
   plugins: [

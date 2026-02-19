@@ -21,11 +21,11 @@ export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack }) => {
           <div className="space-y-6 lg:mt-40">
             {/* タイトル */}
             <div className="text-center">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-600">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
                 さぁ！あなたの適性を<br />
                 診断してみましょう！
               </h2>
-              <p className="text-sm lg:text-base text-gray-600 mt-2">
+              <p className="text-sm lg:text-base font-noto-sans-jp font-light mt-2" style={{ color: '#7d7d7d' }}>
                 (15の質問が出題されます)
               </p>
             </div>
@@ -34,29 +34,43 @@ export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack }) => {
             <div className="flex gap-4 justify-center">
               <button
                 onClick={onBack}
-                className="w-[140px] h-12 rounded-lg font-semibold text-white border border-gray-400 transition-all hover:opacity-90"
+                className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
                 style={{
-                  background: 'linear-gradient(rgb(107, 114, 128) 0%, rgb(75, 85, 99) 100%)',
-                  boxShadow: 'rgb(55, 65, 81) 0px 4px 0px 0px'
+                  background: 'linear-gradient(to bottom, #d4cfc9, #686c6f)'
                 }}
               >
-                もどる
+                <span 
+                  className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
+                  style={{
+                    background: 'linear-gradient(to bottom, #515151, #b1b0b0)',
+                    color: '#ffffff'
+                  }}
+                >
+                  もどる
+                </span>
               </button>
               <button
                 onClick={onStart}
-                className="w-[140px] h-12 rounded-lg font-semibold text-white border border-cyan-300 transition-all hover:opacity-90"
+                className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
                 style={{
-                  background: 'linear-gradient(rgb(34, 211, 238) 0%, rgb(8, 145, 178) 100%)',
-                  boxShadow: 'rgb(22, 78, 99) 0px 4px 0px 0px'
+                  background: 'linear-gradient(to bottom, #00edfe, #015eea)'
                 }}
               >
-                はじめる
+                <span 
+                  className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
+                  style={{
+                    background: 'linear-gradient(to bottom, #0960d8, #00f6ff)',
+                    color: '#ffffff'
+                  }}
+                >
+                  はじめる
+                </span>
               </button>
             </div>
           </div>
 
           {/* 注意書き */}
-          <div className="text-center text-xs lg:text-sm text-gray-500 space-y-1 mt-52">
+          <div className="text-center text-xs lg:text-sm font-noto-sans-jp font-light space-y-1 mt-52" style={{ color: '#7d7d7d' }}>
             <p>※この診断は一度しか行えません。</p>
             <p>やり直しが必要な場合は、こちらから管理者承認が必要となります</p>
           </div>

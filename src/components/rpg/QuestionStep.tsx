@@ -43,13 +43,13 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
     <div className="space-y-0">
       {/* 質問番号表示（上部） */}
       <div className="text-center mb-8">
-        <p className="text-black text-lg font-semibold">
+        <p className="text-sm font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
           質問{formatQuestionNumber(questionNumber)}
         </p>
       </div>
 
       {/* 質問セクション全体（背景色付き） */}
-      <div className="w-full max-w-3xl mx-auto" style={{ backgroundColor: '#6d4040' }}>
+      <div className="w-full max-w-3xl mx-auto" style={{ backgroundColor: '#52333f' }}>
         {/* 質問文 */}
         <div className="text-center pt-12 pb-6 px-6">
           <div className="flex items-center justify-center w-full" style={{ gap: 'calc(var(--spacing) * 4)', paddingInline: 'calc(var(--spacing) * 24)' }}>
@@ -60,7 +60,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
                 className="w-24 h-24 lg:w-32 lg:h-32 object-contain flex-shrink-0"
               />
             )}
-            <h3 className="text-lg font-bold text-white flex-1 whitespace-nowrap">
+            <h3 className="text-lg text-white flex-1 whitespace-nowrap font-noto-sans-jp font-medium">
               {questionText}
             </h3>
             {/* 右側のスペーサー（画像と同じサイズ） */}
@@ -97,7 +97,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
             {/* ボタンと左右ラベル（PC時） */}
             <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 18)' }}>
               {/* PC時: 左ラベル */}
-              <span className="hidden md:block text-sm text-white flex-shrink-0">{labels[0]}</span>
+              <span className="hidden md:block text-sm text-white flex-shrink-0 font-noto-sans-jp font-light">{labels[0]}</span>
 
               {/* ボタン */}
               <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 11), calc(var(--spacing) * 12))' }}>
@@ -133,13 +133,13 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
               </div>
 
               {/* PC時: 右ラベル */}
-              <span className="hidden md:block text-sm text-white flex-shrink-0">{labels[4]}</span>
+              <span className="hidden md:block text-sm text-white flex-shrink-0 font-noto-sans-jp font-light">{labels[4]}</span>
             </div>
           </div>
         </div>
 
         {/* SP時: テキストラベル */}
-        <div className="flex md:hidden justify-between text-sm text-white">
+        <div className="flex md:hidden justify-between text-sm text-white font-noto-sans-jp font-light">
           <span>{labels[0]}</span>
           <span>{labels[4]}</span>
         </div>
@@ -152,34 +152,48 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
         <button
           onClick={onBack}
           disabled={!canGoBack}
-          className="w-[140px] h-12 rounded-lg font-semibold transition-all text-white border"
+          className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
           style={{
             background: canGoBack 
-              ? 'linear-gradient(180deg, #6B7280 0%, #4B5563 100%)'
-              : 'linear-gradient(180deg, #9CA3AF 0%, #6B7280 100%)',
-            borderColor: canGoBack ? '#9CA3AF' : '#6B7280',
-            boxShadow: '0px 4px 0px 0px #374151',
+              ? 'linear-gradient(to bottom, #d4cfc9, #686c6f)'
+              : 'linear-gradient(to bottom, #d4cfc9, #686c6f)',
             opacity: canGoBack ? 1 : 0.5,
             cursor: canGoBack ? 'pointer' : 'not-allowed'
           }}
         >
-          もどる
+          <span 
+            className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
+            style={{
+              background: 'linear-gradient(to bottom, #515151, #b1b0b0)',
+              color: '#ffffff'
+            }}
+          >
+            もどる
+          </span>
         </button>
         <button
           onClick={onNext}
           disabled={!canGoNext}
-          className="w-[140px] h-12 rounded-lg font-semibold transition-all text-white border"
+          className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
           style={{
             background: canGoNext
-              ? 'linear-gradient(180deg, #22D3EE 0%, #0891B2 100%)'
-              : 'linear-gradient(180deg, #6B7280 0%, #4B5563 100%)',
-            borderColor: canGoNext ? '#67E8F9' : '#6B7280',
-            boxShadow: '0px 4px 0px 0px #164E63',
+              ? 'linear-gradient(to bottom, #00edfe, #015eea)'
+              : 'linear-gradient(to bottom, #d4cfc9, #686c6f)',
             opacity: canGoNext ? 1 : 0.5,
             cursor: canGoNext ? 'pointer' : 'not-allowed'
           }}
         >
-          {questionNumber === totalQuestions ? '結果を見る' : '次へ'}
+          <span 
+            className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
+            style={{
+              background: canGoNext
+                ? 'linear-gradient(to bottom, #0960d8, #00f6ff)'
+                : 'linear-gradient(to bottom, #515151, #b1b0b0)',
+              color: '#ffffff'
+            }}
+          >
+            {questionNumber === totalQuestions ? '結果を見る' : '次へ'}
+          </span>
         </button>
       </div>
 
