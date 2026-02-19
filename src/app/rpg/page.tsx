@@ -139,16 +139,6 @@ export default function MyRpgResultPage() {
             ))}
           </div>
         </div>
-
-        {/* 他のユーザーを見るボタン */}
-        <div className="text-center">
-          <button
-            onClick={() => router.push('/rpg/users')}
-            className="px-8 py-4 bg-white text-purple-600 rounded-lg hover:bg-gray-100 transition-all shadow-md font-semibold text-lg"
-          >
-            他のユーザーの診断結果を見る →
-          </button>
-        </div>
       </div>
     </div>
   );

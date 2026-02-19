@@ -13,20 +13,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/a
 async function getIdToken(): Promise<string | null> {
   const user = auth.currentUser;
   
-  console.log('🔑 getIdToken() 呼び出し');
-  console.log('🔑 auth.currentUser:', user);
-  console.log('🔑 user?.uid:', user?.uid);
-  console.log('🔑 user?.email:', user?.email);
-  
   if (!user) {
     console.error('❌ auth.currentUser が null です！');
     return null;
   }
   
   try {
-    console.log('🔑 getIdToken(true) を実行中...');
     const token = await user.getIdToken(true); // 強制的に最新のトークンを取得
-    console.log('✅ ID Token取得成功:', token.substring(0, 50) + '...');
     
     // localStorage に保存（バックエンドの確認用）
     if (typeof window !== 'undefined') {
@@ -48,16 +41,11 @@ async function getHeaders(requireAuth: boolean = false): Promise<HeadersInit> {
     'Content-Type': 'application/json',
   };
   
-  console.log('📋 getHeaders() 呼び出し, requireAuth:', requireAuth);
-  
   if (requireAuth) {
     const token = await getIdToken();
     
-    console.log('📋 取得したtoken:', token ? `${token.substring(0, 30)}...` : 'null');
-    
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log('✅ Authorization ヘッダー設定完了');
     } else {
       console.error('❌ Token が null のため、認証エラーをスロー');
       throw new Error('Firebase authentication required. Please log in again.');
@@ -79,8 +67,6 @@ export async function apiRequest<T>(
   const headers = await getHeaders(requireAuth);
   const url = `${API_BASE_URL}${endpoint}`;
   
-  console.log(`🌐 [API] ${fetchOptions.method || 'GET'} ${url}`);
-  
   try {
     const response = await fetch(url, {
       ...fetchOptions,
@@ -97,7 +83,6 @@ export async function apiRequest<T>(
     }
     
     const data = await response.json();
-    console.log(`✅ [API] Response from ${endpoint}:`, data);
     return data;
   } catch (error: any) {
     // ネットワークエラーの場合

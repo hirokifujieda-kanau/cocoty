@@ -86,7 +86,6 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
     try {
       setLoading(true);
       // TODO: パスワード変更APIを呼び出し
-      console.log('Changing password...');
       
       // 成功時
       setCurrentPassword('');

@@ -143,7 +143,6 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
 
     try {
       // 画像バリデーション
-      console.log('🔍 Validating image...');
       const validation = await validateImageFile(file, AVATAR_VALIDATION_OPTIONS);
       
       if (!validation.isValid) {
@@ -152,10 +151,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
         return;
       }
 
-      console.log(`✅ Validation passed: ${validation.width}x${validation.height}px, ${(validation.size! / 1024 / 1024).toFixed(2)}MB`);
-
       setUploading(true);
-      console.log('📤 Uploading avatar...');
 
       // Cloudinaryにアップロード
       const formData = new FormData();
@@ -177,12 +173,10 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
 
       const cloudinaryData = await cloudinaryResponse.json();
       const avatarUrl = cloudinaryData.secure_url;
-      console.log('✅ Avatar uploaded to Cloudinary:', avatarUrl);
 
       // プロフィールを更新（profileが存在する場合のみ）
       if (profile) {
         await updateProfile(profile.id, { avatar_url: avatarUrl });
-        console.log('✅ Avatar URL saved to profile');
       } else {
         console.warn('⚠️ Profile not created yet, avatar URL will be set on first save');
       }
@@ -225,14 +219,10 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
       }
 
       await updateProfile(profile.id, params); 
-      console.log('✅ Profile updated successfully');
-      console.log('📞 Calling onSave callback...');
       
       // 親コンポーネントに保存成功を通知
       if (onSave) {
-        console.log('✅ onSave callback exists, calling it...');
         await onSave();
-        console.log('✅ onSave callback completed');
       } else {
         console.warn('⚠️ onSave callback is not provided');
       }

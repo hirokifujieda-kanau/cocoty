@@ -33,7 +33,6 @@ const LoginPage: React.FC = () => {
   };
 
   const handleSocialLogin = (provider: string) => {
-    console.log(`Logging in with ${provider}`);
     // TODO: SNSログイン実装
   };
 

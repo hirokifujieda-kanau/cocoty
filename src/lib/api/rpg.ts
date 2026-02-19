@@ -130,6 +130,6 @@ export async function getMyRpgResult(): Promise<MyRpgResultResponse> {
 export async function getRpgUserDetail(id: number): Promise<RpgUserDetailResponse> {
   return apiRequest<RpgUserDetailResponse>(`/rpg_diagnoses/${id}`, {
     method: 'GET',
-    requireAuth: false,
+    requireAuth: false, // 認証不要
   });
 }

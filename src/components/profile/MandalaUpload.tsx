@@ -49,8 +49,6 @@ export default function MandalaUpload({
       return;
     }
 
-    console.log(`✅ Mandala validation passed: ${validation.width}x${validation.height}px, ${(validation.size! / 1024 / 1024).toFixed(2)}MB`);
-
     setError(null);
 
     // プレビュー表示

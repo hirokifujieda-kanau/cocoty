@@ -18,9 +18,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      console.log('🔐 ログイン中...', email);
       await login(email, password);
-      console.log('✅ ログイン成功！');
       router.push('/profile');
     } catch (err: any) {
       console.error('❌ 認証エラー:', err);

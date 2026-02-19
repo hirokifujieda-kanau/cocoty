@@ -6,14 +6,12 @@ import { useRouter } from 'next/navigation';
 interface CommonHeaderProps {
   showSearch?: boolean;
   showSettings?: boolean;
-  showRpgLink?: boolean;
   onSettingsClick?: () => void;
 }
 
 export default function CommonHeader({ 
   showSearch = true, 
   showSettings = true, 
-  showRpgLink = true,
   onSettingsClick 
 }: CommonHeaderProps) {
   const router = useRouter();
@@ -54,15 +52,6 @@ export default function CommonHeader({
               title="設定"
             >
               <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
-            </button>
-          )}
-          {showRpgLink && (
-            <button
-              onClick={() => router.push('/rpg/users')}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              title="RPG診断一覧"
-            >
-              <span className="text-lg">⚔️</span>
             </button>
           )}
         </div>

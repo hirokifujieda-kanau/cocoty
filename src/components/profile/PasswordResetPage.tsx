@@ -36,7 +36,6 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ isOpen, onClose, 
     try {
       setLoading(true);
       // TODO: パスワードリセットAPIを呼び出し
-      console.log('Sending password reset email to:', email);
       
       // 成功時
       setSuccess(true);

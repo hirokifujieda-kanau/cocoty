@@ -39,14 +39,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // IDトークンを取得（強制更新）
           const token = await user.getIdToken(true);
           setIdToken(token);
-          console.log('✅ Firebase Auth: User signed in', user.email);
         } catch (error) {
           console.error('❌ Failed to get ID token:', error);
           setIdToken(null);
         }
       } else {
         setIdToken(null);
-        console.log('⚠️ Firebase Auth: No user signed in');
       }
       
       setLoading(false);
@@ -60,7 +58,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await firebaseSignOut(auth);
       setUser(null);
       setIdToken(null);
-      console.log('✅ User signed out');
     } catch (error) {
       console.error('❌ Sign out error:', error);
       throw error;
@@ -69,9 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      console.log('🔐 Logging in with email:', email);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('✅ Login successful:', userCredential.user.email);
       
       // Get ID token
       const token = await userCredential.user.getIdToken(true);
@@ -84,9 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const handleSignup = async (email: string, password: string) => {
     try {
-      console.log('🔐 Creating account with email:', email);
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log('✅ Signup successful:', userCredential.user.email);
       
       // Get ID token
       const token = await userCredential.user.getIdToken(true);

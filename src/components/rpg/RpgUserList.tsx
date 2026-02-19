@@ -53,7 +53,6 @@ export default function RpgUserList() {
       <CommonHeader 
         showSearch={false}
         showSettings={false}
-        showRpgLink={false}
       />
 
       <div className="max-w-7xl mx-auto p-6">
@@ -150,9 +149,6 @@ export default function RpgUserList() {
                           {user.gender === 'male' ? '👨 男性' : user.gender === 'female' ? '👩 女性' : '👤 その他'}
                         </span>
                       )}
-                    </div>
-                    <div className="text-gray-400 text-sm">
-                      プロフィールを見る →
                     </div>
                   </div>
 

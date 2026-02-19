@@ -1,0 +1,27 @@
+#!/bin/sh
+# Pre-commit Hook - コード品質チェック
+
+echo "🔍 コミット前チェックを実行中..."
+
+# .env*ファイルがステージングされていないか確認
+if git diff --cached --name-only | grep -q "^\.env"; then
+  echo "❌ エラー: .envファイルはコミットできません！"
+  echo "機密情報が含まれているため、.gitignoreに追加されているか確認してください。"
+  exit 1
+fi
+
+# console.logやconsole.warnが残っていないかチェック（.cloudignoreを除外）
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' | grep -v -f .cloudignore 2>/dev/null || true)
+
+if [ -n "$FILES" ]; then
+  for FILE in $FILES; do
+    # console.log/console.warn/console.debug を検出（console.error は除外）
+    if grep -n "console\.\(log\|warn\|debug\)" "$FILE" > /dev/null 2>&1; then
+      echo "⚠️  警告: $FILE に console.log/warn/debug が残っています"
+      grep -n "console\.\(log\|warn\|debug\)" "$FILE"
+    fi
+  done
+fi
+
+echo "✅ コミット前チェック完了！"
+exit 0
