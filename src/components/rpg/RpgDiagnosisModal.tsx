@@ -707,12 +707,12 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                       </p>
                     </div>
                   </div>
-                ) : currentQuestion ? (
+                ) : (
                   /* 質問2以降: 通常の質問 */
                   <QuestionStep
                     questionNumber={currentQuestionIndex + 1}
                     totalQuestions={questions.length + 1}
-                    questionText={currentQuestion.text}
+                    questionText={currentQuestion!.text}
                     currentAnswer={currentAnswer}
                     onAnswer={handleAnswer}
                     onNext={handleNext}
@@ -723,7 +723,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                     setIsSoundOn={setIsSoundOn}
                     playClickSound={playClickSound}
                   />
-                ) : null}
+                )}
               </>
             )}
 
