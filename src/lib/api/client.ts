@@ -401,18 +401,11 @@ export interface RpgDiagnosisResponse {
  * 認証されたユーザーのプロフィールに自動的に保存されます
  */
 export async function saveRpgDiagnosis(diagnosisData: RpgDiagnosisData): Promise<RpgDiagnosisResponse> {
-  // 🚧 モック: バックエンド実装までは保存をスキップ（本番では削除）
-  return Promise.resolve({
-    rpg_diagnosis: diagnosisData,
-    message: '診断結果を保存しました（モック）',
+  return apiRequest<RpgDiagnosisResponse>('/rpg_diagnoses', {
+    method: 'POST',
+    requireAuth: true,
+    body: JSON.stringify({ rpg_diagnosis: diagnosisData }),
   });
-
-  // 本番用コード（コメントアウト）
-  // return apiRequest<RpgDiagnosisResponse>('/rpg_diagnoses', {
-  //   method: 'POST',
-  //   requireAuth: true,
-  //   body: JSON.stringify({ rpg_diagnosis: diagnosisData }),
-  // });
 }
 
 // ========================================
