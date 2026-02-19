@@ -470,12 +470,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
             {/* ON/OFFボタン */}
             <button
               onClick={() => setIsSoundOn(!isSoundOn)}
-              className="flex items-center rounded-md font-noto-sans-jp font-medium px-3 py-1 transition-all"
-              style={{
-                border: '2px solid #a7a7a7',
-                fontSize: '14px',
-                color: '#7d7d7d'
-              }}
+              className="flex items-center rounded-md font-noto-sans-jp font-medium px-3 py-1 transition-all border-2 border-[#a7a7a7] text-sm text-[#7d7d7d]"
             >
               {isSoundOn ? 'ON' : 'OFF'}
             </button>
@@ -712,12 +707,12 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                       </p>
                     </div>
                   </div>
-                ) : (
+                ) : currentQuestion ? (
                   /* 質問2以降: 通常の質問 */
                   <QuestionStep
                     questionNumber={currentQuestionIndex + 1}
                     totalQuestions={questions.length + 1}
-                    questionText={currentQuestion!.text}
+                    questionText={currentQuestion.text}
                     currentAnswer={currentAnswer}
                     onAnswer={handleAnswer}
                     onNext={handleNext}
@@ -728,7 +723,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                     setIsSoundOn={setIsSoundOn}
                     playClickSound={playClickSound}
                   />
-                )}
+                ) : null}
               </>
             )}
 
