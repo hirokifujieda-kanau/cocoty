@@ -80,7 +80,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
 
     // BGMの再生/停止（性別選択画面または質問画面の場合のみ）
     if (isOpen && (showGenderSelect || (!showStart && !showResult)) && isSoundOn) {
-      bgmRef.current.play().catch(err => console.log('BGM再生エラー:', err));
+      bgmRef.current.play().catch(() => {});
     } else {
       // 一時停止またはOFF時、結果画面表示時
       bgmRef.current.pause();
@@ -99,7 +99,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const playClickSound = () => {
     if (isSoundOn && clickSoundRef.current) {
       clickSoundRef.current.currentTime = 0;
-      clickSoundRef.current.play().catch(err => console.log('効果音再生エラー:', err));
+      clickSoundRef.current.play().catch(() => {});
     }
   };
 
