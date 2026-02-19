@@ -12,6 +12,9 @@ interface QuestionStepProps {
   onBack: () => void;
   canGoNext: boolean;
   canGoBack: boolean;
+  isSoundOn: boolean;
+  setIsSoundOn: (value: boolean) => void;
+  playClickSound: () => void;
 }
 
 export const QuestionStep: React.FC<QuestionStepProps> = ({
@@ -24,10 +27,13 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
   onBack,
   canGoNext,
   canGoBack,
+  isSoundOn,
+  setIsSoundOn,
+  playClickSound,
 }) => {
   const scores = [1, 2, 3, 4, 5];
   const labels = ['まったく違う', '', '', '', 'まさにその通り'];
-  
+
   // 質問番号を2桁にフォーマット (例: 1 -> 01, 15 -> 15)
   const formatQuestionNumber = (num: number) => num.toString().padStart(2, '0');
   
@@ -150,7 +156,10 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       {/* ナビゲーションボタン */}
       <div className="flex justify-center pt-8" style={{ gap: 'calc(var(--spacing) * 33)' }}>
         <button
-          onClick={onBack}
+          onClick={() => {
+            playClickSound();
+            onBack();
+          }}
           disabled={!canGoBack}
           className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
           style={{
@@ -172,7 +181,13 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
           </span>
         </button>
         <button
-          onClick={onNext}
+          onClick={() => {
+            // 最後の質問でない場合のみ効果音を再生
+            if (questionNumber !== totalQuestions) {
+              playClickSound();
+            }
+            onNext();
+          }}
           disabled={!canGoNext}
           className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
           style={{

@@ -1,15 +1,19 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 interface StartStepProps {
   onStart: () => void;
   onBack: () => void;
+  isSoundOn: boolean;
+  playClickSound: () => void;
 }
 
-export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack }) => {
+export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack, isSoundOn, playClickSound }) => {
+
   return (
-    <div className="mx-auto flex justify-center min-h-full pt-20 pb-8">
+    <div className="mx-auto p-8">
+      <div className="mx-auto flex justify-center min-h-full pt-20 pb-8">
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-[176px] px-4 font-noto-sans-jp">
         <img 
           src="/rpg-images/TOP.png" 
@@ -33,7 +37,10 @@ export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack }) => {
             {/* ボタン */}
             <div className="flex gap-4 justify-center">
               <button
-                onClick={onBack}
+                onClick={() => {
+                  playClickSound();
+                  onBack();
+                }}
                 className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
                 style={{
                   background: 'linear-gradient(to bottom, #d4cfc9, #686c6f)'
@@ -50,7 +57,10 @@ export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack }) => {
                 </span>
               </button>
               <button
-                onClick={onStart}
+                onClick={() => {
+                  playClickSound();
+                  onStart();
+                }}
                 className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
                 style={{
                   background: 'linear-gradient(to bottom, #00edfe, #015eea)'
@@ -75,6 +85,7 @@ export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack }) => {
             <p>やり直しが必要な場合は、こちらから管理者承認が必要となります</p>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

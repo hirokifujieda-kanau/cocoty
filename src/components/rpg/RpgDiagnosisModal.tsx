@@ -37,6 +37,11 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   // 性別選択用のステート
   const [showGenderSelect, setShowGenderSelect] = useState(false);
   const [gender, setGender] = useState<'男性' | '女性' | undefined>(undefined);
+  
+  // 音声制御用のステート
+  const [isSoundOn, setIsSoundOn] = useState(true);
+  const bgmRef = React.useRef<HTMLAudioElement | null>(null);
+  const clickSoundRef = React.useRef<HTMLAudioElement | null>(null);
 
   // 診断完了済みかチェック
   const isCompleted = !!profile?.rpg_diagnosis_completed_at;
@@ -56,6 +61,46 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     audio.play().catch(() => {
       // 音声再生エラーは無視
     });
+  };
+
+  // BGMと効果音の初期化と再生制御
+  useEffect(() => {
+    // BGMの作成
+    if (!bgmRef.current) {
+      bgmRef.current = new Audio('/rpg-characters/質問中のBGM.mp3');
+      bgmRef.current.loop = true;
+      bgmRef.current.volume = 0.5;
+    }
+
+    // 効果音の作成
+    if (!clickSoundRef.current) {
+      clickSoundRef.current = new Audio('/rpg-characters/ボタンクリック音.mp3');
+      clickSoundRef.current.volume = 0.7;
+    }
+
+    // BGMの再生/停止（性別選択画面または質問画面の場合のみ）
+    if (isOpen && (showGenderSelect || (!showStart && !showResult)) && isSoundOn) {
+      bgmRef.current.play().catch(err => console.log('BGM再生エラー:', err));
+    } else {
+      // 一時停止またはOFF時、結果画面表示時
+      bgmRef.current.pause();
+    }
+
+    // クリーンアップ（モーダルを閉じた時のみリセット）
+    return () => {
+      if (bgmRef.current && !isOpen) {
+        bgmRef.current.pause();
+        bgmRef.current.currentTime = 0;
+      }
+    };
+  }, [isOpen, showGenderSelect, showStart, showResult, isSoundOn]);
+
+  // ボタンクリック時の効果音再生
+  const playClickSound = () => {
+    if (isSoundOn && clickSoundRef.current) {
+      clickSoundRef.current.currentTime = 0;
+      clickSoundRef.current.play().catch(err => console.log('効果音再生エラー:', err));
+    }
   };
 
   // 質問データをAPIから取得
@@ -205,6 +250,11 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       }, 600);
     } else {
       // 全問回答完了 → ホワイトアウト → 動画再生 → 結果表示
+      // BGMを停止
+      if (bgmRef.current) {
+        bgmRef.current.pause();
+      }
+      
       // 診断結果へボタン音を再生
       playSound('/rpg-characters/診断結果へボタン音.mp3');
       
@@ -379,6 +429,59 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       )}
 
       <div className="fixed inset-0 z-[9999] bg-white">
+        {/* 音声ON/OFFボタン（結果画面以外で表示） */}
+        {!showResult && !showVideo && (
+          <div 
+            className="fixed flex items-center gap-2 z-[10000]"
+            style={{
+              top: 'calc(var(--spacing) * 18)',
+              right: 'calc(var(--spacing) * 64)'
+            }}
+          >
+            {/* スピーカーアイコン */}
+            <div className="w-8 h-8 flex items-center justify-center">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 5L6 9H2v6h4l5 4V5z"
+                  fill="#7d7d7d"
+                  stroke="#7d7d7d"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {isSoundOn && (
+                  <path
+                    d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"
+                    stroke="#7d7d7d"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                )}
+              </svg>
+            </div>
+            
+            {/* ON/OFFボタン */}
+            <button
+              onClick={() => setIsSoundOn(!isSoundOn)}
+              className="flex items-center rounded-md font-noto-sans-jp font-medium px-3 py-1 transition-all"
+              style={{
+                border: '2px solid #a7a7a7',
+                fontSize: '14px',
+                color: '#7d7d7d'
+              }}
+            >
+              {isSoundOn ? 'ON' : 'OFF'}
+            </button>
+          </div>
+        )}
+
         {/* コンテンツ */}
         <div className="h-screen overflow-y-auto flex items-center justify-center">
           <div className={`mx-auto ${showResult ? 'max-w-7xl' : 'p-8'}`}>
@@ -387,6 +490,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
               <StartStep
                 onStart={handleStart}
                 onBack={onClose}
+                isSoundOn={isSoundOn}
+                playClickSound={playClickSound}
               />
             )}
 
@@ -398,13 +503,13 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                   <div className="space-y-0">
                     {/* 質問番号表示（上部） */}
                     <div className="text-center mb-8">
-                      <p className="text-black text-lg font-semibold">
+                      <p className="text-sm font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
                         質問01
                       </p>
                     </div>
 
                     {/* 質問セクション全体（背景色付き） */}
-                    <div className="w-full max-w-3xl mx-auto" style={{ backgroundColor: '#6d4040' }}>
+                    <div className="w-full max-w-3xl mx-auto" style={{ backgroundColor: '#52333f' }}>
                       {/* 質問文 */}
                       <div className="text-center pt-12 pb-6 px-6">
                         <div className="flex items-center justify-center w-full" style={{ gap: 'calc(var(--spacing) * 4)', paddingInline: 'calc(var(--spacing) * 24)' }}>
@@ -413,7 +518,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                             alt="質問アイコン" 
                             className="w-24 h-24 lg:w-32 lg:h-32 object-contain flex-shrink-0"
                           />
-                          <h3 className="text-lg font-bold text-white flex-1 whitespace-nowrap">
+                          <h3 className="text-lg text-white flex-1 whitespace-nowrap font-noto-sans-jp font-medium">
                             性別を選択してください
                           </h3>
                           {/* 右側のスペーサー（画像と同じサイズ） */}
@@ -523,20 +628,29 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                     {/* ナビゲーションボタン */}
                     <div className="flex justify-center pt-8" style={{ gap: 'calc(var(--spacing) * 33)' }}>
                       <button
-                        onClick={handleBackToStart}
-                        className="w-[140px] h-12 rounded-lg font-semibold transition-all text-white border"
+                        onClick={() => {
+                          playClickSound();
+                          handleBackToStart();
+                        }}
+                        className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
                         style={{
-                          background: 'linear-gradient(180deg, #6B7280 0%, #4B5563 100%)',
-                          borderColor: '#9CA3AF',
-                          boxShadow: '0px 4px 0px 0px #374151',
-                          cursor: 'pointer'
+                          background: 'linear-gradient(to bottom, #d4cfc9, #686c6f)'
                         }}
                       >
-                        もどる
+                        <span 
+                          className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
+                          style={{
+                            background: 'linear-gradient(to bottom, #515151, #b1b0b0)',
+                            color: '#ffffff'
+                          }}
+                        >
+                          もどる
+                        </span>
                       </button>
                       <button
                         onClick={() => {
                           if (gender) {
+                            playClickSound();
                             // ホワイトアウト → ホワイトイン演出
                             setShowWhiteOverlay(true);
                             
@@ -568,18 +682,26 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                           }
                         }}
                         disabled={!gender}
-                        className="w-[140px] h-12 rounded-lg font-semibold transition-all text-white border"
+                        className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
                         style={{
-                          background: gender
-                            ? 'linear-gradient(180deg, #22D3EE 0%, #0891B2 100%)'
-                            : 'linear-gradient(180deg, #6B7280 0%, #4B5563 100%)',
-                          borderColor: gender ? '#67E8F9' : '#6B7280',
-                          boxShadow: '0px 4px 0px 0px #164E63',
+                          background: gender 
+                            ? 'linear-gradient(to bottom, #00edfe, #015eea)'
+                            : 'linear-gradient(to bottom, #d4cfc9, #686c6f)',
                           opacity: gender ? 1 : 0.5,
                           cursor: gender ? 'pointer' : 'not-allowed'
                         }}
                       >
-                        次へ
+                        <span 
+                          className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
+                          style={{
+                            background: gender
+                              ? 'linear-gradient(to bottom, #0960d8, #00f6ff)'
+                              : 'linear-gradient(to bottom, #515151, #b1b0b0)',
+                            color: '#ffffff'
+                          }}
+                        >
+                          次へ
+                        </span>
                       </button>
                     </div>
 
@@ -602,6 +724,9 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                     onBack={handleBack}
                     canGoNext={true}
                     canGoBack={true}
+                    isSoundOn={isSoundOn}
+                    setIsSoundOn={setIsSoundOn}
+                    playClickSound={playClickSound}
                   />
                 )}
               </>
