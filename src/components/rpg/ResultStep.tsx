@@ -5,7 +5,7 @@ import type { InstinctLevels } from '@/lib/rpg/calculator';
 import { INSTINCT_DESCRIPTIONS } from '@/lib/rpg/constants';
 import { saveRpgDiagnosis } from '@/lib/api/client';
 
-// シンプルなレーダーチャートコンポーネント
+// グラデーション背景付きレーダーチャートコンポーネント
 const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
   // 順序を固定（時計回り）
   const CHART_ORDER: (keyof InstinctLevels)[] = [
@@ -20,97 +20,318 @@ const RadarChart: React.FC<{ data: InstinctLevels }> = ({ data }) => {
   const values = CHART_ORDER.map(key => data[key]);
   const maxValue = 4;
   
+  // 表示名のマッピング
+  const labelDisplayNames: Record<keyof InstinctLevels, string> = {
+    '狩猟本能': '狩猟本能',
+    '共感本能': '共感本能',
+    '飛躍本能': '飛躍本能',
+    '職人魂': '職人魂',
+    '防衛本能': '防御本能',
+  };
+  
+  // アイコン画像のマッピング
+  const iconPaths: Record<keyof InstinctLevels, string> = {
+    '職人魂': '/rpg-images/Icon_tamashii.png',
+    '狩猟本能': '/rpg-images/Icon_syuryou.png',
+    '共感本能': '/rpg-images/Icon_kyoukan.png',
+    '防衛本能': '/rpg-images/Icon_bougyo.png',
+    '飛躍本能': '/rpg-images/Icon_hiyaku.png',
+  };
+  
   // 五角形の頂点を計算
   const points = labels.map((_, index) => {
     const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
     const value = values[index];
-    const radius = (value / maxValue) * 100;
+    const radius = (value / maxValue) * 90; // 最大値90に調整
     const x = 150 + radius * Math.cos(angle);
     const y = 150 + radius * Math.sin(angle);
     return { x, y, value };
   });
 
-  // 背景グリッドの円
-  const gridCircles = [1, 2, 3, 4].map(level => {
-    const radius = (level / maxValue) * 100;
-    return radius;
+  // 最大サイズの五角形（背景用）
+  const maxPolygonPoints = labels.map((_, index) => {
+    const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
+    const x = 150 + 100 * Math.cos(angle);
+    const y = 150 + 100 * Math.sin(angle);
+    return { x, y };
+  });
+
+  // グリッド用の五角形（複数サイズ）
+  const gridPentagons = [0.2, 0.4, 0.6, 0.8].map(ratio => {
+    return labels.map((_, index) => {
+      const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
+      const x = 150 + 100 * ratio * Math.cos(angle);
+      const y = 150 + 100 * ratio * Math.sin(angle);
+      return { x, y };
+    });
   });
 
   return (
-    <svg viewBox="0 0 300 300" className="w-full h-full max-w-md mx-auto">
-      {/* 背景グリッド */}
-      {gridCircles.map((radius, i) => (
-        <circle
-          key={i}
-          cx="150"
-          cy="150"
-          r={radius}
+    <div className="relative w-full h-full">
+      <svg viewBox="-30 -60 360 390" className="w-full h-full" style={{ display: 'block' }}>
+        <defs>
+          {/* データ領域のグラデーション（明るく光る感じ） */}
+          <linearGradient id="dataGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style={{ stopColor: '#cffafe', stopOpacity: 0.95 }} />
+            <stop offset="50%" style={{ stopColor: '#a5f3fc', stopOpacity: 0.9 }} />
+            <stop offset="100%" style={{ stopColor: '#67e8f9', stopOpacity: 0.85 }} />
+          </linearGradient>
+          
+          {/* 背景五角形のグラデーション */}
+          <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style={{ stopColor: '#1e40af', stopOpacity: 0.6 }} />
+            <stop offset="100%" style={{ stopColor: '#1e3a8a', stopOpacity: 0.8 }} />
+          </linearGradient>
+          
+          {/* 角丸フィルター */}
+          <filter id="round">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+          </filter>
+          
+          {/* 放射状の光グラデーション */}
+          <radialGradient id="lightGradient">
+            <stop offset="0%" style={{ stopColor: '#22d3ee', stopOpacity: 0.4 }} />
+            <stop offset="50%" style={{ stopColor: '#06b6d4', stopOpacity: 0.2 }} />
+            <stop offset="100%" style={{ stopColor: '#0891b2', stopOpacity: 0 }} />
+          </radialGradient>
+          
+          {/* 光のフィルター（グロー効果 - 形を保持） */}
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          
+          {/* 奥行き用のグラデーション（内側が明るく、外側が暗く） */}
+          <radialGradient id="depthGradient">
+            <stop offset="0%" style={{ stopColor: '#22d3ee', stopOpacity: 0.5 }} />
+            <stop offset="50%" style={{ stopColor: '#0891b2', stopOpacity: 0.2 }} />
+            <stop offset="100%" style={{ stopColor: '#164e63', stopOpacity: 0 }} />
+          </radialGradient>
+          
+          {/* モヤモヤエフェクト用フィルター */}
+          <filter id="mist" x="-100%" y="-100%" width="300%" height="300%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="5" result="turbulence"/>
+            <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="25" result="displacement"/>
+            <feGaussianBlur in="displacement" stdDeviation="12" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="blur"/>
+            </feMerge>
+          </filter>
+          
+          {/* 水色（内側）〜ピンク（外側）の放射グラデーション */}
+          <radialGradient id="mistGradient" cx="50%" cy="50%">
+            <stop offset="0%" style={{ stopColor: '#22d3ee', stopOpacity: 0.8 }} />
+            <stop offset="45%" style={{ stopColor: '#22d3ee', stopOpacity: 0.7 }} />
+            <stop offset="55%" style={{ stopColor: '#ec4899', stopOpacity: 0.7 }} />
+            <stop offset="100%" style={{ stopColor: '#ec4899', stopOpacity: 0.6 }} />
+          </radialGradient>
+        </defs>
+
+        {/* 中心からの奥行き感を出す放射光 */}
+        <circle cx="150" cy="150" r="90" fill="url(#depthGradient)" />
+
+        {/* モヤモヤレイヤー - 外側のピンク */}
+        <polygon
+          points={maxPolygonPoints.map(p => `${p.x},${p.y}`).join(' ')}
           fill="none"
-          stroke="rgba(255, 255, 255, 0.1)"
-          strokeWidth="1"
+          stroke="#d946ef"
+          strokeWidth="35"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          opacity="0.4"
+          filter="url(#mist)"
         />
-      ))}
+        
+        {/* モヤモヤレイヤー - 内側の水色 */}
+        <polygon
+          points={maxPolygonPoints.map(p => `${p.x},${p.y}`).join(' ')}
+          fill="none"
+          stroke="#22d3ee"
+          strokeWidth="8"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          opacity="0.5"
+          filter="url(#mist)"
+        />
 
-      {/* グリッドライン */}
-      {labels.map((_, index) => {
-        const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
-        const x = 150 + 100 * Math.cos(angle);
-        const y = 150 + 100 * Math.sin(angle);
-        return (
-          <line
-            key={index}
-            x1="150"
-            y1="150"
-            x2={x}
-            y2={y}
-            stroke="rgba(255, 255, 255, 0.1)"
-            strokeWidth="1"
-          />
-        );
-      })}
+        {/* 背景の最大五角形（フィルターで角丸） */}
+        <polygon
+          points={maxPolygonPoints.map(p => `${p.x},${p.y}`).join(' ')}
+          fill="url(#bgGradient)"
+          stroke="rgba(255, 255, 255, 0.4)"
+          strokeWidth="6"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          filter="url(#round)"
+        />
 
-      {/* データ領域 */}
-      <polygon
-        points={points.map(p => `${p.x},${p.y}`).join(' ')}
-        fill="rgba(168, 85, 247, 0.3)"
-        stroke="rgba(168, 85, 247, 1)"
-        strokeWidth="2"
-      />
+        {/* グリッドライン */}
+        {labels.map((_, index) => {
+          const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
+          const x = 150 + 100 * Math.cos(angle);
+          const y = 150 + 100 * Math.sin(angle);
+          return (
+            <line
+              key={index}
+              x1="150"
+              y1="150"
+              x2={x}
+              y2={y}
+              stroke="rgba(255, 255, 255, 0.2)"
+              strokeWidth="1"
+            />
+          );
+        })}
 
-      {/* データポイント */}
-      {points.map((point, index) => (
-        <circle
-          key={index}
-          cx={point.x}
-          cy={point.y}
-          r="4"
-          fill="rgba(236, 72, 153, 1)"
-          stroke="#fff"
+        {/* グリッド五角形（線の外側に光） */}
+        {gridPentagons.map((pentagon, i) => {
+          // 内側ほど明るく（手前に見える）
+          const innerRatio = 1 - (i / gridPentagons.length);
+          const brightness = 0.3 + innerRatio * 0.6;
+          const glowSize = 3 + innerRatio * 6;
+          
+          return (
+            <g key={i}>
+              {/* 外側に広がる光レイヤー3（最も外側・薄い） */}
+              <polygon
+                points={pentagon.map(p => `${p.x},${p.y}`).join(' ')}
+                fill="none"
+                stroke="#22d3ee"
+                strokeWidth={glowSize * 3}
+                opacity={brightness * 0.15}
+                strokeLinejoin="round"
+                filter="url(#glow)"
+              />
+              {/* 外側に広がる光レイヤー2（中間） */}
+              <polygon
+                points={pentagon.map(p => `${p.x},${p.y}`).join(' ')}
+                fill="none"
+                stroke="#06b6d4"
+                strokeWidth={glowSize * 2}
+                opacity={brightness * 0.35}
+                strokeLinejoin="round"
+                filter="url(#glow)"
+              />
+              {/* 外側に広がる光レイヤー1（コア） */}
+              <polygon
+                points={pentagon.map(p => `${p.x},${p.y}`).join(' ')}
+                fill="none"
+                stroke="#22d3ee"
+                strokeWidth={glowSize}
+                opacity={brightness * 0.6}
+                strokeLinejoin="round"
+                filter="url(#glow)"
+              />
+              {/* 線本体（細く鮮明に） */}
+              <polygon
+                points={pentagon.map(p => `${p.x},${p.y}`).join(' ')}
+                fill="none"
+                stroke={`rgba(34, 211, 238, ${0.5 + innerRatio * 0.5})`}
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+            </g>
+          );
+        })}
+
+        {/* データ領域（グラデーション） */}
+        <polygon
+          points={points.map(p => `${p.x},${p.y}`).join(' ')}
+          fill="url(#dataGradient)"
+          stroke="rgba(34, 211, 238, 0.8)"
           strokeWidth="2"
         />
-      ))}
 
-      {/* ラベル */}
-      {labels.map((label, index) => {
-        const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
-        const x = 150 + 120 * Math.cos(angle);
-        const y = 150 + 120 * Math.sin(angle);
-        return (
-          <text
-            key={index}
-            x={x}
-            y={y}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="#fff"
-            fontSize="12"
-            fontWeight="bold"
-          >
-            {label}
-          </text>
-        );
-      })}
-    </svg>
+        {/* データポイントと数値 */}
+        {points.map((point, index) => {
+          const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
+          // 一番外側の五角形の少し内側に配置(半径80付近)
+          const labelX = 150 + 80 * Math.cos(angle);
+          const labelY = 150 + 80 * Math.sin(angle);
+          
+          // 数値に応じて色を変更
+          let numberColor = '#f59e0b'; // デフォルトはオレンジ(2-4用)
+          if (point.value === 1) {
+            numberColor = '#9ca3af'; // グレー
+          } else if (point.value === 5) {
+            numberColor = '#dc2626'; // 赤
+          }
+          
+          return (
+            <g key={index}>
+              {/* 数値ラベル（五角形の内側） */}
+              <text
+                x={labelX}
+                y={labelY}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill={numberColor}
+                stroke="#fff"
+                strokeWidth="3"
+                fontSize="14"
+                fontWeight="bold"
+                paintOrder="stroke"
+              >
+                {point.value}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* アイコンとラベルテキスト */}
+        {labels.map((label, index) => {
+          const angle = (Math.PI * 2 * index) / labels.length - Math.PI / 2;
+          let x = 150 + 130 * Math.cos(angle);
+          let y = 150 + 130 * Math.sin(angle);
+          
+          // 個別調整：防御本能を左に、共感本能を右に
+          if (label === '防衛本能') {
+            x -= 25;
+            y -= 30;
+          } else if (label === '共感本能') {
+            x += 25;
+            y -= 30;
+          }
+          
+          return (
+            <g key={index}>
+              {/* アイコン画像 */}
+              <image
+                href={iconPaths[label]}
+                x={x - 25}
+                y={y - 40}
+                width="50"
+                height="50"
+              />
+              {/* ラベルテキスト */}
+              <text
+                x={x}
+                y={y + 20}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="#395d9f"
+                stroke="#ffffff"
+                strokeWidth="3"
+                fontSize="13"
+                fontWeight="500"
+                fontFamily="Noto Sans JP"
+                paintOrder="stroke"
+              >
+                {labelDisplayNames[label]}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 };
 
@@ -176,145 +397,214 @@ export const ResultStep: React.FC<ResultStepProps> = ({
     }
   };
 
-  // 因子の順序を固定（要件通り：時計回り）
+  // 因子の順序を固定（時計回り）
   const FIXED_ORDER: (keyof typeof INSTINCT_DESCRIPTIONS)[] = [
-    '職人魂',    // ガンナー素質
-    '狩猟本能',  // フェンサー素質
-    '共感本能',  // ヒーラー素質
-    '防衛本能',  // シールダー素質
-    '飛躍本能',  // スキーマー素質
+    '職人魂',
+    '狩猟本能',
+    '共感本能',
+    '防衛本能',
+    '飛躍本能',
   ];
 
   return (
     <div className="space-y-8">
-      {/* タイトル */}
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-white mb-2">
-          🎮 あなたのRPG診断結果
-        </h2>
-        <p className="text-purple-200">
-          5つの本能から見たあなたの特性
-        </p>
+      {/* 右上：ホームに戻るリンク */}
+      <div className="flex justify-end">
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 text-base font-medium transition-colors cursor-pointer"
+        >
+          ホームに戻る
+        </button>
       </div>
 
-      {/* レーダーチャート */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-        <div className="max-w-md mx-auto aspect-square">
-          <RadarChart data={instinctLevels} />
-        </div>
-      </div>
-
-      {/* 5つの因子を静的に表示（固定順序） */}
-      <div className="space-y-4">
-        <h3 className="text-xl font-bold text-white text-center">📊 全本能の詳細レポート</h3>
-        <p className="text-center text-purple-200 text-sm mb-4">
-          <span className="font-semibold">名称：</span>ガンナー素質・フェンサー素質・ヒーラー素質・シールダー素質・スキーマー素質<br />
-          <span className="font-semibold">遺伝"素質"名：</span>職人魂・狩猟本能・共感本能・防衛本能・飛躍本能
-        </p>
-        {FIXED_ORDER.map((instinct) => {
-          const info = INSTINCT_DESCRIPTIONS[instinct];
-          const level = instinctLevels[instinct];
-          const isHigh = level >= 3;
-          
-          return (
-            <div
-              key={instinct}
-              className="bg-white/10 backdrop-blur-sm rounded-xl p-5 space-y-4"
-            >
-              {/* ヘッダー */}
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">{info.emoji}</span>
-                  <div>
-                    <h4 className="font-bold text-white text-lg">{instinct}</h4>
-                    <p className="text-sm text-purple-200">{info.素質名}</p>
-                    <p className="text-xs text-purple-300 mt-1">{info.description}</p>
+      {/* メインコンテンツエリア（上部：レーダーチャート + スコア + キャラクター） */}
+      <div className="rounded-2xl mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {/* 左：スコア表示 */}
+          <div>
+            {/* タイトル画像 */}
+            <div className="text-center mb-4">
+              <img 
+                src="/tarot-images/result.png" 
+                alt="あなたの適性診断結果" 
+                className="mx-auto"
+              />
+            </div>
+            
+            <div className="overflow-hidden shadow-lg border-[6px] max-w-[280px] mx-auto" style={{ borderColor: '#4d97da' }}>
+              {FIXED_ORDER.map((instinct, index) => {
+                const info = INSTINCT_DESCRIPTIONS[instinct];
+                const level = instinctLevels[instinct];
+                const isEven = index % 2 === 0;
+                return (
+                  <div 
+                    key={instinct} 
+                    className="flex justify-between items-center px-3 border-b-[3px] gap-2"
+                    style={{ 
+                      backgroundColor: isEven ? '#e0efff' : '#c3d6fc',
+                      borderColor: '#4d97da',
+                      paddingBlock: 'calc(var(--spacing) * 1)'
+                    }}
+                  >
+                    <span className="text-sm font-noto-sans-jp font-light" style={{ color: '#3567a5' }}>{instinct}</span>
+                    <span className="text-lg">
+                      <span className="font-noto-sans-jp font-light" style={{ color: '#3567a5' }}>{level}</span>
+                      <span className="text-xs font-noto-sans-jp font-light" style={{ color: '#3567a5' }}> ポイント</span>
+                    </span>
                   </div>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <div className="text-3xl font-bold text-white">
-                    {level}
-                  </div>
-                  <div className="text-xs text-purple-200 mt-1">
-                    レベル
-                  </div>
-                </div>
-              </div>
-              
-              {/* レベルバー */}
-              <div className="w-full bg-white/20 rounded-full h-2">
-                <div
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all"
-                  style={{ width: `${(level / 4) * 100}%` }}
-                />
-              </div>
-
-              {/* 詳細情報 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {/* 左列：高い場合の特徴 */}
-                <div className="space-y-3">
-                  <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg p-3 border border-blue-400/30">
-                    <div className="font-semibold text-blue-200 mb-2 text-sm">
-                      📈 レベルが高い人の特徴
-                    </div>
-                    <p className="text-white/90 text-sm mb-2">{info.高い人の特徴}</p>
-                    <div className="space-y-1">
-                      <div className="flex items-start gap-1">
-                        <span className="text-green-300 text-xs">✅</span>
-                        <p className="text-green-200 text-xs">{info.高い利点}</p>
-                      </div>
-                      <div className="flex items-start gap-1">
-                        <span className="text-orange-300 text-xs">⚠️</span>
-                        <p className="text-orange-200 text-xs">{info.高いコスト}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 右列：低い場合の特徴 */}
-                <div className="space-y-3">
-                  <div className="bg-gradient-to-br from-gray-500/20 to-slate-500/20 rounded-lg p-3 border border-gray-400/30">
-                    <div className="font-semibold text-gray-200 mb-2 text-sm">
-                      📉 レベルが低い人の特徴
-                    </div>
-                    <p className="text-white/90 text-sm mb-2">{info.低い人の特徴}</p>
-                    <div className="space-y-1">
-                      <div className="flex items-start gap-1">
-                        <span className="text-green-300 text-xs">✅</span>
-                        <p className="text-green-200 text-xs">{info.低い利点}</p>
-                      </div>
-                      <div className="flex items-start gap-1">
-                        <span className="text-orange-300 text-xs">⚠️</span>
-                        <p className="text-orange-200 text-xs">{info.低いコスト}</p>
-                      </div>
-                    </div>
-                  </div>
+                );
+              })}
+              <div className="px-3 py-2" style={{ backgroundColor: '#4eb8ef' }}>
+                <div className="flex justify-between items-center gap-2">
+                  <span className="text-base font-noto-sans-jp font-light" style={{ color: '#ffffff' }}>トータル</span>
+                  <span className="text-xl font-noto-sans-jp font-light">
+                    <span style={{ color: '#ffffff' }}>{Object.values(instinctLevels).reduce((a, b) => a + b, 0)}</span>
+                    <span className="text-xs" style={{ color: '#ffffff' }}>ポイント</span>
+                  </span>
                 </div>
               </div>
             </div>
-          );
-        })}
+            <p className="text-xs text-center mt-2 font-noto-sans-jp font-light" style={{ color: '#555555' }}>
+              ※ポイントの大小は、
+              <br />
+              直接的な評価や優劣を示すものではありません。
+            </p>
+          </div>
+
+          {/* 中央：レーダーチャート */}
+          <div className="flex justify-center items-center">
+            <div className="w-full max-w-[450px] aspect-square relative">
+              <RadarChart data={instinctLevels} />
+            </div>
+          </div>
+
+          {/* 右：キャラクターイラスト + 吹き出し */}
+          <div className="flex flex-col items-center mt-8">
+            {/* 吹き出し画像 */}
+            <img 
+              src="/rpg-images/Fukidashi_01.png" 
+              alt="診断結果の説明" 
+              className="w-64 h-auto"
+            />
+            {/* キャラクター画像 */}
+            <img 
+              src="/rpg-images/Healer_Girl.png" 
+              alt="キャラクター" 
+              className="w-64 h-auto"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* アクションボタン */}
-      <div className="space-y-3">
-        <button
-          onClick={onClose}
-          className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all"
-        >
-          閉じる
-        </button>
+      {/* 下部：5つのカード - ゲームカード風デザイン */}
+      <div className="border-2 rounded-lg" style={{ borderColor: '#e7d4b6', padding: 'calc(var(--spacing) * 2)' }}>
+        <div className="flex gap-6">
+          {/* 左側：項目リスト */}
+          <div className="flex-shrink-0 flex flex-col gap-0.5 font-noto-sans-jp font-demilight" style={{ fontSize: '0.65rem', color: '#9c773e' }}>
+            <div className="px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', paddingBlock: 'calc(var(--spacing) * 2)' }}>名称</div>
+            <div className="px-2 text-center font-bold whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', paddingBlock: 'calc(var(--spacing) * 2)' }}>適性名</div>
+            <div className="text-center font-bold flex flex-1 items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#ffffff', writingMode: 'horizontal-tb', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
+              職業イメージ
+            </div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い人の特徴</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高い利点</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#f8ebd8', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>高いコスト</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', marginTop: '1px' }}>低い人の特徴</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低い利点</div>
+            <div className="text-center font-bold flex items-center justify-center whitespace-nowrap" style={{ backgroundColor: '#e7d4b6', minHeight: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>低いコスト</div>
+          </div>
+          
+          {/* 右側：5つのカード */}
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5" style={{ gap: 'calc(var(--spacing) * 3)' }}>
+            {FIXED_ORDER.map((instinct) => {
+            // 本能名から職業画像へのマッピング
+            const jobImageMap: Record<keyof InstinctLevels, string> = {
+              '職人魂': '/rpg-images/Job_gunner.png',
+              '狩猟本能': '/rpg-images/Job_fencer.png',
+              '共感本能': '/rpg-images/Job_healer.png',
+              '防衛本能': '/rpg-images/Job_Shielder.png',
+              '飛躍本能': '/rpg-images/Job_Schemer.png',
+            };
+            
+            // 本能名から枠線の色へのマッピング
+            const borderColorMap: Record<keyof InstinctLevels, string> = {
+              '狩猟本能': '#d2537d', // ピンク（フェンサー）
+              '防衛本能': '#536bd2', // 青（シールダー）
+              '職人魂': '#ffa760', // オレンジ（ガンナー）
+              '共感本能': '#3cbc6c', // 緑（ヒーラー）
+              '飛躍本能': '#903cbc', // 紫（スキーマー）
+            };
+            
+            // 高い人の特徴用の薄い背景色
+            const lightBgColorMap: Record<keyof InstinctLevels, string> = {
+              '狩猟本能': '#fee7ef', // 薄いピンク
+              '防衛本能': '#e7f7fe', // 薄い青
+              '職人魂': '#fef6de', // 薄いベージュ
+              '共感本能': '#ddfce0', // 薄い緑
+              '飛躍本能': '#f8eaff', // 薄い紫
+            };
+            
+            // 低い人の特徴用の濃い背景色
+            const darkBgColorMap: Record<keyof InstinctLevels, string> = {
+              '狩猟本能': '#ecccd6', // 濃いピンク
+              '防衛本能': '#d1d9ea', // 濃い青
+              '職人魂': '#eadec2', // 濃いベージュ
+              '共感本能': '#c1e7cb', // 濃い緑
+              '飛躍本能': '#e4d1ee', // 濃い紫
+            };
+            
+            // セル間のボーダー色
+            const cellBorderColorMap: Record<keyof InstinctLevels, string> = {
+              '狩猟本能': '#611818', // 暗い赤
+              '防衛本能': '#183261', // 暗い青
+              '職人魂': '#613b18', // 茶色
+              '共感本能': '#186143', // 暗い緑
+              '飛躍本能': '#431861', // 暗い紫
+            };
+            
+            const desc = INSTINCT_DESCRIPTIONS[instinct];
+            const score = instinctLevels[instinct];
+            
+            return (
+              <div key={instinct} className="relative flex flex-col h-full rounded-lg" style={{ border: '4px solid ' + borderColorMap[instinct] }}>
+                <div className="p-0.5" style={{ backgroundColor: borderColorMap[instinct] }}>
+                  <img 
+                    src={jobImageMap[instinct]}
+                    alt={instinct}
+                    className="w-full h-auto object-contain"
+                  />
+                </div>
+                <div className="flex flex-col flex-1 font-noto-sans-jp font-demilight" style={{ fontSize: '0.8rem', color: '#000000', backgroundColor: borderColorMap[instinct] }}>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>
+                    {instinct === '防衛本能' && desc['高い人の特徴'] === '危機察知性が高く、高ストレス・心配性の傾向' 
+                      ? '危機察知性が高く、\n高ストレス・心配性の傾向'
+                      : instinct === '飛躍本能' && desc['高い人の特徴'] === '独創的・創造力に富む・エキセントリック'
+                      ? '独創的・想像力に富む\nエキセントリック'
+                      : desc['高い人の特徴']}
+                  </div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>
+                    {instinct === '防衛本能' && desc['高い利点'] === 'ミスを回避、事前努力が苦なくできる'
+                      ? 'ミスを回避、事前努力が\n苦なくできる'
+                      : instinct === '狩猟本能' && desc['高い利点'] === '金銭・快楽の成功を得やすい → 行動が積極的'
+                      ? '金銭・快楽の成功を得やすい\n→ 行動が積極的'
+                      : desc['高い利点']}
+                  </div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: lightBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, borderBottom: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', whiteSpace: 'pre-line' }}>{desc['高いコスト']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem', marginTop: '2px' }}>{desc['低い人の特徴']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低い利点']}</div>
+                  <div className="px-2 text-center flex-1 flex items-center justify-center" style={{ backgroundColor: darkBgColorMap[instinct], borderTop: `1px solid ${cellBorderColorMap[instinct]}`, borderLeft: `1px solid ${cellBorderColorMap[instinct]}`, borderRight: `1px solid ${cellBorderColorMap[instinct]}`, borderBottom: `1px solid ${cellBorderColorMap[instinct]}`, minHeight: '2.5rem' }}>{desc['低いコスト']}</div>
+                </div>
+              </div>
+            );
+          })}
+          </div>
+        </div>
       </div>
-      
+
       {isCompleted && (
         <p className="text-center text-purple-200 text-sm mt-4">
           この診断は完了済みです。診断は1回のみ実施可能です。
-        </p>
-      )}
-      
-      {!isCompleted && (
-        <p className="text-center text-purple-200 text-sm mt-4">
-          結果は自動的に保存されました
         </p>
       )}
     </div>
