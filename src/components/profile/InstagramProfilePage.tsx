@@ -21,6 +21,7 @@ import AvatarUploadModal from '@/components/profile/AvatarUploadModal';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getCurrentUser, getProfile, updateProfile, type Profile, ApiError } from '@/lib/api/client';
+import { UnderConstructionModal, SHOW_UNDER_CONSTRUCTION } from '@/components/fortune/UnderConstructionModal';
 
 const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdProp }) => {
   const { user, signOut } = useAuth();
@@ -253,6 +254,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [showDailyTarot, setShowDailyTarot] = useState(false);
   const [showSeasonalDiagnosis, setShowSeasonalDiagnosis] = useState(false);
   const [showMentalStats, setShowMentalStats] = useState(false);
+  const [showTarotUnderConstruction, setShowTarotUnderConstruction] = useState(false);
   
   // プロフィール機能の状態
   const [showSettings, setShowSettings] = useState(false);
@@ -694,6 +696,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                       <div className="relative">
                         <button
                           onClick={async () => {
+                            // 実装中モーダルを表示するかどうかチェック
+                            if (SHOW_UNDER_CONSTRUCTION) {
+                              setShowTarotUnderConstruction(true);
+                              return;
+                            }
                             // モーダルを開く前に最新のプロフィールを取得
                             await refetchProfile();
                             setShowDailyTarot(true);
@@ -1133,6 +1140,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     profile={displayUser!}
                     isOwner={isOwner}
                     onOpenTarot={async () => {
+                      // 実装中モーダルを表示するかどうかチェック
+                      if (SHOW_UNDER_CONSTRUCTION) {
+                        setShowTarotUnderConstruction(true);
+                        return;
+                      }
                       // モーダルを開く前に最新のプロフィールを取得
                       await refetchProfile();
                       setShowDailyTarot(true);
@@ -1144,7 +1156,13 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
               <div className="space-y-4">
                 {/* タロット占い */}
                 <button
-                  onClick={() => setShowDailyTarot(true)}
+                  onClick={() => {
+                    if (SHOW_UNDER_CONSTRUCTION) {
+                      setShowTarotUnderConstruction(true);
+                      return;
+                    }
+                    setShowDailyTarot(true);
+                  }}
                   className="w-full p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border border-purple-100 hover:shadow-lg transition-all"
                 >
                   <div className="flex items-center gap-4">
@@ -1290,6 +1308,12 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         )}
 
       {/* Fortune Modals */}
+      {/* 実装中モーダル */}
+      <UnderConstructionModal
+        isOpen={showTarotUnderConstruction}
+        onClose={() => setShowTarotUnderConstruction(false)}
+      />
+      
       {showDailyTarot && displayUser && (
         <DailyTarot 
           isOpen={showDailyTarot}

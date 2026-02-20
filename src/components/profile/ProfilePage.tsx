@@ -7,6 +7,7 @@ import { dummyUsers, currentUserId as defaultUserId, getUserById, getCommonFrien
 import DailyTarot from '@/components/fortune/DailyTarot';
 import SeasonalDiagnosisHub from '@/components/fortune/SeasonalDiagnosisHub';
 import MentalStatsAdmin from '@/components/fortune/MentalStatsAdmin';
+import { UnderConstructionModal, SHOW_UNDER_CONSTRUCTION } from '@/components/fortune/UnderConstructionModal';
 
 const STORAGE_KEY = 'cocoty_profile_v1';
 const ALBUM_KEY = 'cocoty_albums_v1';
@@ -249,6 +250,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, onClose }) => {
   const [showDailyTarot, setShowDailyTarot] = useState(false);
   const [showSeasonalDiagnosis, setShowSeasonalDiagnosis] = useState(false);
   const [showMentalStats, setShowMentalStats] = useState(false);
+  const [showTarotUnderConstruction, setShowTarotUnderConstruction] = useState(false);
   const [seasonalDiagnosisHistory, setSeasonalDiagnosisHistory] = useState<any[]>([]);
 
   // Helper: MBTI診断の説明文を取得
@@ -700,7 +702,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, onClose }) => {
             <div className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">占い・メンタル</div>
             <div className="flex flex-col gap-2">
               <button
-                onClick={() => setShowDailyTarot(true)}
+                onClick={() => {
+                  if (SHOW_UNDER_CONSTRUCTION) {
+                    setShowTarotUnderConstruction(true);
+                    return;
+                  }
+                  setShowDailyTarot(true);
+                }}
                 className="px-3 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <span>🔮</span>
@@ -1792,6 +1800,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, onClose }) => {
       )}
 
       {/* 占い・メンタル機能のモーダル */}
+      {/* 実装中モーダル */}
+      <UnderConstructionModal
+        isOpen={showTarotUnderConstruction}
+        onClose={() => setShowTarotUnderConstruction(false)}
+      />
+      
       <DailyTarot
         isOpen={showDailyTarot}
         onClose={() => setShowDailyTarot(false)}
