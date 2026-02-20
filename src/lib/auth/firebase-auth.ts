@@ -20,7 +20,6 @@ import { auth } from '@/lib/firebaseConfig';
 export const signUp = async (email: string, password: string): Promise<User> => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    console.log('✅ Firebase signup successful:', userCredential.user.uid);
     return userCredential.user;
   } catch (error: any) {
     console.error('❌ Firebase signup error:', error);
@@ -34,7 +33,6 @@ export const signUp = async (email: string, password: string): Promise<User> => 
 export const signIn = async (email: string, password: string): Promise<User> => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log('✅ Firebase signin successful:', userCredential.user.uid);
     return userCredential.user;
   } catch (error: any) {
     console.error('❌ Firebase signin error:', error);
@@ -48,7 +46,6 @@ export const signIn = async (email: string, password: string): Promise<User> => 
 export const logout = async (): Promise<void> => {
   try {
     await signOut(auth);
-    console.log('✅ Firebase logout successful');
   } catch (error) {
     console.error('❌ Firebase logout error:', error);
     throw error;
@@ -61,7 +58,6 @@ export const logout = async (): Promise<void> => {
 export const sendVerificationEmail = async (user: User): Promise<void> => {
   try {
     await sendEmailVerification(user);
-    console.log('✅ Verification email sent to:', user.email);
   } catch (error) {
     console.error('❌ Failed to send verification email:', error);
     throw error;
@@ -74,7 +70,6 @@ export const sendVerificationEmail = async (user: User): Promise<void> => {
 export const resetPassword = async (email: string): Promise<void> => {
   try {
     await sendPasswordResetEmail(auth, email);
-    console.log('✅ Password reset email sent to:', email);
   } catch (error: any) {
     console.error('❌ Failed to send password reset email:', error);
     throw new Error(getAuthErrorMessage(error.code));
@@ -90,7 +85,6 @@ export const updateUserProfile = async (
 ): Promise<void> => {
   try {
     await updateProfile(user, profile);
-    console.log('✅ User profile updated');
   } catch (error) {
     console.error('❌ Failed to update user profile:', error);
     throw error;

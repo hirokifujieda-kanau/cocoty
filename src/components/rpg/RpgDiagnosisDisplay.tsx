@@ -36,7 +36,7 @@ const INSTINCT_CONFIG = {
     description: 'ガンナー素質'
   },
   rpg_shielder: { 
-    label: '警戒本能', 
+    label: '防衛本能', 
     icon: Shield,
     color: 'from-green-500 to-emerald-500',
     description: 'シールダー素質'

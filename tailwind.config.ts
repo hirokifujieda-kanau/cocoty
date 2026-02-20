@@ -15,6 +15,10 @@ export default {
       fontFamily: {
         inter: ['var(--font-inter)', 'sans-serif'],
         noto: ['Noto Sans JP', 'sans-serif'],
+        'noto-sans-jp': ['var(--font-noto-sans-jp)', 'sans-serif'],
+      },
+      fontWeight: {
+        demilight: '350',
       },
     },
   },

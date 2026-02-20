@@ -41,7 +41,6 @@ export async function getProfile(uid: string): Promise<FirestoreProfile | null> 
     if (docSnap.exists()) {
       return docSnap.data() as FirestoreProfile;
     } else {
-      console.log('No profile found for uid:', uid);
       return null;
     }
   } catch (error) {
@@ -78,7 +77,6 @@ export async function createProfile(
     };
 
     await setDoc(docRef, profileData);
-    console.log('Profile created successfully for uid:', user.uid);
   } catch (error) {
     console.error('Error creating profile:', error);
     throw error;
@@ -101,7 +99,6 @@ export async function updateProfile(
     };
 
     await updateDoc(docRef, dataWithTimestamp);
-    console.log('Profile updated successfully for uid:', uid);
   } catch (error) {
     console.error('Error updating profile:', error);
     throw error;
@@ -114,7 +111,6 @@ export async function updateProfile(
 export async function updateProfilePhoto(uid: string, photoURL: string): Promise<void> {
   try {
     await updateProfile(uid, { photoURL });
-    console.log('Profile photo updated successfully for uid:', uid);
   } catch (error) {
     console.error('Error updating profile photo:', error);
     throw error;

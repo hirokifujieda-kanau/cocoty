@@ -1,0 +1,39 @@
+# Cloudignore - コード品質チェック用
+# このファイルに記載されたパターンに一致するファイルは、
+# デバッグログやconsole.logが残っていてもコミット時に警告されません
+
+# ドキュメント・設定ファイル
+*.md
+*.json
+*.yaml
+*.yml
+.gitignore
+.env*
+next.config.ts
+tailwind.config.ts
+postcss.config.mjs
+eslint.config.mjs
+
+# ビルド成果物
+/.next/
+/out/
+/build/
+/dist/
+
+# 依存関係
+/node_modules/
+
+# テストファイル
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# 型定義ファイル
+*.d.ts
+
+# ログファイル
+*.log
+
+# その他
+.DS_Store
