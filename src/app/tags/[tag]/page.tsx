@@ -74,11 +74,11 @@ const TagUsersPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <button
               onClick={() => router.back()}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-900"
             >
-              <ArrowLeft className="h-6 w-6" />
+              <ArrowLeft className="h-6 w-6 text-gray-900" />
             </button>
-            <h1 className="text-lg font-semibold truncate max-w-[200px]">#{tag}</h1>
+            <h1 className="text-lg font-semibold truncate max-w-[200px] text-gray-900">#{tag}</h1>
             <div className="w-10" />
           </div>
         </div>
@@ -109,7 +109,7 @@ const TagUsersPage: React.FC = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortType)}
-              className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
             >
               <option value="relevance">関連度順</option>
               <option value="followers">フォロワー数順</option>

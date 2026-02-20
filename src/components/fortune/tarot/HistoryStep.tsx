@@ -1,62 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { Clock, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getTarotReadings, type TarotReading } from '@/lib/api/tarot';
+import React, { useEffect, useState, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { TarotReading } from '@/lib/api/tarot';
+import { useHistoryData } from '@/hooks/useHistoryData';
+import { HistoryCard } from './components';
 
 interface HistoryStepProps {
   onClose: () => void;
   onViewDetail: (reading: TarotReading) => void;
+  currentReading?: TarotReading | null;
 }
 
-export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail }) => {
-  const [readings, setReadings] = useState<TarotReading[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail, currentReading }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const perPage = 10;
+  const historyListRef = useRef<HTMLDivElement>(null);
 
+  const { readings, loading, error, totalPages } = useHistoryData({
+    currentPage,
+    perPage,
+    currentReading,
+  });
+
+  // ページが変わったら一番上にスクロール
   useEffect(() => {
-    fetchReadings(currentPage);
-  }, [currentPage]);
-
-  const fetchReadings = async (page: number) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await getTarotReadings(page, perPage);
-      setReadings(response.readings);
-      setTotalPages(response.pagination.total_pages);
-    } catch (err) {
-      console.error('Failed to fetch readings:', err);
-      setError('占い履歴の取得に失敗しました');
-    } finally {
-      setLoading(false);
+    if (historyListRef.current) {
+      historyListRef.current.scrollTop = 0;
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('ja-JP', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getMentalStateLabel = (state: string) => {
-    const labels = {
-      sunny: '☀️ 晴れ',
-      cloudy: '☁️ 曇り',
-      rainy: '🌧️ 雨'
-    };
-    return labels[state as keyof typeof labels] || state;
-  };
-
-  const getTargetLabel = (target: string) => {
-    return target === 'self' ? '自分' : '相手';
-  };
+  }, [currentPage]);
 
   if (loading && readings.length === 0) {
     return (
@@ -70,8 +40,9 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-2xl font-bold text-white mb-2">占い履歴</h3>
-        <p className="text-purple-200">過去の占い結果を振り返りましょう</p>
+        <h3 className="font-bold text-xs leading-5 text-center text-white font-noto-sans-jp">
+          過去の占い
+        </h3>
       </div>
 
       {error && (
@@ -88,77 +59,51 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
         </div>
       ) : (
         <>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {readings.map((reading) => (
-              <button
+          <div 
+            ref={historyListRef} 
+            className="space-y-0 max-h-96 md:max-h-[600px] overflow-y-auto backdrop-blur-sm rounded-xl w-[343px] mx-auto bg-gradient-to-b from-[#1B2742] to-[#0F172A]"
+          >
+            {readings.map((reading, index) => (
+              <HistoryCard
                 key={reading.id}
+                reading={reading}
                 onClick={() => onViewDetail(reading)}
-                className="w-full p-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl transition-all text-left border border-purple-400/30 hover:border-purple-400"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-purple-300" />
-                    <span className="text-sm text-purple-200">
-                      {formatDate(reading.created_at)}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-xs px-2 py-1 bg-purple-500/30 rounded-full text-white">
-                      {getTargetLabel(reading.target)}
-                    </span>
-                    <span className="text-xs px-2 py-1 bg-blue-500/30 rounded-full text-white">
-                      {getMentalStateLabel(reading.mental_state)}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="text-2xl">
-                    {reading.is_reversed ? '🔄' : '✨'}
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-white">
-                      {reading.card.name}
-                    </h4>
-                    <p className="text-sm text-purple-200">
-                      {reading.card.name_en}
-                      {reading.is_reversed && ' (逆位置)'}
-                    </p>
-                  </div>
-                </div>
-
-                {reading.user_comment && (
-                  <div className="mt-3 pt-3 border-t border-purple-400/30">
-                    <p className="text-sm text-purple-100 italic">
-                      💭 {reading.user_comment}
-                    </p>
-                  </div>
-                )}
-              </button>
+                showDivider={index < readings.length - 1}
+              />
             ))}
           </div>
 
           {/* ページネーション */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-2 w-[343px] mx-auto">
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="p-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all"
+                className="p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all bg-transparent flex items-center"
               >
-                <ChevronLeft className="h-5 w-5 text-white" />
+                <ChevronLeft className="w-4 h-6 -mr-[10px] text-white" />
+                <ChevronLeft className="w-4 h-6 text-white" />
               </button>
               
-              <span className="text-white">
-                {currentPage} / {totalPages}
-              </span>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`w-4 h-4 flex items-center justify-center rounded transition-all text-white font-noto-sans-jp text-base font-medium leading-none ${
+                    currentPage === pageNum ? 'bg-[#C4C46D]' : 'bg-transparent'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
               
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="p-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all"
+                className="p-2 disabled:opacity-30 disabled:cursor-not-allowed transition-all bg-transparent flex items-center"
               >
-                <ChevronRight className="h-5 w-5 text-white" />
+                <ChevronRight className="w-4 h-6 -mr-[10px] text-white" />
+                <ChevronRight className="w-4 h-6 text-white" />
               </button>
             </div>
           )}
@@ -167,7 +112,7 @@ export const HistoryStep: React.FC<HistoryStepProps> = ({ onClose, onViewDetail 
 
       <button
         onClick={onClose}
-        className="w-full px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all"
+        className="w-[343px] mx-auto block px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all"
       >
         閉じる
       </button>

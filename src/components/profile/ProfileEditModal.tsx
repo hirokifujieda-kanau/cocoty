@@ -7,6 +7,7 @@ import { updateProfile, UpdateProfileParams, getCurrentUser, Profile } from '@/l
 import MandalaUpload from './MandalaUpload';
 import { validateImageFile, AVATAR_VALIDATION_OPTIONS } from '@/lib/utils/imageValidation';
 import { ValidationErrorModal } from '@/components/common/ValidationErrorModal';
+import { ImageCropModal } from '@/components/common/ImageCropModal';
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     bio: '',
@@ -141,25 +144,41 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
+    // 基本的なファイルタイプチェックのみ
+    if (!file.type.startsWith('image/')) {
+      setValidationError('画像ファイルを選択してください');
+      e.target.value = '';
+      return;
+    }
+
+    // ファイルサイズチェック（10MB以下）
+    if (file.size > 10 * 1024 * 1024) {
+      setValidationError('画像サイズは10MB以下にしてください');
+      e.target.value = '';
+      return;
+    }
+
+    // 画像をプレビュー用に読み込み、トリミングモーダルを表示
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageToCrop(reader.result as string);
+      setShowCropModal(true);
+    };
+    reader.readAsDataURL(file);
+
+    e.target.value = ''; // inputをリセット
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!user) return;
+
     try {
-      // 画像バリデーション
-      console.log('🔍 Validating image...');
-      const validation = await validateImageFile(file, AVATAR_VALIDATION_OPTIONS);
-      
-      if (!validation.isValid) {
-        setValidationError(validation.error || '画像のアップロードに失敗しました');
-        e.target.value = ''; // inputをリセット
-        return;
-      }
-
-      console.log(`✅ Validation passed: ${validation.width}x${validation.height}px, ${(validation.size! / 1024 / 1024).toFixed(2)}MB`);
-
       setUploading(true);
-      console.log('📤 Uploading avatar...');
+      setShowCropModal(false);
 
       // Cloudinaryにアップロード
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', croppedBlob, `avatar_${Date.now()}.jpg`);
       formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default');
       formData.append('public_id', `${user.uid}_avatar_${Date.now()}`);
 
@@ -177,12 +196,10 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
 
       const cloudinaryData = await cloudinaryResponse.json();
       const avatarUrl = cloudinaryData.secure_url;
-      console.log('✅ Avatar uploaded to Cloudinary:', avatarUrl);
 
       // プロフィールを更新（profileが存在する場合のみ）
       if (profile) {
         await updateProfile(profile.id, { avatar_url: avatarUrl });
-        console.log('✅ Avatar URL saved to profile');
       } else {
         console.warn('⚠️ Profile not created yet, avatar URL will be set on first save');
       }
@@ -198,6 +215,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
       alert('画像のアップロードに失敗しました');
     } finally {
       setUploading(false);
+      setImageToCrop(null);
     }
   };
 
@@ -225,14 +243,10 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
       }
 
       await updateProfile(profile.id, params); 
-      console.log('✅ Profile updated successfully');
-      console.log('📞 Calling onSave callback...');
       
       // 親コンポーネントに保存成功を通知
       if (onSave) {
-        console.log('✅ onSave callback exists, calling it...');
         await onSave();
-        console.log('✅ onSave callback completed');
       } else {
         console.warn('⚠️ onSave callback is not provided');
       }
@@ -506,6 +520,20 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
         </div>
       </div>
     </div>
+
+      {/* 画像トリミングモーダル */}
+      {imageToCrop && (
+        <ImageCropModal
+          isOpen={showCropModal}
+          imageUrl={imageToCrop}
+          aspectRatio={{ width: 1, height: 1 }}
+          onClose={() => {
+            setShowCropModal(false);
+            setImageToCrop(null);
+          }}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </>
   );
 };

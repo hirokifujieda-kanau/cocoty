@@ -187,7 +187,6 @@ const TeamHome: React.FC<TeamHomeProps> = ({ teamName }) => {
                 <div
                   key={member.id}
                   onClick={() => {
-                    console.log('TeamHome: Member clicked:', member.id, member.name);
                     const profileUrl = '/profile?userId=' + member.id;
                     router.push(profileUrl);
                   }}

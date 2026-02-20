@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { uploadToCloudinary, validateImageFile, type CloudinaryUploadResponse } from '@/lib/cloudinary/upload';
-import { uploadAvatarUrl } from '@/lib/api/profiles';
+import { uploadAvatar } from '@/lib/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface UseAvatarUploadReturn {
@@ -27,19 +27,10 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
       setUploadProgress(0);
 
       // 認証確認（Firebaseのみ）
-      console.log('🔍 Firebase Auth Debug:', {
-        user: user,
-        uid: user?.uid,
-        email: user?.email,
-        isSignedIn: !!user
-      });
-      
       if (!user) {
         console.error('❌ No authenticated Firebase user found');
         throw new Error('認証が必要です。ログインしてください。');
       }
-      
-      console.log('✅ Using Firebase user:', user.email || user.uid);
 
       // ファイル検証
       const validation = validateImageFile(file);
@@ -57,11 +48,12 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
       setUploadProgress(70); // Cloudinary完了で70%
 
       // Rails APIに保存
-      console.log('💾 Saving avatar URL to Rails API');
+      if (!profileId) {
+        throw new Error('プロフィールIDが指定されていません');
+      }
       
       try {
-        await uploadAvatarUrl(cloudinaryResponse.secure_url);
-        console.log('✅ Avatar URL saved to Rails API successfully');
+        await uploadAvatar(profileId, cloudinaryResponse.secure_url);
         setUploadProgress(100);
       } catch (apiError: any) {
         console.error('❌ Rails API save failed:', apiError);

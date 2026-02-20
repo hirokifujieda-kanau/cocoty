@@ -1,77 +1,65 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DrawnCardResult } from './types';
+import { ResultConfirmation } from './ResultConfirmation';
+import { ResultInput } from './ResultInput';
 
 interface ResultStepProps {
   drawnCard: DrawnCardResult;
   interpretation: string;
   onComment: () => void;
   onClose: () => void;
+  initialShowConfirmation?: boolean;
+  savedFeeling?: 'good' | 'soso' | 'bad' | null;
+  savedComment?: string;
+  onSaveData?: (feeling: 'good' | 'soso' | 'bad' | null, comment: string) => void;
+  target?: 'self' | 'partner' | null;
 }
+
+type Feeling = 'good' | 'soso' | 'bad' | null;
 
 export const ResultStep: React.FC<ResultStepProps> = ({
   drawnCard,
   interpretation,
   onComment,
-  onClose
+  onClose,
+  initialShowConfirmation = false,
+  savedFeeling = null,
+  savedComment = '',
+  onSaveData,
+  target = null
 }) => {
+  const [showConfirmation, setShowConfirmation] = useState(initialShowConfirmation);
+  const [feeling, setFeeling] = useState<Feeling>(savedFeeling);
+  const [comment, setComment] = useState(savedComment);
+
+  const handleSave = (newFeeling: Feeling, newComment: string) => {
+    setFeeling(newFeeling);
+    setComment(newComment);
+    onSaveData?.(newFeeling, newComment);
+    setShowConfirmation(true);
+  };
+
+  // 確認ページを表示
+  if (showConfirmation) {
+    return (
+      <ResultConfirmation
+        drawnCard={drawnCard}
+        interpretation={interpretation}
+        feeling={feeling}
+        comment={comment}
+        onComplete={onComment}
+      />
+    );
+  }
+
+  // 入力ページを表示
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        {/* カード画像 */}
-        <div className="mb-6">
-          <img
-            src={drawnCard.card.image_url}
-            alt={drawnCard.card.name}
-            className="w-64 h-auto mx-auto rounded-2xl shadow-2xl"
-            onError={(e) => {
-              // 画像読み込みエラー時のフォールバック
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-            }}
-          />
-        </div>
-
-        {/* カード名 */}
-        <div className="inline-block px-6 py-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl shadow-2xl mb-6">
-          <div className="text-6xl mb-4">{drawnCard.isReversed ? '🔄' : '✨'}</div>
-          <h3 className="text-3xl font-bold text-white">{drawnCard.card.name}</h3>
-          <p className="text-sm text-yellow-100 mt-2">{drawnCard.card.name_en}</p>
-          {drawnCard.isReversed && (
-            <div className="mt-3 px-4 py-2 bg-white/20 rounded-lg">
-              <span className="text-sm text-white font-semibold">逆位置</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-        <h4 className="text-lg font-bold text-white mb-3">🔮 カードの意味</h4>
-        <p className="text-purple-100 leading-relaxed whitespace-pre-line">
-          {interpretation}
-        </p>
-      </div>
-
-      <div className="bg-gradient-to-r from-purple-600/50 to-pink-600/50 rounded-xl p-6">
-        <h4 className="text-lg font-bold text-white mb-3">💡 キーワード</h4>
-        <p className="text-white">
-          {drawnCard.isReversed ? drawnCard.card.reverse_meaning : drawnCard.card.meaning}
-        </p>
-      </div>
-
-      <div className="text-center space-y-4">
-        <button
-          onClick={onComment}
-          className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all"
-        >
-          感想を残す
-        </button>
-        <button
-          onClick={onClose}
-          className="w-full px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all"
-        >
-          終了する
-        </button>
-      </div>
-    </div>
+    <ResultInput
+      drawnCard={drawnCard}
+      interpretation={interpretation}
+      initialFeeling={savedFeeling}
+      initialComment={savedComment}
+      onSave={handleSave}
+    />
   );
 };

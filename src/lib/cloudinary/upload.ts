@@ -47,15 +47,6 @@ export async function uploadToCloudinary(
   // 変換が必要な場合は、アップロード後にURLで適用するか、
   // upload_presetに事前定義する必要があります。
 
-  // デバッグ用ログ
-  console.log('Cloudinary upload config:', {
-    cloudName: CLOUDINARY_CONFIG.cloudName,
-    hasApiKey: !!CLOUDINARY_CONFIG.apiKey,
-    uploadPreset: 'ml_default',
-    folder: folderPath,
-    transformation: transformation || 'none'
-  });
-
   try {
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/image/upload`,

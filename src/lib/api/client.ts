@@ -13,20 +13,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/a
 async function getIdToken(): Promise<string | null> {
   const user = auth.currentUser;
   
-  console.log('🔑 getIdToken() 呼び出し');
-  console.log('🔑 auth.currentUser:', user);
-  console.log('🔑 user?.uid:', user?.uid);
-  console.log('🔑 user?.email:', user?.email);
-  
   if (!user) {
     console.error('❌ auth.currentUser が null です！');
     return null;
   }
   
   try {
-    console.log('🔑 getIdToken(true) を実行中...');
     const token = await user.getIdToken(true); // 強制的に最新のトークンを取得
-    console.log('✅ ID Token取得成功:', token.substring(0, 50) + '...');
     
     // localStorage に保存（バックエンドの確認用）
     if (typeof window !== 'undefined') {
@@ -48,16 +41,11 @@ async function getHeaders(requireAuth: boolean = false): Promise<HeadersInit> {
     'Content-Type': 'application/json',
   };
   
-  console.log('📋 getHeaders() 呼び出し, requireAuth:', requireAuth);
-  
   if (requireAuth) {
     const token = await getIdToken();
     
-    console.log('📋 取得したtoken:', token ? `${token.substring(0, 30)}...` : 'null');
-    
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log('✅ Authorization ヘッダー設定完了');
     } else {
       console.error('❌ Token が null のため、認証エラーをスロー');
       throw new Error('Firebase authentication required. Please log in again.');
@@ -79,8 +67,6 @@ export async function apiRequest<T>(
   const headers = await getHeaders(requireAuth);
   const url = `${API_BASE_URL}${endpoint}`;
   
-  console.log(`🌐 [API] ${fetchOptions.method || 'GET'} ${url}`);
-  
   try {
     const response = await fetch(url, {
       ...fetchOptions,
@@ -97,7 +83,6 @@ export async function apiRequest<T>(
     }
     
     const data = await response.json();
-    console.log(`✅ [API] Response from ${endpoint}:`, data);
     return data;
   } catch (error: any) {
     // ネットワークエラーの場合
@@ -495,4 +480,65 @@ export async function searchByAttribute(
   return apiRequest<SearchByAttributeResponse>(
     `/search/by_attribute?${queryParams.toString()}`
   );
+}
+
+// ========================================
+// Tarot API
+// ========================================
+
+export interface TarotCard {
+  id: number;
+  name: string;
+  number: number;
+  meaning_upright: string;
+  meaning_reversed: string;
+  image_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TarotCardsResponse {
+  cards: TarotCard[];
+}
+
+/**
+ * タロットカード一覧を取得
+ */
+export async function getTarotCards(): Promise<TarotCardsResponse> {
+  return apiRequest<TarotCardsResponse>('/tarot/cards', {
+    requireAuth: false,
+  });
+}
+
+export interface DrawnCard {
+  card: TarotCard;
+  is_reversed: boolean;
+  position: number;
+}
+
+export interface TarotDrawResponse {
+  drawn_cards: DrawnCard[];
+  drawn_at: string;
+  message: string;
+}
+
+/**
+ * タロットカードを引く（認証必須）
+ * @param count 引くカードの枚数（デフォルト: 3）
+ * @param target 占う対象（'self' | 'partner'）
+ * @param mentalState 気分の状態（'sunny' | 'cloudy' | 'rainy' | 'very-rainy'）
+ */
+export async function drawTarotCards(
+  count: number = 3,
+  target?: 'self' | 'partner',
+  mentalState?: 'sunny' | 'cloudy' | 'rainy' | 'very-rainy'
+): Promise<TarotDrawResponse> {
+  const params = new URLSearchParams({ count: count.toString() });
+  if (target) params.append('target', target);
+  if (mentalState) params.append('mental_state', mentalState);
+  
+  return apiRequest<TarotDrawResponse>(`/tarot/draw?${params.toString()}`, {
+    method: 'POST',
+    requireAuth: true,
+  });
 }
