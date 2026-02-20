@@ -5,6 +5,7 @@ import { uploadToCloudinary } from '@/lib/cloudinary/upload';
 import { apiRequest } from '@/lib/api/client';
 import { validateImageFile, MANDALA_VALIDATION_OPTIONS } from '@/lib/utils/imageValidation';
 import { ValidationErrorModal } from '@/components/common/ValidationErrorModal';
+import { ImageCropModal } from '@/components/common/ImageCropModal';
 
 interface MandalaUploadProps {
   userId: number;
@@ -32,6 +33,15 @@ export default function MandalaUpload({
   }>({ thumbnail: 0, detail: 0 });
   const [error, setError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  
+  // トリミング用のstate
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropImageUrl, setCropImageUrl] = useState<string>('');
+  const [cropType, setCropType] = useState<'thumbnail' | 'detail'>('thumbnail');
+  const [croppedBlobs, setCroppedBlobs] = useState<{
+    thumbnail: Blob | null;
+    detail: Blob | null;
+  }>({ thumbnail: null, detail: null });
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -51,30 +61,36 @@ export default function MandalaUpload({
 
     setError(null);
 
-    // プレビュー表示
+    // トリミングモーダルを開く
     const reader = new FileReader();
     reader.onloadend = () => {
-      if (type === 'thumbnail') {
-        setThumbnailPreview(reader.result as string);
-      } else {
-        setDetailPreview(reader.result as string);
-      }
+      setCropImageUrl(reader.result as string);
+      setCropType(type);
+      setCropModalOpen(true);
     };
     reader.readAsDataURL(file);
+    
+    // inputをリセット（同じファイルを再選択可能にする）
+    e.target.value = '';
+  };
+
+  // トリミング完了時の処理
+  const handleCropComplete = (croppedBlob: Blob) => {
+    // プレビュー表示
+    const previewUrl = URL.createObjectURL(croppedBlob);
+    if (cropType === 'thumbnail') {
+      setThumbnailPreview(previewUrl);
+      setCroppedBlobs((prev) => ({ ...prev, thumbnail: croppedBlob }));
+    } else {
+      setDetailPreview(previewUrl);
+      setCroppedBlobs((prev) => ({ ...prev, detail: croppedBlob }));
+    }
+    
+    setCropModalOpen(false);
   };
 
   const handleUpload = async () => {
-    const thumbnailInput = document.getElementById(
-      'mandala-thumbnail'
-    ) as HTMLInputElement;
-    const detailInput = document.getElementById(
-      'mandala-detail'
-    ) as HTMLInputElement;
-
-    const thumbnailFile = thumbnailInput?.files?.[0];
-    const detailFile = detailInput?.files?.[0];
-
-    if (!thumbnailFile && !detailFile && !currentThumbnail && !currentDetail) {
+    if (!croppedBlobs.thumbnail && !croppedBlobs.detail && !currentThumbnail && !currentDetail) {
       setError('少なくとも1枚の画像を選択してください');
       return;
     }
@@ -88,8 +104,11 @@ export default function MandalaUpload({
       let detailUrl = currentDetail || '';
 
       // サムネイル画像のアップロード
-      if (thumbnailFile) {
+      if (croppedBlobs.thumbnail) {
         setUploadProgress((prev) => ({ ...prev, thumbnail: 30 }));
+        const thumbnailFile = new File([croppedBlobs.thumbnail], 'mandala-thumbnail.jpg', {
+          type: 'image/jpeg',
+        });
         const thumbnailResult = await uploadToCloudinary(thumbnailFile, {
           folder: 'mandala_thumbnails',
           transformation: 'mandala_thumbnail',
@@ -99,8 +118,11 @@ export default function MandalaUpload({
       }
 
       // 詳細画像のアップロード
-      if (detailFile) {
+      if (croppedBlobs.detail) {
         setUploadProgress((prev) => ({ ...prev, detail: 30 }));
+        const detailFile = new File([croppedBlobs.detail], 'mandala-detail.jpg', {
+          type: 'image/jpeg',
+        });
         const detailResult = await uploadToCloudinary(detailFile, {
           folder: 'mandala_details',
           transformation: 'mandala_detail',
@@ -139,6 +161,14 @@ export default function MandalaUpload({
         isOpen={!!validationError}
         error={validationError || ''}
         onClose={() => setValidationError(null)}
+      />
+
+      <ImageCropModal
+        isOpen={cropModalOpen}
+        imageUrl={cropImageUrl}
+        aspectRatio={{ width: 1, height: 1 }}
+        onClose={() => setCropModalOpen(false)}
+        onCropComplete={handleCropComplete}
       />
 
       <div className="space-y-6">

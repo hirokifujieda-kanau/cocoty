@@ -17,6 +17,7 @@ import MandalaDisplay from '@/components/profile/MandalaDisplay';
 import { RpgDiagnosisModal } from '@/components/rpg/RpgDiagnosisModal';
 import { RpgDiagnosisCard } from '@/components/profile/RpgDiagnosisCard';
 import { TarotCard } from '@/components/profile/TarotCard';
+import CommonHeader from '@/components/layout/CommonHeader';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getCurrentUser, getProfile, updateProfile, type Profile } from '@/lib/api/client';
@@ -152,14 +153,21 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         console.error('❌ エラーメッセージ:', err.message);
         console.error('❌ エラー全体:', JSON.stringify(err, null, 2));
         
-        // ユーザーに分かりやすいエラーメッセージを表示
-        if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
+        // 404エラー（プロフィール未作成）の場合は初回ユーザーとして扱う
+        if (err.message?.includes('404')) {
+          setIsFirstTimeUser(true);
+          setError(null); // エラーメッセージをクリア
+        } 
+        // ネットワークエラー
+        else if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
           setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
-        } else if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
+        } 
+        // 認証エラー
+        else if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
           setError('認証エラー: ログインし直してください');
-        } else if (err.message?.includes('404')) {
-          setError('プロフィールが見つかりません');
-        } else {
+        } 
+        // その他のエラー
+        else {
           setError(`プロフィールの読み込みに失敗しました: ${err.message || '不明なエラー'}`);
         }
       } finally {
@@ -364,39 +372,13 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="sticky top-0 z-50 h-[30px] bg-[#FFD26A] flex items-center">
-        <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,106px)]" style={{ maxWidth: '750px' }}>
-          {/* Logo */}
-          <h1 className="font-noto text-base font-medium text-white leading-none">
-            ここてぃ
-          </h1>
-          
-          {/* Search & Settings */}
-          <div className="flex gap-2 items-center">
-            <div className="relative flex items-center my-1 ml-[9px]">
-              <img 
-                src="/人物アイコン　チーム 1.svg" 
-                alt="search" 
-                className="absolute left-2 w-5 h-5 pointer-events-none"
-              />
-              <input
-                type="text"
-                placeholder="ユーザー一覧"
-                onClick={() => router.push('/users')}
-                className="w-[clamp(120px,30vw,200px)] h-5 pl-8 pr-3 text-[10px] font-noto font-medium bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer shadow-sm placeholder:text-[#5C5C5C] placeholder:font-medium placeholder:text-[10px]"
-                readOnly
-              />
-            </div>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              title="設定"
-            >
-              <img src="/歯車.svg" alt="設定" className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <CommonHeader 
+        showSearch={true}
+        showSettings={true}
+        showBackButton={!isOwner}
+        backButtonPath="/users"
+        onSettingsClick={() => setShowSettings(true)}
+      />
 
       <div className="mx-auto w-full" style={{ maxWidth: '750px' }}>
         {/* Profile Section - 内部コンテンツ最大幅 626px（750px - 88px*2 - 18px*2） */}

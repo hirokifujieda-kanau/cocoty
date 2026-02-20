@@ -58,7 +58,7 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ isOpen, onClose, 
               <div className="my-1 ml-[9px]">
                 <div className="relative flex items-center">
                   <img alt="search" src="/人物アイコン　チーム 1.svg" className="absolute left-2 w-5 h-5 pointer-events-none" />
-                  <input placeholder="ユーザー一覧" type="text" className={`px-4 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 text-[10px] font-medium font-['Noto_Sans_JP'] my-[5px] pl-8 shadow-sm ${styles.searchInput}`} />
+                  <input placeholder="ユーザー一覧" type="text" className={`px-4 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 text-[10px] font-medium font-noto-sans-jp my-[5px] pl-8 shadow-sm ${styles.searchInput}`} />
                 </div>
               </div>
               <button className="hover:bg-gray-100 rounded-full transition-colors" title="設定">
@@ -108,14 +108,14 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ isOpen, onClose, 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder=""
-                    className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
+                    className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 h-[28px] px-2 font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
                   />
                 </div>
 
                 {/* Error Message */}
                 {error && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-[#dc2626] text-sm font-['Inter']">{error}</p>
+                    <p className="text-[#dc2626] text-sm font-inter-sans">{error}</p>
                   </div>
                 )}
 
@@ -125,7 +125,7 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ isOpen, onClose, 
                     type="submit"
                     onClick={handleSendReset}
                     disabled={loading || !email}
-                    className={`w-full gap-2 rounded-[12px] border-none font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300 ${
+                    className={`w-full gap-2 rounded-[12px] border-none font-inter-sans font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300 ${
                       email
                         ? 'bg-[#FFBA48] text-white cursor-pointer'
                         : 'bg-[#F8E8AA] text-[#FFFFFFB2] cursor-not-allowed'
@@ -149,7 +149,7 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ isOpen, onClose, 
                 <div className="px-[80px]">
                   <button
                     onClick={onBack}
-                    className="w-full gap-2 rounded-[12px] border-none font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300 bg-[#FFBA48] text-white cursor-pointer shadow-[0px_1px_2px_0px_#0000000D]"
+                    className="w-full gap-2 rounded-[12px] border-none font-inter-sans font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300 bg-[#FFBA48] text-white cursor-pointer shadow-[0px_1px_2px_0px_#0000000D]"
                   >
                     戻る
                   </button>

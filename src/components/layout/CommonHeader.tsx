@@ -2,30 +2,55 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 
 interface CommonHeaderProps {
   showSearch?: boolean;
   showSettings?: boolean;
+  showBackButton?: boolean;
+  backButtonPath?: string;
   onSettingsClick?: () => void;
+  onBackClick?: () => void;
 }
 
 export default function CommonHeader({ 
   showSearch = true, 
-  showSettings = true, 
-  onSettingsClick 
+  showSettings = true,
+  showBackButton = false,
+  backButtonPath,
+  onSettingsClick,
+  onBackClick
 }: CommonHeaderProps) {
   const router = useRouter();
+
+  const handleBackClick = () => {
+    if (onBackClick) {
+      onBackClick();
+    } else if (backButtonPath) {
+      router.push(backButtonPath);
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <div className="sticky top-0 z-50 h-[30px] bg-[#FFD26A] flex items-center">
       <div className="mx-auto flex w-full items-center justify-between px-[clamp(26px,8vw,106px)]" style={{ maxWidth: '750px' }}>
-        {/* Logo */}
-        <button
-          onClick={() => router.push('/profile')}
-          className="font-noto text-base font-medium text-white leading-none hover:opacity-80 transition-opacity"
-        >
-          ここてぃ
-        </button>
+        {/* Left side: Back button or Logo */}
+        <div className="flex items-center gap-2">
+          {showBackButton && (
+            <button
+              onClick={handleBackClick}
+              className="p-1 hover:bg-yellow-500/30 rounded-full transition-colors"
+              title="戻る"
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+          )}
+          <div className="font-noto text-base font-medium text-white leading-none">
+            ここてぃ
+          </div>
+        </div>
         
         {/* Search & Settings */}
         <div className="flex gap-2 items-center">

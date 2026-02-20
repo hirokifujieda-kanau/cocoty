@@ -7,6 +7,7 @@ import { updateProfile, UpdateProfileParams, getCurrentUser, Profile } from '@/l
 import MandalaUpload from './MandalaUpload';
 import { validateImageFile, AVATAR_VALIDATION_OPTIONS } from '@/lib/utils/imageValidation';
 import { ValidationErrorModal } from '@/components/common/ValidationErrorModal';
+import { ImageCropModal } from '@/components/common/ImageCropModal';
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -21,6 +22,8 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     bio: '',
@@ -141,21 +144,41 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    try {
-      // 画像バリデーション
-      const validation = await validateImageFile(file, AVATAR_VALIDATION_OPTIONS);
-      
-      if (!validation.isValid) {
-        setValidationError(validation.error || '画像のアップロードに失敗しました');
-        e.target.value = ''; // inputをリセット
-        return;
-      }
+    // 基本的なファイルタイプチェックのみ
+    if (!file.type.startsWith('image/')) {
+      setValidationError('画像ファイルを選択してください');
+      e.target.value = '';
+      return;
+    }
 
+    // ファイルサイズチェック（10MB以下）
+    if (file.size > 10 * 1024 * 1024) {
+      setValidationError('画像サイズは10MB以下にしてください');
+      e.target.value = '';
+      return;
+    }
+
+    // 画像をプレビュー用に読み込み、トリミングモーダルを表示
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageToCrop(reader.result as string);
+      setShowCropModal(true);
+    };
+    reader.readAsDataURL(file);
+
+    e.target.value = ''; // inputをリセット
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!user) return;
+
+    try {
       setUploading(true);
+      setShowCropModal(false);
 
       // Cloudinaryにアップロード
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', croppedBlob, `avatar_${Date.now()}.jpg`);
       formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default');
       formData.append('public_id', `${user.uid}_avatar_${Date.now()}`);
 
@@ -192,6 +215,7 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
       alert('画像のアップロードに失敗しました');
     } finally {
       setUploading(false);
+      setImageToCrop(null);
     }
   };
 
@@ -496,6 +520,20 @@ const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ isOpen, onClose, on
         </div>
       </div>
     </div>
+
+      {/* 画像トリミングモーダル */}
+      {imageToCrop && (
+        <ImageCropModal
+          isOpen={showCropModal}
+          imageUrl={imageToCrop}
+          aspectRatio={{ width: 1, height: 1 }}
+          onClose={() => {
+            setShowCropModal(false);
+            setImageToCrop(null);
+          }}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </>
   );
 };

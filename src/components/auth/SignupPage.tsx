@@ -2,10 +2,14 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/api/client';
 import styles from './SignupPage.module.css';
+
+// 全角数字を半角数字に変換する関数
+const toHalfWidth = (str: string): string => {
+  return str.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+};
 
 // 生年月日のバリデーション関数
 const validateBirthday = (year: string, month: string, day: string): { isValid: boolean; errorMessage?: string } => {
@@ -120,11 +124,20 @@ const SignupPage: React.FC = () => {
 
     const errors: string[] = [];
     
+    // パスワード一致チェック
     if (formData.password !== formData.confirmPassword) {
       errors.push('パスワードが一致しません');
     }
 
-    if (!/[0-9]/.test(formData.password) || !/[a-zA-Z]/.test(formData.password)) {
+    // パスワードの文字種チェック（最初のパスワード欄を基準にチェック）
+    const hasNumber = /[0-9]/.test(formData.password);
+    const hasLetter = /[a-zA-Z]/.test(formData.password);
+
+    if (!hasNumber && !hasLetter) {
+      errors.push('パスワードには英数字を使用してください');
+    } else if (!hasNumber) {
+      errors.push('パスワードには数字も使用してください');
+    } else if (!hasLetter) {
       errors.push('パスワードには英語も使用してください');
     }
 
@@ -208,14 +221,8 @@ const SignupPage: React.FC = () => {
       {/* Header */}
       <div className="sticky top-0 bg-white py-8 px-4">
         <div className="flex items-center justify-center gap-4 relative">
-          <button
-            onClick={() => router.back()}
-            className="absolute left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ChevronLeft className="h-6 w-6 text-gray-900" />
-          </button>
           <h1
-            className="font-['Noto_Sans_JP'] font-bold text-[20px] leading-[20px] text-center align-middle text-[#1A1A1A]"
+            className="font-noto-sans-jp font-bold text-[20px] leading-[20px] text-center align-middle text-[#1A1A1A]"
           >
             アカウント作成
           </h1>
@@ -235,7 +242,7 @@ const SignupPage: React.FC = () => {
             {/* Name */}
             <div>
               <label
-                className="block font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
+                className="block font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
               >
                 名前
               </label>
@@ -243,7 +250,7 @@ const SignupPage: React.FC = () => {
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 h-[28px] mb-[14px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
+                className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 h-[28px] mb-[14px] px-2 font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
                 placeholder=""
                 required
               />
@@ -252,53 +259,71 @@ const SignupPage: React.FC = () => {
             {/* Birthday */}
             <div>
               <label
-                className="block font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
+                className="block font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
               >
                 生年月日
               </label>
               <div className="flex items-center mb-[14px] gap-1">
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   min="1900"
                   max="2024"
                   value={formData.year}
-                  onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-center placeholder-gray-400 w-[60px] h-[28px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
+                  onChange={(e) => {
+                    const halfWidth = toHalfWidth(e.target.value).replace(/[^0-9]/g, '');
+                    setFormData({ ...formData, year: halfWidth });
+                  }}
+                  onFocus={(e) => {
+                    if (!e.target.value) {
+                      setFormData({ ...formData, year: '1999' });
+                    }
+                  }}
+                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-center placeholder-gray-400 w-[60px] h-[28px] font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
                   placeholder="1999"
                 />
-                <span className="font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#5C5C5C]">年</span>
+                <span className="font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#5C5C5C]">年</span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   min="1"
                   max="12"
                   value={formData.month}
                   onChange={(e) => {
-                    const newMonth = e.target.value;
-                    setFormData({ ...formData, month: newMonth });
+                    const halfWidth = toHalfWidth(e.target.value).replace(/[^0-9]/g, '');
+                    setFormData({ ...formData, month: halfWidth });
                     // 月が変わった時に日を検証
-                    if (newMonth && formData.year && formData.day) {
-                      const maxDay = getMaxDayInMonth(formData.year, newMonth);
+                    if (halfWidth && formData.year && formData.day) {
+                      const maxDay = getMaxDayInMonth(formData.year, halfWidth);
                       if (parseInt(formData.day, 10) > maxDay) {
-                        setFormData(prev => ({ ...prev, month: newMonth, day: '' }));
+                        setFormData(prev => ({ ...prev, month: halfWidth, day: '' }));
                       }
                     }
                   }}
-                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
+                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A] [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
                   placeholder="1"
                 />
-                <span className="font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#5C5C5C]">月</span>
+                <span className="font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#5C5C5C]">月</span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   min="1"
                   max={getMaxDayInMonth(formData.year, formData.month)}
                   value={formData.day}
-                  onChange={(e) => setFormData({ ...formData, day: e.target.value })}
-                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
+                  onChange={(e) => {
+                    const halfWidth = toHalfWidth(e.target.value).replace(/[^0-9]/g, '');
+                    setFormData({ ...formData, day: halfWidth });
+                  }}
+                  className="bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 w-[35px] h-[28px] px-[8.5px] font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A] [&::-webkit-outer-spin-button]:hidden [&::-webkit-inner-spin-button]:hidden"
                   placeholder="1"
                 />
-                <span className="font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#5C5C5C]">日</span>
-                <label className="flex items-center gap-2 ml-auto cursor-pointer relative">
-                  <span className="font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#1A1A1A]">
+                <span className="font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#5C5C5C]">日</span>
+                {/* 公開/非公開トグル - 一時的にコメントアウト */}
+                {/* <label className="flex items-center gap-2 ml-auto cursor-pointer relative">
+                  <span className="font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#1A1A1A]">
                     {formData.isPrivate ? '公開' : '非公開'}
                   </span>
                   <input
@@ -320,10 +345,10 @@ const SignupPage: React.FC = () => {
                       }`}
                     />
                   </div>
-                </label>
+                </label> */}
               </div>
               {birthdayError && (
-                <p className="text-red-600 text-[12px] font-['Noto_Sans_JP'] mb-[14px]">
+                <p className="text-red-600 text-[12px] font-noto-sans-jp mb-[14px]">
                   {birthdayError}
                 </p>
               )}
@@ -332,7 +357,7 @@ const SignupPage: React.FC = () => {
             {/* Email */}
             <div>
               <label
-                className="block font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
+                className="block font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
               >
                 メールアドレス
               </label>
@@ -340,7 +365,7 @@ const SignupPage: React.FC = () => {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 h-[28px] mb-[14px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
+                className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 h-[28px] mb-[14px] px-2 font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
                 placeholder=""
                 required
               />
@@ -349,16 +374,19 @@ const SignupPage: React.FC = () => {
             {/* Password */}
             <div>
               <label
-                className="block font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
+                className="block font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
               >
-                パスワード <span className="font-['Noto_Sans_JP'] font-bold text-[10px] leading-[12px] text-[#828282] ml-[7px]">8文字以上・数字混合 必須</span>
+                パスワード <span className="font-noto-sans-jp font-bold text-[10px] leading-[12px] text-[#828282] ml-[7px]">8文字以上・数字混合 必須</span>
               </label>
               <div className="relative mb-[14px]">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
+                  onChange={(e) => {
+                    const halfWidth = toHalfWidth(e.target.value);
+                    setFormData({ ...formData, password: halfWidth });
+                  }}
+                  className="w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A]"
                   placeholder=""
                   required
                 />
@@ -379,19 +407,20 @@ const SignupPage: React.FC = () => {
             {/* Confirm Password */}
             <div>
               <label
-                className="block font-['Noto_Sans_JP'] font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
+                className="block font-noto-sans-jp font-bold text-[12px] leading-[12px] text-[#1A1A1A] mb-[10px]"
               >
-                パスワード再入力 <span className="font-['Noto_Sans_JP'] font-bold text-[10px] leading-[12px] text-[#828282] ml-[7px]">8文字以上・英数字混合 必須</span>
+                パスワード再入力 <span className="font-noto-sans-jp font-bold text-[10px] leading-[12px] text-[#828282] ml-[7px]">8文字以上・英数字混合 必須</span>
               </label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => {
-                    setFormData({ ...formData, confirmPassword: e.target.value });
+                    const halfWidth = toHalfWidth(e.target.value);
+                    setFormData({ ...formData, confirmPassword: halfWidth });
                     setPasswordErrors([]);
                   }}
-                  className={`w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-['Inter'] font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${passwordErrors.length > 0 ? 'border border-[#FF0000]' : ''}`}
+                  className={`w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 pr-10 h-[28px] px-2 font-inter-sans font-medium text-[14px] leading-[130%] text-[#1A1A1A] ${passwordErrors.length > 0 ? 'border border-[#FF0000]' : ''}`}
                   placeholder=""
                   required
                 />
@@ -412,7 +441,7 @@ const SignupPage: React.FC = () => {
                   {passwordErrors.map((err, idx) => (
                     <div
                       key={idx}
-                      className="font-['Noto_Sans_JP'] font-bold text-[10px] leading-[12px] text-[#FF383C]"
+                      className="font-noto-sans-jp font-bold text-[10px] leading-[12px] text-[#FF383C]"
                       style={{
                         marginBottom: idx < passwordErrors.length - 1 ? '4px' : '0'
                       }}
@@ -428,7 +457,7 @@ const SignupPage: React.FC = () => {
             <button
               type="submit"
               disabled={!isFormValid || isLoading}
-              className={`w-[calc(100%-161px)] ml-[80.5px] mr-[80.5px] gap-2 rounded-[12px] border-none mt-[32px] font-['Inter'] font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300`}
+              className={`w-[calc(100%-161px)] ml-[80.5px] mr-[80.5px] gap-2 rounded-[12px] border-none mt-[32px] font-inter-sans font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300`}
               style={{
                 backgroundColor: isFormValid ? '#FFBA48' : '#F8E8AA',
                 cursor: isFormValid ? 'pointer' : 'not-allowed',
@@ -442,10 +471,11 @@ const SignupPage: React.FC = () => {
 
           {/* Login Link */}
           <div className="mt-6 text-center">
-            <span className="font-['Noto_Sans_JP'] text-[14px] text-gray-600">アカウントをお持ちの方は</span>{' '}
+            <span className="font-noto-sans-jp text-[14px] text-gray-600">アカウントをお持ちの方は</span>{' '}
             <button
               onClick={() => router.push('/login')}
-              className="font-['Noto_Sans_JP'] font-semibold text-[14px] text-purple-600 hover:text-purple-700 transition-colors"
+              className="font-noto-sans-jp font-semibold text-[14px] transition-colors"
+              style={{ color: '#FFBA48' }}
             >
               ログイン
             </button>
