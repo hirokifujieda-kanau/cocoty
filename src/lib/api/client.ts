@@ -481,3 +481,64 @@ export async function searchByAttribute(
     `/search/by_attribute?${queryParams.toString()}`
   );
 }
+
+// ========================================
+// Tarot API
+// ========================================
+
+export interface TarotCard {
+  id: number;
+  name: string;
+  number: number;
+  meaning_upright: string;
+  meaning_reversed: string;
+  image_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TarotCardsResponse {
+  cards: TarotCard[];
+}
+
+/**
+ * タロットカード一覧を取得
+ */
+export async function getTarotCards(): Promise<TarotCardsResponse> {
+  return apiRequest<TarotCardsResponse>('/tarot/cards', {
+    requireAuth: false,
+  });
+}
+
+export interface DrawnCard {
+  card: TarotCard;
+  is_reversed: boolean;
+  position: number;
+}
+
+export interface TarotDrawResponse {
+  drawn_cards: DrawnCard[];
+  drawn_at: string;
+  message: string;
+}
+
+/**
+ * タロットカードを引く（認証必須）
+ * @param count 引くカードの枚数（デフォルト: 3）
+ * @param target 占う対象（'self' | 'partner'）
+ * @param mentalState 気分の状態（'sunny' | 'cloudy' | 'rainy' | 'very-rainy'）
+ */
+export async function drawTarotCards(
+  count: number = 3,
+  target?: 'self' | 'partner',
+  mentalState?: 'sunny' | 'cloudy' | 'rainy' | 'very-rainy'
+): Promise<TarotDrawResponse> {
+  const params = new URLSearchParams({ count: count.toString() });
+  if (target) params.append('target', target);
+  if (mentalState) params.append('mental_state', mentalState);
+  
+  return apiRequest<TarotDrawResponse>(`/tarot/draw?${params.toString()}`, {
+    method: 'POST',
+    requireAuth: true,
+  });
+}

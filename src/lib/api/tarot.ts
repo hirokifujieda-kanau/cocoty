@@ -27,6 +27,7 @@ export interface TarotReading {
   card_id: number;
   is_reversed: boolean;
   interpretation: string;
+  user_feeling?: 'good' | 'soso' | 'bad';
   user_comment?: string;
   created_at: string;
   updated_at: string;
@@ -39,6 +40,7 @@ export interface CreateTarotReadingParams {
   card_id: number;
   is_reversed: boolean;
   interpretation: string;
+  user_feeling?: 'good' | 'soso' | 'bad';
   user_comment?: string;
 }
 

@@ -17,8 +17,8 @@ import MandalaDisplay from '@/components/profile/MandalaDisplay';
 import { RpgDiagnosisModal } from '@/components/rpg/RpgDiagnosisModal';
 import { RpgDiagnosisCard } from '@/components/profile/RpgDiagnosisCard';
 import { TarotCard } from '@/components/profile/TarotCard';
-import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import CommonHeader from '@/components/layout/CommonHeader';
+import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
 import { getCurrentUser, getProfile, updateProfile, type Profile } from '@/lib/api/client';
 
@@ -33,15 +33,13 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   const [error, setError] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
-  const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   
   // propsからuserIdを取得、なければURLパラメータを確認
   const userIdFromUrl = searchParams.get('userId');
   const userId = userIdProp || userIdFromUrl;
   
-  // 自分のプロフィールかどうかを判定
-  // userId指定がないか、displayUserのIDが自分のプロフィールIDと一致する場合はオーナー
-  const isOwner = !userId || (!!displayUser && !!currentUserProfile && displayUser.id === currentUserProfile.id);
+  // URLパラメータがない場合は自分のプロフィール（オーナー）として扱う
+  const isOwner = !userId;
   
   // プロフィールデータを再取得する関数
   const refetchProfile = async () => {
@@ -54,16 +52,12 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       setLoading(true);
       setError(null);
 
-      // まず自分のプロフィールを取得
-      const currentUserResponse = await getCurrentUser();
-      if (currentUserResponse.profile) {
-        setCurrentUserProfile(currentUserResponse.profile);
-      }
-
-      if (!userId) {
-        // userIdが指定されていない場合は自分のプロフィールを表示
-        if (currentUserResponse.profile) {
-          setDisplayUser(currentUserResponse.profile);
+      if (isOwner) {
+        // 自分のプロフィールを取得
+        const response = await getCurrentUser();
+        
+        if (response.profile) {
+          setDisplayUser(response.profile);
           setIsFirstTimeUser(false);
         } else {
           // プロフィールがない場合、初回ユーザーとして扱い、ダミープロフィールを作成
@@ -96,7 +90,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           });
           setError(null);
         }
-      } else {
+      } else if (userId) {
         // 他のユーザーのプロフィールを取得
         const profile = await getProfile(Number(userId));
         setDisplayUser(profile);
@@ -134,24 +128,22 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         setLoading(true);
         setError(null);
 
-        // まず自分のプロフィールを取得（isOwner判定に必要）
-        const currentUserResponse = await getCurrentUser();
-        if (currentUserResponse.profile) {
-          setCurrentUserProfile(currentUserResponse.profile);
-        }
-
-        if (!userId) {
-          // userIdが指定されていない場合は自分のプロフィールを表示
-          if (currentUserResponse.profile) {
-            setDisplayUser(currentUserResponse.profile);
+        if (isOwner) {
+          // 自分のプロフィールを取得
+          
+          const response = await getCurrentUser();
+          
+          
+          if (response.profile) {
+            setDisplayUser(response.profile);
             setIsFirstTimeUser(false);
           } else {
             // プロフィールがない場合、初回ユーザーとして扱う
             setIsFirstTimeUser(true);
             setError(null);
           }
-        } else {
-          // userIdが指定されている場合は他のユーザーのプロフィールを取得
+        } else if (userId) {
+          // 他のユーザーのプロフィールを取得
           const profile = await getProfile(Number(userId));
           setDisplayUser(profile);
         }
@@ -184,14 +176,12 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     };
 
     fetchProfile();
-  }, [user, userId]);
+  }, [user, userId, isOwner]);
   
   // アバターアップロード処理
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user || !displayUser) {
-      return;
-    }
+    if (!file || !user || !displayUser) return;
 
     try {
       setUploadingAvatar(true);
@@ -211,9 +201,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       );
 
       if (!cloudinaryResponse.ok) {
-        const errorText = await cloudinaryResponse.text();
-        console.error('❌ Cloudinary upload failed:', errorText);
-        throw new Error(`Cloudinary upload failed: ${cloudinaryResponse.status}`);
+        throw new Error('Cloudinary upload failed');
       }
 
       const cloudinaryData = await cloudinaryResponse.json();
@@ -226,9 +214,8 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       await refetchProfile();
 
       alert('プロフィール画像を更新しました！');
-    } catch (error: any) {
-      console.error('❌ Avatar upload error:', error);
-      alert(`画像のアップロードに失敗しました: ${error.message || '不明なエラー'}`);
+    } catch {
+      alert('画像のアップロードに失敗しました');
     } finally {
       setUploadingAvatar(false);
     }
@@ -236,16 +223,35 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   
   const [activeTab, setActiveTab] = useState<'posts' | 'saved' | 'fortune'>('fortune');
   
+  // activeTab変更を監視
+  useEffect(() => {
+  }, [activeTab]);
+  
   // Fortune機能の状態
   const [showDailyTarot, setShowDailyTarot] = useState(false);
   const [showSeasonalDiagnosis, setShowSeasonalDiagnosis] = useState(false);
   const [showMentalStats, setShowMentalStats] = useState(false);
+  const [tarotDrawnToday, setTarotDrawnToday] = useState(false);
   
   // プロフィール機能の状態
   const [showSettings, setShowSettings] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showShareProfile, setShowShareProfile] = useState(false);
   const [showRpgDiagnosis, setShowRpgDiagnosis] = useState(false);
+  
+  // デバッグ用: showSettingsの変更を監視
+  useEffect(() => {
+  }, [showSettings]);
+  
+  // タロット占いの実施状況をlocalStorageから確認
+  useEffect(() => {
+    const checkTarotStatus = () => {
+      const lastDrawn = localStorage.getItem('tarot_last_drawn_date');
+      const today = new Date().toDateString();
+      setTarotDrawnToday(lastDrawn === today);
+    };
+    checkTarotStatus();
+  }, []);
   
   // 初回ユーザーの場合、自動的にプロフィール編集モーダルを開く
   useEffect(() => {
@@ -580,49 +586,31 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
               <div className="w-full flex flex-col items-center" style={{ gap: '56px' }}>
                 <div className="w-full flex justify-center" style={{ gap: 'clamp(16px, 4vw, 40px)' }}>
                   {/* タロット占い - 1日1回制限（0時リセット） */}
-                  {(() => {
-                    const lastDrawn = displayUser.tarot_last_drawn_at 
-                      ? new Date(displayUser.tarot_last_drawn_at) 
-                      : null;
-                    const today = new Date();
-                    const isDrawnToday = lastDrawn && 
-                      lastDrawn.getDate() === today.getDate() &&
-                      lastDrawn.getMonth() === today.getMonth() &&
-                      lastDrawn.getFullYear() === today.getFullYear();
-
-                    return (
-                      <div className="relative">
-                        <button
-                          onClick={async () => {
-                            // モーダルを開く前に最新のプロフィールを取得
-                            await refetchProfile();
-                            setShowDailyTarot(true);
-                          }}
-                          className={`transition-all transform rounded-xl overflow-hidden flex-shrink-0 ${
-                            isDrawnToday 
-                              ? 'opacity-90 cursor-pointer hover:opacity-100 hover:scale-105' 
-                              : 'hover:opacity-80 hover:scale-105'
-                          }`}
-                          style={{ 
-                            width: 'clamp(150px, 26vw, 200px)', 
-                            height: 'clamp(56px, 10vw, 75px)',
-                            boxSizing: 'border-box'
-                          }}
-                        >
-                          <img 
-                            src="/タロット占い.svg" 
-                            alt={isDrawnToday ? "今日の結果" : "今日のタロット占い"} 
-                            className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" 
-                          />
-                        </button>
-                        {isDrawnToday && (
-                          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
-                            本日完了
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
+                  <div className="relative">
+                    <button
+                      onClick={async () => {
+                        // モーダルを開く前に最新のプロフィールを取得
+                        await refetchProfile();
+                        setShowDailyTarot(true);
+                      }}
+                      className={`transition-all transform rounded-xl overflow-hidden flex-shrink-0 ${
+                        tarotDrawnToday 
+                          ? 'opacity-90 cursor-pointer hover:opacity-100 hover:scale-105' 
+                          : 'hover:opacity-80 hover:scale-105'
+                      }`}
+                      style={{ 
+                        width: 'clamp(150px, 26vw, 200px)', 
+                        height: 'clamp(56px, 10vw, 75px)',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <img 
+                        src={tarotDrawnToday ? "/タロット占い終わり.svg" : "/タロット占い.svg"}
+                        alt={tarotDrawnToday ? "今日の結果" : "今日のタロット占い"} 
+                        className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" 
+                      />
+                    </button>
+                  </div>
 
                   {/* RPG診断 - 1回のみ（完了後は結果のみ） */}
                   {(() => {
@@ -873,7 +861,9 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         <div className="border-t border-gray-200">
           <div className="flex">
             <button
-              onClick={() => setActiveTab('fortune')}
+              onClick={() => {
+                setActiveTab('fortune');
+              }}
               className={`flex-1 flex items-center justify-center gap-2 py-3 border-t-2 transition-colors ${
                 activeTab === 'fortune'
                   ? 'border-black text-black'
@@ -1188,14 +1178,23 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           isOpen={showDailyTarot}
           onClose={() => {
             setShowDailyTarot(false);
-            // タロット占い完了後、プロフィールを再取得
+            
+            // localStorageから今日の占い完了状態を確認
+            const today = new Date().toDateString();
+            const lastDrawnDate = localStorage.getItem('tarot_last_drawn_date');
+            const isDrawnToday = lastDrawnDate === today;
+            
+            setTarotDrawnToday(isDrawnToday);
+            
+            // プロフィールを再取得（バックエンドAPIとの同期用）
             setTimeout(() => {
               refetchProfile();
-            }, 500); // 少し遅延させてバックエンドの更新を待つ
+            }, 500);
           }}
           userId={displayUser.id.toString()}
           userName={displayUser.name}
           profile={displayUser}
+          isDrawnToday={tarotDrawnToday}
         />
       )}
       

@@ -18,6 +18,9 @@ export default {
         'noto-sans-jp': ['var(--font-noto-sans-jp)', 'Noto Sans JP', 'sans-serif'],
         'inter-sans': ['var(--font-inter)', 'Inter', 'sans-serif'],
       },
+      fontWeight: {
+        demilight: '350',
+      },
     },
   },
   plugins: [
