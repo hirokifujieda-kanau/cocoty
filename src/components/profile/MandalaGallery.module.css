@@ -1,0 +1,9 @@
+.mandalaContainer {
+  width: 343px;
+}
+
+@media (min-width: 750px) {
+  .mandalaContainer {
+    width: 472px;
+  }
+}

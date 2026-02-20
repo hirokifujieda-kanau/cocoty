@@ -21,6 +21,9 @@ export default {
       fontWeight: {
         demilight: '350',
       },
+      screens: {
+        'pc': '750px',
+      },
     },
   },
   plugins: [

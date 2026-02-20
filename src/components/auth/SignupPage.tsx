@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/api/client';
 import styles from './SignupPage.module.css';
@@ -220,7 +221,13 @@ const SignupPage: React.FC = () => {
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
       <div className="sticky top-0 bg-white py-8 px-4">
-        <div className="flex items-center justify-center gap-4 relative">
+        <div className="flex items-center justify-center gap-4 relative page-container">
+          <button
+            onClick={() => router.push('/login')}
+            className="absolute left-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <ChevronLeft className="h-6 w-6 text-gray-900" />
+          </button>
           <h1
             className="font-noto-sans-jp font-bold text-[20px] leading-[20px] text-center align-middle text-[#1A1A1A]"
           >
@@ -231,14 +238,14 @@ const SignupPage: React.FC = () => {
 
       {/* Form Container */}
       <div className="flex-1 overflow-y-auto px-[37.5px]">
-        <div className="max-w-md mx-auto">
+        <div className="page-container">
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className={styles.signupForm}>
             {/* Name */}
             <div>
               <label
@@ -457,7 +464,7 @@ const SignupPage: React.FC = () => {
             <button
               type="submit"
               disabled={!isFormValid || isLoading}
-              className={`w-[calc(100%-161px)] ml-[80.5px] mr-[80.5px] gap-2 rounded-[12px] border-none mt-[32px] font-inter-sans font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300`}
+              className={`w-[140px] mx-auto gap-2 rounded-[12px] border-none mt-[32px] font-inter-sans font-medium text-[16px] leading-[150%] min-h-[48px] flex items-center justify-center transition-colors duration-300`}
               style={{
                 backgroundColor: isFormValid ? '#FFBA48' : '#F8E8AA',
                 cursor: isFormValid ? 'pointer' : 'not-allowed',

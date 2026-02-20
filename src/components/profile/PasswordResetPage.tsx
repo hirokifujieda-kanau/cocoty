@@ -51,7 +51,7 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ isOpen, onClose, 
     <div className="fixed inset-0 bg-black/40 z-50 flex flex-col h-screen max-h-screen overflow-hidden">
       {/* Top Header */}
       <div className="sticky top-0 border-b border-gray-200 z-50 bg-[#FFD26A]">
-        <div className="mx-auto h-[30px] flex items-center px-[clamp(26px,8vw,106px)]" style={{ maxWidth: '750px' }}>
+        <div className="mx-auto h-[30px] flex items-center px-[clamp(26px,8vw,55px)]" style={{ maxWidth: '750px' }}>
           <div className="flex items-center justify-between w-full">
             <h1 className="text-white text-[16px] leading-[100%] align-middle font-medium" style={{ fontFamily: '"Noto Sans JP"' }}>ここてぃ</h1>
             <div className="flex gap-2 items-center">
