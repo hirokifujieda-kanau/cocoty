@@ -48,20 +48,14 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     }
 
     try {
-      console.log('🔄 [InstagramProfilePage] refetchProfile called');
       setLoading(true);
       setError(null);
 
       if (isOwner) {
         // 自分のプロフィールを取得
         const response = await getCurrentUser();
-        console.log('📥 [InstagramProfilePage] API Response:', response);
         
         if (response.profile) {
-          console.log('📋 [InstagramProfilePage] Profile data:', {
-            rpg_diagnosis_completed_at: response.profile.rpg_diagnosis_completed_at,
-            tarot_last_drawn_at: response.profile.tarot_last_drawn_at,
-          });
           setDisplayUser(response.profile);
           setIsFirstTimeUser(false);
         } else {
@@ -121,19 +115,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
     }
   };
   
-  // displayUserの変更を監視してログ出力
-  useEffect(() => {
-    if (displayUser) {
-      console.log('🎨 [InstagramProfilePage] displayUser updated:', {
-        name: displayUser.name,
-        tarot_last_drawn_at: displayUser.tarot_last_drawn_at,
-        rpg_diagnosis_completed_at: displayUser.rpg_diagnosis_completed_at,
-        mandala_thumbnail_url: displayUser.mandala_thumbnail_url,
-        mandala_detail_url: displayUser.mandala_detail_url,
-      });
-    }
-  }, [displayUser]);
-  
   // プロフィールデータ取得
   useEffect(() => {
     const fetchProfile = async () => {
@@ -148,25 +129,15 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
         if (isOwner) {
           // 自分のプロフィールを取得
-          console.log('🔍 プロフィール取得開始...');
-          console.log('🔍 user:', user);
-          console.log('🔍 user.uid:', user?.uid);
-          console.log('🔍 user.email:', user?.email);
           
           const response = await getCurrentUser();
           
-          console.log('✅ getCurrentUser() レスポンス:', response);
-          console.log('✅ response.user:', response.user);
-          console.log('✅ response.profile:', response.profile);
-          console.log('✅ レスポンス全体 (JSON):', JSON.stringify(response, null, 2));
           
           if (response.profile) {
             setDisplayUser(response.profile);
             setIsFirstTimeUser(false);
-            console.log('✅ プロフィール設定完了');
           } else {
             // プロフィールがない場合、初回ユーザーとして扱う
-            console.log('⚠️ プロフィールが見つかりません。初回ユーザーとして扱います。');
             setIsFirstTimeUser(true);
             setError(null);
           }
@@ -246,7 +217,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   
   // activeTab変更を監視
   useEffect(() => {
-    console.log('🎯 [InstagramProfilePage] activeTab changed:', activeTab);
   }, [activeTab]);
   
   // Fortune機能の状態
@@ -263,7 +233,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
   
   // デバッグ用: showSettingsの変更を監視
   useEffect(() => {
-    console.log('🔍 showSettings が変更されました:', showSettings);
   }, [showSettings]);
   
   // タロット占いの実施状況をlocalStorageから確認
@@ -911,7 +880,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
           <div className="flex">
             <button
               onClick={() => {
-                console.log('🔘 [InstagramProfilePage] 占い・診断タブクリック');
                 setActiveTab('fortune');
               }}
               className={`flex-1 flex items-center justify-center gap-2 py-3 border-t-2 transition-colors ${
@@ -1227,7 +1195,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         <DailyTarot 
           isOpen={showDailyTarot}
           onClose={() => {
-            console.log('🔒 [InstagramProfilePage] DailyTarot closed');
             setShowDailyTarot(false);
             
             // localStorageから今日の占い完了状態を確認
@@ -1235,7 +1202,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             const lastDrawnDate = localStorage.getItem('tarot_last_drawn_date');
             const isDrawnToday = lastDrawnDate === today;
             
-            console.log('📅 [InstagramProfilePage] onClose - lastDrawnDate:', lastDrawnDate, 'today:', today, 'isDrawnToday:', isDrawnToday);
             setTarotDrawnToday(isDrawnToday);
             
             // プロフィールを再取得（バックエンドAPIとの同期用）
@@ -1288,7 +1254,6 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       <RpgDiagnosisModal
         isOpen={showRpgDiagnosis}
         onClose={() => {
-          console.log('🔒 [InstagramProfilePage] RpgDiagnosis closed, refetching profile...');
           setShowRpgDiagnosis(false);
           // 診断完了後、プロフィールを再取得
           setTimeout(() => {

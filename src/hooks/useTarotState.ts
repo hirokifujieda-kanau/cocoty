@@ -63,12 +63,9 @@ export const useTarotState = ({
 
   // 初期化時に今日既に占いを実施済みの場合、今日の結果を表示
   useEffect(() => {
-    console.log('🔍 [useTarotState] useEffect triggered - isOpen:', isOpen, 'isDrawnToday:', isDrawnToday);
     if (isOpen && isDrawnToday) {
       const todayReading = getTodayReading();
-      console.log('📖 [useTarotState] getTodayReading result:', todayReading);
       if (todayReading) {
-        console.log('✅ [useTarotState] 今日の結果を復元します');
         const restoredState = {
           ...todayReading.tarotState,
           step: 'result' as const,
@@ -78,16 +75,9 @@ export const useTarotState = ({
         setSavedFeeling(todayReading.savedFeeling);
         setSavedComment(todayReading.savedComment);
         setShowResultConfirmation(true);
-        console.log('📺 [useTarotState] Restored state:', {
-          step: restoredState.step,
-          showResultConfirmation: true,
-          hasDrawnCard: !!restoredState.drawnCard,
-        });
       } else {
-        console.log('⚠️ [useTarotState] 今日の結果が見つかりませんでした');
       }
     } else if (isOpen && !isDrawnToday) {
-      console.log('🆕 [useTarotState] 新規占いを開始');
       resetState();
     }
   }, [isOpen, isDrawnToday]);
@@ -200,7 +190,6 @@ export const useTarotState = ({
   };
 
   const handleSaveData = (feeling: 'good' | 'soso' | 'bad' | null, comment: string) => {
-    console.log('💾 [useTarotState] onSaveData called - feeling:', feeling, 'comment:', comment);
     setSavedFeeling(feeling);
     setSavedComment(comment);
     const dataToSave = {
@@ -209,9 +198,7 @@ export const useTarotState = ({
       savedFeeling: feeling,
       savedComment: comment,
     };
-    console.log('💾 [useTarotState] Saving to localStorage:', dataToSave);
     saveTodayReading(dataToSave);
-    console.log('✅ [useTarotState] Saved to localStorage');
   };
 
   return {

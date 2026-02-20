@@ -150,7 +150,6 @@ const DailyTarot: React.FC<DailyTarotProps> = ({
               <CommentStep
                 comment={tarotState.userComment}
                 onChange={(comment) => {
-                  console.log('Comment changed:', comment);
                 }}
                 onSave={handleComplete}
                 onBack={handleBack}
