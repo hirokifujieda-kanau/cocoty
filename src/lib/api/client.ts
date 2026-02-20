@@ -56,6 +56,16 @@ async function getHeaders(requireAuth: boolean = false): Promise<HeadersInit> {
 }
 
 /**
+ * カスタムAPIエラー（ステータスコードを保持）
+ */
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+/**
  * APIリクエストのラッパー
  */
 export async function apiRequest<T>(
@@ -79,7 +89,7 @@ export async function apiRequest<T>(
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
       console.error(`❌ [API] Error ${response.status}:`, errorData);
-      throw new Error(errorData?.error || `HTTP error! status: ${response.status}`);
+      throw new ApiError(response.status, errorData?.error || `HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
@@ -104,6 +114,7 @@ export interface User {
   id: number;
   email: string;
   firebase_uid: string;
+  admin?: boolean; // 管理者フラグ
   created_at: string;
 }
 
@@ -539,6 +550,46 @@ export async function drawTarotCards(
   
   return apiRequest<TarotDrawResponse>(`/tarot/draw?${params.toString()}`, {
     method: 'POST',
+    requireAuth: true,
+  });
+}
+
+// ========================================
+// Admin API
+// ========================================
+
+export interface AdminUser {
+  id: number;
+  email: string;
+  admin: boolean;
+  firebase_uid: string;
+  created_at: string;
+  profile: {
+    id: number;
+    nickname: string;
+    avatar_url?: string;
+  } | null;
+}
+
+export interface AdminUsersResponse {
+  users: AdminUser[];
+}
+
+/**
+ * 全ユーザー一覧を取得（管理者専用）
+ */
+export async function getUsers(): Promise<AdminUsersResponse> {
+  return apiRequest<AdminUsersResponse>('/users', {
+    requireAuth: true,
+  });
+}
+
+/**
+ * ユーザーを削除（管理者専用）
+ */
+export async function deleteUser(userId: number): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>(`/users/${userId}`, {
+    method: 'DELETE',
     requireAuth: true,
   });
 }

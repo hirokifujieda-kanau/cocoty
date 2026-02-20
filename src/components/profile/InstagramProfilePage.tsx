@@ -20,7 +20,7 @@ import { TarotCard } from '@/components/profile/TarotCard';
 import AvatarUploadModal from '@/components/profile/AvatarUploadModal';
 import { getUserTasks, getTaskStats } from '@/lib/mock/mockLearningTasks';
 import { getUserCourseProgress } from '@/lib/mock/mockLearningCourses';
-import { getCurrentUser, getProfile, updateProfile, type Profile } from '@/lib/api/client';
+import { getCurrentUser, getProfile, updateProfile, type Profile, ApiError } from '@/lib/api/client';
 
 const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdProp }) => {
   const { user, signOut } = useAuth();
@@ -106,15 +106,14 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
       // デバッグ用：エラーの詳細をコンソールに出力
       console.error('❌ プロフィール取得エラー:', err);
       console.error('❌ エラーメッセージ:', err.message);
-      console.error('❌ エラー全体:', JSON.stringify(err, null, 2));
+      console.error('❌ エラー型:', err.constructor.name);
+      if (err instanceof ApiError) {
+        console.error('❌ HTTPステータス:', err.status);
+      }
       
-      // ユーザーに分かりやすいエラーメッセージを表示
+      // エラーメッセージを表示
       if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
         setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
-      } else if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
-        setError('認証エラー: ログインし直してください');
-      } else if (err.message?.includes('404')) {
-        setError('プロフィールが見つかりません');
       } else {
         setError(`プロフィールの読み込みに失敗しました: ${err.message || '不明なエラー'}`);
       }
@@ -181,15 +180,14 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
         // デバッグ用：エラーの詳細をコンソールに出力
         console.error('❌ プロフィール取得エラー (useEffect):', err);
         console.error('❌ エラーメッセージ:', err.message);
-        console.error('❌ エラー全体:', JSON.stringify(err, null, 2));
+        console.error('❌ エラー型:', err.constructor.name);
+        if (err instanceof ApiError) {
+          console.error('❌ HTTPステータス:', err.status);
+        }
         
-        // ユーザーに分かりやすいエラーメッセージを表示
+        // エラーメッセージを表示
         if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
           setError('Rails APIサーバーに接続できません。http://localhost:5000 が起動しているか確認してください。');
-        } else if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
-          setError('認証エラー: ログインし直してください');
-        } else if (err.message?.includes('404')) {
-          setError('プロフィールが見つかりません');
         } else {
           setError(`プロフィールの読み込みに失敗しました: ${err.message || '不明なエラー'}`);
         }
@@ -349,16 +347,39 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
   // エラー状態（初回ユーザー以外）
   if (error && !isFirstTimeUser && !displayUser) {
+    const handleLogout = async () => {
+      try {
+        await signOut();
+        router.push('/login');
+      } catch (err) {
+        console.error('ログアウトエラー:', err);
+        // エラーが発生してもログイン画面に遷移
+        router.push('/login');
+      }
+    };
+
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={() => router.back()}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-          >
-            戻る
-          </button>
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="mb-6">
+            <p className="text-red-600 text-lg font-semibold mb-2">エラーが発生しました</p>
+            <p className="text-gray-700 mb-4">{error}</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleLogout}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold flex items-center justify-center gap-2"
+            >
+              <LogOut className="w-5 h-5" />
+              ログアウト
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold"
+            >
+              ホームに戻る
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -366,16 +387,37 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
 
   // displayUserがnullの場合（通常ありえないが念のため）
   if (!displayUser) {
+    const handleLogout = async () => {
+      try {
+        await signOut();
+        router.push('/login');
+      } catch (err) {
+        console.error('ログアウトエラー:', err);
+        router.push('/login');
+      }
+    };
+
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">プロフィールデータの読み込みに失敗しました</p>
-          <button
-            onClick={() => router.back()}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-          >
-            戻る
-          </button>
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="mb-6">
+            <p className="text-red-600 text-lg font-semibold mb-2">プロフィールデータの読み込みに失敗しました</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleLogout}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold flex items-center justify-center gap-2"
+            >
+              <LogOut className="w-5 h-5" />
+              ログアウト
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold"
+            >
+              ホームに戻る
+            </button>
+          </div>
         </div>
       </div>
     );
