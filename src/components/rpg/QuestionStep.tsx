@@ -66,7 +66,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
                 className="w-40 h-40 lg:w-48 lg:h-48 object-contain flex-shrink-0"
               />
             )}
-            <h3 className="text-2xl text-white whitespace-nowrap font-noto-sans-jp font-medium">
+            <h3 className="text-2xl text-white whitespace-nowrap font-noto-sans-jp font-bold">
               {questionText}
             </h3>
           </div>
@@ -81,10 +81,10 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
             {/* スケールラベル（数字） - ボタンと同じ幅のコンテナに配置 */}
             <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 18)' }}>
               {/* PC時: 左スペーサー（左ラベルと同じ幅） */}
-              <span className="hidden md:block text-xs flex-shrink-0 opacity-0">{labels[0]}</span>
+              <span className="hidden md:block text-2xl flex-shrink-0 opacity-0 font-noto-sans-jp font-light">{labels[0]}</span>
               
               {/* 数字 */}
-              <div className="flex justify-center items-center text-xs text-white" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 11), calc(var(--spacing) * 12))' }}>
+              <div className="flex justify-center items-center text-base text-white" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 15), calc(var(--spacing) * 16))' }}>
                 {scores.map((score) => (
                   <span key={score} className="w-6 text-center flex items-center justify-center h-6">
                     {score}
@@ -93,7 +93,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
               </div>
               
               {/* PC時: 右スペーサー（右ラベルと同じ幅） */}
-              <span className="hidden md:block text-xs flex-shrink-0 opacity-0">{labels[4]}</span>
+              <span className="hidden md:block text-2xl flex-shrink-0 opacity-0 font-noto-sans-jp font-light">{labels[4]}</span>
             </div>
 
             {/* ボタンと左右ラベル（PC時） */}
@@ -102,7 +102,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
               <span className="hidden md:block text-2xl text-white flex-shrink-0 font-noto-sans-jp font-light">{labels[0]}</span>
 
               {/* ボタン */}
-              <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 11), calc(var(--spacing) * 12))' }}>
+              <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 15), calc(var(--spacing) * 16))' }}>
                 {scores.map((score) => (
                   <button
                     key={score}
