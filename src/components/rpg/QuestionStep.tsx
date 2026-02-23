@@ -49,35 +49,31 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
     <div className="space-y-0">
       {/* 質問番号表示（上部） */}
       <div className="text-center mb-8">
-        <p className="text-sm font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
+        <p className="text-base font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
           質問{formatQuestionNumber(questionNumber)}
         </p>
       </div>
 
-      {/* 質問セクション全体（背景色付き） */}
-      <div className="w-full max-w-3xl mx-auto" style={{ backgroundColor: '#52333f' }}>
+      {/* 質問セクション全体（背景色付き） - 固定幅 */}
+      <div className="w-full mx-auto" style={{ backgroundColor: '#52333f', maxWidth: '1050px' }}>
         {/* 質問文 */}
-        <div className="text-center pt-12 pb-6 px-6">
-          <div className="flex items-center justify-center w-full" style={{ gap: 'calc(var(--spacing) * 4)', paddingInline: 'calc(var(--spacing) * 24)' }}>
+        <div className="text-center px-6" style={{ paddingTop: '80px', paddingBottom: '40px' }}>
+          <div className="flex items-center justify-center w-full" style={{ gap: 'calc(var(--spacing) * 8)' }}>
             {getQuestionImagePath(questionNumber) && (
               <img 
                 src={getQuestionImagePath(questionNumber)!} 
                 alt={`質問${questionNumber}アイコン`} 
-                className="w-24 h-24 lg:w-32 lg:h-32 object-contain flex-shrink-0"
+                className="w-40 h-40 lg:w-48 lg:h-48 object-contain flex-shrink-0"
               />
             )}
-            <h3 className="text-lg text-white flex-1 whitespace-nowrap font-noto-sans-jp font-medium">
+            <h3 className="text-2xl text-white whitespace-nowrap font-noto-sans-jp font-medium">
               {questionText}
             </h3>
-            {/* 右側のスペーサー（画像と同じサイズ） */}
-            {getQuestionImagePath(questionNumber) && (
-              <div className="w-24 h-24 lg:w-32 lg:h-32 flex-shrink-0 opacity-0" aria-hidden="true"></div>
-            )}
           </div>
         </div>
 
         {/* 回答選択肢 */}
-        <div className="space-y-4 pb-6 w-full px-8">
+        <div className="w-full px-8" style={{ paddingBottom: '60px' }}>
         {/* ボタンとラベル */}
         <div className="flex flex-col gap-4">
           {/* 中央: 数字とボタン */}
@@ -90,7 +86,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
               {/* 数字 */}
               <div className="flex justify-center items-center text-xs text-white" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 11), calc(var(--spacing) * 12))' }}>
                 {scores.map((score) => (
-                  <span key={score} className="w-6 text-center">
+                  <span key={score} className="w-6 text-center flex items-center justify-center h-6">
                     {score}
                   </span>
                 ))}
@@ -103,7 +99,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
             {/* ボタンと左右ラベル（PC時） */}
             <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 18)' }}>
               {/* PC時: 左ラベル */}
-              <span className="hidden md:block text-sm text-white flex-shrink-0 font-noto-sans-jp font-light">{labels[0]}</span>
+              <span className="hidden md:block text-2xl text-white flex-shrink-0 font-noto-sans-jp font-light">{labels[0]}</span>
 
               {/* ボタン */}
               <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(1rem, calc(var(--spacing) * 11), calc(var(--spacing) * 12))' }}>
@@ -139,13 +135,13 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
               </div>
 
               {/* PC時: 右ラベル */}
-              <span className="hidden md:block text-sm text-white flex-shrink-0 font-noto-sans-jp font-light">{labels[4]}</span>
+              <span className="hidden md:block text-2xl text-white flex-shrink-0 font-noto-sans-jp font-light">{labels[4]}</span>
             </div>
           </div>
         </div>
 
         {/* SP時: テキストラベル */}
-        <div className="flex md:hidden justify-between text-sm text-white font-noto-sans-jp font-light">
+        <div className="flex md:hidden justify-between text-xl text-white font-noto-sans-jp font-light">
           <span>{labels[0]}</span>
           <span>{labels[4]}</span>
         </div>
@@ -154,7 +150,7 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       </div>
 
       {/* ナビゲーションボタン */}
-      <div className="flex justify-center pt-8" style={{ gap: 'calc(var(--spacing) * 33)' }}>
+      <div className="flex justify-center pt-8" style={{ gap: 'calc(var(--spacing) * 70)' }}>
         <button
           onClick={() => {
             playClickSound();
@@ -213,8 +209,8 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
       </div>
 
       {/* 質問番号表示 */}
-      <div className="text-center pt-4">
-        <p className="text-black text-sm">
+      <div className="text-center pt-8">
+        <p className="text-lg font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
           {formatQuestionNumber(questionNumber)}/{formatQuestionNumber(totalQuestions)}
         </p>
       </div>

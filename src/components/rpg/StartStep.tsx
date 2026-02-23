@@ -14,7 +14,7 @@ export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack, isSoundOn
   return (
     <div className="mx-auto p-8">
       <div className="mx-auto flex justify-center min-h-full pt-20 pb-8">
-      <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-[176px] px-4 font-noto-sans-jp">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-[120px] px-4 font-noto-sans-jp">
         <img 
           src="/rpg-images/TOP.png" 
           alt="RPG診断" 
@@ -22,10 +22,10 @@ export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack, isSoundOn
         />
         
         <div className="flex flex-col space-y-6 lg:space-y-0 lg:h-[500px] lg:justify-between w-full max-w-sm lg:max-w-md mt-8 lg:mt-0">
-          <div className="space-y-6 lg:mt-40">
+          <div className="space-y-16 lg:mt-32">
             {/* タイトル */}
             <div className="text-center">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
                 さぁ！あなたの適性を<br />
                 診断してみましょう！
               </h2>
@@ -35,7 +35,7 @@ export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack, isSoundOn
             </div>
             
             {/* ボタン */}
-            <div className="flex gap-4 justify-center">
+            <div className="flex justify-center" style={{ gap: 'calc(var(--spacing) * 30)' }}>
               <button
                 onClick={() => {
                   playClickSound();
@@ -80,7 +80,7 @@ export const StartStep: React.FC<StartStepProps> = ({ onStart, onBack, isSoundOn
           </div>
 
           {/* 注意書き */}
-          <div className="text-center text-xs lg:text-sm font-noto-sans-jp font-light space-y-1 mt-52" style={{ color: '#7d7d7d' }}>
+          <div className="text-center text-xs lg:text-sm font-noto-sans-jp font-light space-y-1" style={{ color: '#7d7d7d', marginTop: 'calc(var(--spacing) * 50)' }}>
             <p>※この診断は一度しか行えません。</p>
             <p>やり直しが必要な場合は、こちらから管理者承認が必要となります</p>
           </div>

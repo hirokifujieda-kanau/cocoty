@@ -4,6 +4,8 @@
  * 仕様書: /docs/rpg-diagnosis-specification.md
  */
 
+import { RPG_QUESTIONS, type RpgQuestion } from './constants';
+
 export type FactorType = 'fencer' | 'healer' | 'schemer' | 'gunner' | 'shielder';
 
 export interface RpgAnswer {
@@ -37,13 +39,24 @@ export const calculateFactorScores = (answers: RpgAnswer[]): FactorScores => {
     answerMap.set(answer.questionId, answer.score);
   });
 
-  const fencer = (answerMap.get(1) || 0) + (answerMap.get(6) || 0);
-  const healer = (answerMap.get(2) || 0) + reverseScore(answerMap.get(7) || 3) + (answerMap.get(12) || 0);
-  const schemer = (answerMap.get(3) || 0) + (answerMap.get(8) || 0) + (answerMap.get(11) || 0);
-  const gunner = (answerMap.get(4) || 0) + reverseScore(answerMap.get(9) || 3);
-  const shielder = (answerMap.get(5) || 0) + (answerMap.get(10) || 0);
+  // 質問データから各因子のスコアを計算
+  const scores: FactorScores = {
+    fencer: 0,
+    healer: 0,
+    schemer: 0,
+    gunner: 0,
+    shielder: 0,
+  };
 
-  return { fencer, healer, schemer, gunner, shielder };
+  RPG_QUESTIONS.forEach(question => {
+    const answer = answerMap.get(question.id);
+    if (answer !== undefined && question.factor !== 'other') {
+      const score = question.isReversed ? reverseScore(answer) : answer;
+      scores[question.factor] += score;
+    }
+  });
+
+  return scores;
 };
 
 export const calculateInstinctLevel = (factorScore: number, factorType: FactorType = 'fencer'): number => {
