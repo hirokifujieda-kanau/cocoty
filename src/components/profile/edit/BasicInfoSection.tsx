@@ -77,7 +77,7 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
         </div>
       </div>
 
-      {/* 血液型入力フィールド */}
+      {/* 血液型選択フィールド */}
       <div className="flex items-center justify-between py-3 border-b border-gray-200">
         <span className="font-inter font-medium text-sm leading-[130%] text-[#1A1A1A]">
           血液型
@@ -87,20 +87,23 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
             name="bloodType"
             control={control}
             render={({ field }) => (
-              <input
+              <select
                 {...field}
-                type="text"
-                className="text-sm text-gray-600 text-right border-none focus:outline-none bg-transparent w-20"
-                placeholder="A"
-                maxLength={2}
-              />
+                className="text-sm text-gray-600 text-right border-none focus:outline-none bg-transparent cursor-pointer appearance-none"
+              >
+                <option value="">選択してください</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="O">O</option>
+                <option value="AB">AB</option>
+              </select>
             )}
           />
           <span className="text-[#828282]">&gt;</span>
         </div>
       </div>
 
-      {/* MBTI診断結果入力フィールド */}
+      {/* MBTI診断結果選択フィールド */}
       <div className="flex items-center justify-between py-3 border-b border-gray-200">
         <span className="font-inter font-medium text-sm leading-[130%] text-[#1A1A1A]">
           MBTI
@@ -110,14 +113,28 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
             name="mbtiType"
             control={control}
             render={({ field }) => (
-              <input
+              <select
                 {...field}
-                type="text"
-                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                className="text-sm text-gray-600 text-right border-none focus:outline-none bg-transparent w-24"
-                placeholder="ENTP"
-                maxLength={4}
-              />
+                className="text-sm text-gray-600 text-right border-none focus:outline-none bg-transparent cursor-pointer appearance-none"
+              >
+                <option value="">選択してください</option>
+                <option value="INTJ">INTJ</option>
+                <option value="INTP">INTP</option>
+                <option value="ENTJ">ENTJ</option>
+                <option value="ENTP">ENTP</option>
+                <option value="INFJ">INFJ</option>
+                <option value="INFP">INFP</option>
+                <option value="ENFJ">ENFJ</option>
+                <option value="ENFP">ENFP</option>
+                <option value="ISTJ">ISTJ</option>
+                <option value="ISFJ">ISFJ</option>
+                <option value="ESTJ">ESTJ</option>
+                <option value="ESFJ">ESFJ</option>
+                <option value="ISTP">ISTP</option>
+                <option value="ISFP">ISFP</option>
+                <option value="ESTP">ESTP</option>
+                <option value="ESFP">ESFP</option>
+              </select>
             )}
           />
           <span className="text-[#828282]">&gt;</span>
