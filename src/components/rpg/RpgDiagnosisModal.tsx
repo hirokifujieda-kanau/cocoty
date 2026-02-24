@@ -100,7 +100,6 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
 
   // 質問データをフロントエンドから取得
   useEffect(() => {
-    console.log('🎯 [RpgDiagnosis] useEffect triggered, isOpen:', isOpen, 'questions.length:', questions.length);
     if (isOpen && !isCompleted) {
       // 未完了の場合はスタート画面から開始
       loadQuestions();
@@ -120,7 +119,6 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     } else if (!isOpen) {
       // モーダルが閉じられたときは、完了済みでない場合のみリセット
       if (!isCompleted) {
-        console.log('🔒 [RpgDiagnosis] Modal closed, resetting state but keeping questions');
         setShowResult(false);
         setShowStart(true);
         setShowGenderSelect(false);
@@ -155,15 +153,12 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   }, [isOpen, isCompleted]);
 
   const loadQuestions = async () => {
-    console.log('🔍 [RpgDiagnosis] Loading questions from frontend...');
     setIsLoading(true);
     setError(null);
     try {
       // フロントエンドの定数から質問を取得（APIリクエスト不要）
       const { RPG_QUESTIONS } = await import('@/lib/rpg/constants');
-      console.log('✅ [RpgDiagnosis] Questions loaded:', RPG_QUESTIONS.length);
       setQuestions(RPG_QUESTIONS);
-      console.log('✅ [RpgDiagnosis] Questions set:', RPG_QUESTIONS.length);
     } catch (err) {
       console.error('❌ [RpgDiagnosis] Failed to load RPG questions:', err);
       setError('質問の読み込みに失敗しました。');
