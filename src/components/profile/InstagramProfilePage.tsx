@@ -731,7 +731,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                     );
                   })()}
 
-                  {/* RPG診断 - 1回のみ（完了後は結果のみ） */}
+                  {/* RPG診断 - 1回のみ（完了後は結果表示） */}
                   {(() => {
                     const isCompleted = !!displayUser.rpg_diagnosis_completed_at;
 
@@ -739,11 +739,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                       <div className="relative">
                         <button
                           onClick={() => setShowRpgDiagnosis(true)}
-                          className={`transition-all transform rounded-xl overflow-hidden ${
-                            isCompleted 
-                              ? 'opacity-60 cursor-default' 
-                              : 'hover:opacity-80 hover:scale-105'
-                          }`}
+                          className="transition-all transform rounded-xl overflow-hidden hover:opacity-80 hover:scale-105"
                           style={{ 
                             width: 'clamp(150px, 26vw, 200px)', 
                             height: 'clamp(56px, 10vw, 75px)',
@@ -753,7 +749,7 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
                         >
                           <img 
                             src="/診断.svg" 
-                            alt={isCompleted ? "診断結果" : "RPG診断"} 
+                            alt={isCompleted ? "診断結果を見る" : "RPG診断"} 
                             className="w-full h-full shadow-lg hover:shadow-xl rounded-xl object-cover" 
                           />
                         </button>

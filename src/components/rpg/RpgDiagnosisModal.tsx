@@ -70,13 +70,13 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     if (!bgmRef.current) {
       bgmRef.current = new Audio('/rpg-characters/質問中のBGM.mp3');
       bgmRef.current.loop = true;
-      bgmRef.current.volume = 0.5;
+      bgmRef.current.volume = 0.2; // 0.5 → 0.2に音量を下げる
     }
 
     // 効果音の作成
     if (!clickSoundRef.current) {
       clickSoundRef.current = new Audio('/rpg-characters/ボタンクリック音.mp3');
-      clickSoundRef.current.volume = 0.7;
+      clickSoundRef.current.volume = 0.4; // 0.7 → 0.4に音量を下げる
     }
 
     // BGMの再生/停止（性別選択画面または質問画面の場合のみ）
@@ -143,6 +143,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   useEffect(() => {
     if (isOpen && !isCompleted && videoRef.current) {
       videoRef.current.load();
+      videoRef.current.volume = 0.3; // 動画の音量を30%に設定
       
       // 動画の読み込み完了を検知
       const handleCanPlay = () => {
@@ -262,6 +263,9 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       // 診断結果へボタン音を再生
       playSound('/rpg-characters/診断結果へボタン音.mp3');
       
+      // 性別画面を即座に非表示にしてチラつき防止
+      setHideQuestion(true);
+      
       setShowWhiteOverlay(true);
       
       // 少し遅らせてopacityを1にする
@@ -272,11 +276,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         }
       }, 50);
       
-      // ホワイトアウト完了まで待ってから動画再生
+      // ホワイトアウト完了まで待ってから動画再生（1500ms → 800msに短縮）
       setTimeout(() => {
-        // ホワイトアウト完了後に質問画面を非表示
-        setHideQuestion(true);
-        
         // 完全に白くなったら動画再生開始
         setShowVideo(true);
         
@@ -290,9 +291,9 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         
         setTimeout(() => {
           if (videoRef.current) {
-            // 動画の終了少し前に音声を再生
+            // 動画の終了3秒前に音声を再生
             videoRef.current.addEventListener('timeupdate', function checkTime() {
-              if (videoRef.current && videoRef.current.duration - videoRef.current.currentTime < 1.0) {
+              if (videoRef.current && videoRef.current.duration - videoRef.current.currentTime < 3.0) {
                 playSound('/rpg-characters/演出から診断結果表示.mp3');
                 videoRef.current.removeEventListener('timeupdate', checkTime);
               }
@@ -306,42 +307,14 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
             });
           }
         }, 100);
-      }, 1500);
+      }, 800);
     }
   };
 
   // 動画再生終了時
   const handleVideoEnd = () => {
     setShowVideo(false);
-    // 再度白い画面を表示
-    setShowWhiteOverlay(true);
-    
-    // 白い画面を一瞬表示してからフェードイン開始
-    setTimeout(() => {
-      // 白いオーバーレイをopacity: 1にする
-      const overlay = document.getElementById('white-overlay');
-      if (overlay) {
-        overlay.style.opacity = '1';
-      }
-    }, 50);
-    
-    setTimeout(() => {
-      // 白いオーバーレイをフェードアウト開始
-      const overlay = document.getElementById('white-overlay');
-      if (overlay) {
-        overlay.style.opacity = '0';
-      }
-      
-      // フェードアウト開始と同時に結果を表示開始
-      setTimeout(() => {
-        setShowResult(true);
-      }, 100);
-      
-      // フェードアウト完了後、オーバーレイを完全に削除
-      setTimeout(() => {
-        setShowWhiteOverlay(false);
-      }, 2000); // 1000ms → 2000ms にしてゆっくりに
-    }, 1000); // 500ms → 1000ms にしてゆっくりに
+    setShowResult(true);
   };
 
   // 戻る
@@ -419,18 +392,6 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
             onEnded={handleVideoEnd}
           />
         </div>
-      )}
-
-      {/* ホワイトアウトオーバーレイ */}
-      {showWhiteOverlay && (
-        <div
-          id="white-overlay"
-          className="fixed inset-0 bg-white transition-opacity duration-1000"
-          style={{ 
-            zIndex: showVideo ? 10002 : 10001,
-            opacity: showResult ? 0 : 0
-          }}
-        />
       )}
 
       <div className="fixed inset-0 z-[9999] bg-white">
