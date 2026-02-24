@@ -44,17 +44,11 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const bgmRef = React.useRef<HTMLAudioElement | null>(null);
   const clickSoundRef = React.useRef<HTMLAudioElement | null>(null);
 
-  // 診断完了済みかチェック
-  const isCompleted = !!profile?.rpg_diagnosis_completed_at;
+  // 診断完了済みかチェック（何度でも診断可能にするためfalseに固定）
+  const isCompleted = false;
 
-  // 完了済みの結果を取得
-  const completedResult: InstinctLevels | null = isCompleted && profile ? {
-    狩猟本能: profile.rpg_fencer || 1,
-    共感本能: profile.rpg_healer || 1,
-    飛躍本能: profile.rpg_schemer || 1,
-    職人魂: profile.rpg_gunner || 1,
-    防衛本能: profile.rpg_shielder || 1,
-  } : null;
+  // 完了済みの結果を取得（常にnull - 何度でも診断可能）
+  const completedResult: InstinctLevels | null = null;
 
   // 音声再生用のヘルパー関数
   const playSound = (soundPath: string) => {
@@ -394,6 +388,18 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         </div>
       )}
 
+      {/* ホワイトアウトオーバーレイ */}
+      {showWhiteOverlay && (
+        <div
+          id="white-overlay"
+          className="fixed inset-0 bg-white transition-opacity duration-500"
+          style={{ 
+            zIndex: showVideo ? 10002 : 10000,
+            opacity: 0
+          }}
+        />
+      )}
+
       <div className="fixed inset-0 z-[9999] bg-white">
         {/* 音声ON/OFFボタン（結果画面以外で表示） */}
         {!showResult && !showVideo && (
@@ -465,8 +471,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                   /* 質問13: 性別選択 */
                   <div className="space-y-0">
                     {/* 質問番号表示（上部） */}
-                    <div className="text-center mb-8">
-                      <p className="text-base font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
+                    <div className="text-center mb-4">
+                      <p className="text-3xl font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
                         質問13
                       </p>
                     </div>
@@ -511,7 +517,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                           {/* ボタンと左右ラベル（PC時） */}
                           <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 12)' }}>
                             {/* PC時: 左ラベル */}
-                            <span className="hidden md:block text-2xl text-white flex-shrink-0 font-noto-sans-jp font-light">男</span>
+                            <span className="hidden md:block text-2xl text-white flex-shrink-0 font-noto-sans-jp font-light">男性</span>
 
                             {/* ボタン */}
                             <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(8rem, calc(var(--spacing) * 40), calc(var(--spacing) * 50))' }}>
@@ -573,76 +579,78 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                             </div>
 
                             {/* PC時: 右ラベル */}
-                            <span className="hidden md:block text-2xl text-white flex-shrink-0 font-noto-sans-jp font-light">女</span>
+                            <span className="hidden md:block text-2xl text-white flex-shrink-0 font-noto-sans-jp font-light">女性</span>
                           </div>
                         </div>
                       </div>
 
                       {/* SP時: テキストラベル */}
                       <div className="flex md:hidden justify-between text-xl text-white font-noto-sans-jp font-light">
-                        <span className="font-noto-sans-jp">男</span>
-                        <span className="font-noto-sans-jp">女</span>
+                        <span className="font-noto-sans-jp">男性</span>
+                        <span className="font-noto-sans-jp">女性</span>
                       </div>
                       </div>
                     </div>
 
                     {/* ナビゲーションボタン */}
-                    <div className="relative w-full pt-8">
-                      {/* 左寄せの「もどる」ボタン */}
-                      <button
-                        onClick={() => {
-                          playClickSound();
-                          handleBack();
-                        }}
-                        className="absolute left-0 w-[140px] h-12 rounded-lg transition-all hover:opacity-90 p-1"
-                        style={{
-                          left: 'calc(var(--spacing) * 80)',
-                          background: 'linear-gradient(to bottom, #d4cfc9, #686c6f)'
-                        }}
-                      >
-                        <span 
-                          className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
-                          style={{
-                            background: 'linear-gradient(to bottom, #515151, #b1b0b0)',
-                            color: '#ffffff'
-                          }}
-                        >
-                          もどる
-                        </span>
-                      </button>
-                      
-                      {/* 中央の「結果を見る」ボタン */}
-                      <div className="flex justify-center">
+                    <div className="w-full pt-8 px-4">
+                      <div className="relative max-w-4xl mx-auto">
+                        {/* 左寄せの「もどる」ボタン */}
                         <button
                           onClick={() => {
-                            if (gender) {
-                              playClickSound();
-                              // 質問13（性別選択）が終わったので結果表示へ
-                              handleNext();
-                            }
+                            playClickSound();
+                            handleBack();
                           }}
-                          disabled={!gender}
-                          className="w-[240px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
+                          className="absolute left-0 w-[140px] h-12 rounded-lg transition-all hover:opacity-90 p-1"
                           style={{
-                            background: gender 
-                              ? 'linear-gradient(to bottom, #00edfe, #015eea)'
-                              : 'linear-gradient(to bottom, #d4cfc9, #686c6f)',
-                            opacity: gender ? 1 : 0.5,
-                            cursor: gender ? 'pointer' : 'not-allowed'
+                            background: 'linear-gradient(to bottom, #d4cfc9, #686c6f)',
+                            left: '-3rem'
                           }}
                         >
                           <span 
                             className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
                             style={{
-                              background: gender
-                                ? 'linear-gradient(to bottom, #0960d8, #00f6ff)'
-                                : 'linear-gradient(to bottom, #515151, #b1b0b0)',
+                              background: 'linear-gradient(to bottom, #515151, #b1b0b0)',
                               color: '#ffffff'
                             }}
                           >
-                            結果を見る
+                            もどる
                           </span>
                         </button>
+                        
+                        {/* 中央の「結果を見る」ボタン */}
+                        <div className="flex justify-center">
+                          <button
+                            onClick={() => {
+                              if (gender) {
+                                playClickSound();
+                                // 質問13（性別選択）が終わったので結果表示へ
+                                handleNext();
+                              }
+                            }}
+                            disabled={!gender}
+                            className="w-[240px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
+                            style={{
+                              background: gender 
+                                ? 'linear-gradient(to bottom, #00edfe, #015eea)'
+                                : 'linear-gradient(to bottom, #d4cfc9, #686c6f)',
+                              opacity: gender ? 1 : 0.5,
+                              cursor: gender ? 'pointer' : 'not-allowed'
+                            }}
+                          >
+                            <span 
+                              className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
+                              style={{
+                                background: gender
+                                  ? 'linear-gradient(to bottom, #0960d8, #00f6ff)'
+                                  : 'linear-gradient(to bottom, #515151, #b1b0b0)',
+                                color: '#ffffff'
+                              }}
+                            >
+                              結果を見る
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
 

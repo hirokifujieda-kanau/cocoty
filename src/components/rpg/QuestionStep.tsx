@@ -48,8 +48,8 @@ export const QuestionStep: React.FC<QuestionStepProps> = ({
   return (
     <div className="space-y-0">
       {/* 質問番号表示（上部） */}
-      <div className="text-center mb-8">
-        <p className="text-base font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
+      <div className="text-center mb-4">
+        <p className="text-3xl font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
           質問{formatQuestionNumber(questionNumber)}
         </p>
       </div>
