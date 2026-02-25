@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles } from 'lucide-react';
 import { calculateRpgDiagnosis, type RpgAnswer, type InstinctLevels } from '@/lib/rpg/calculator';
-import { getRpgQuestions, type RpgQuestion, type Profile } from '@/lib/api/client';
+import { getRpgQuestions, type RpgQuestion, type Profile, getCurrentUser } from '@/lib/api/client';
 import { StartStep } from './StartStep';
 import { QuestionStep } from './QuestionStep';
 import { ResultStep } from './ResultStep';
@@ -43,8 +43,28 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const bgmRef = React.useRef<HTMLAudioElement | null>(null);
   const clickSoundRef = React.useRef<HTMLAudioElement | null>(null);
 
-  // 診断完了済みかチェック
-  const isCompleted = !!profile?.rpg_diagnosis_completed_at;
+  // 管理者かどうかのステート
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // 管理者チェック
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const data = await getCurrentUser();
+        setIsAdmin(data.user.admin || false);
+      } catch (error) {
+        console.error('Failed to check admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+    
+    if (isOpen) {
+      checkAdmin();
+    }
+  }, [isOpen]);
+
+  // 診断完了済みかチェック（管理者の場合は常に未完了として扱う）
+  const isCompleted = !isAdmin && !!profile?.rpg_diagnosis_completed_at;
 
   // 完了済みの結果を取得
   const completedResult: InstinctLevels | null = isCompleted && profile ? {

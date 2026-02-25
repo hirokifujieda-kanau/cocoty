@@ -588,11 +588,11 @@ const InstagramProfilePage: React.FC<{ userId?: string }> = ({ userId: userIdPro
             )}
 
             {/* 好きな食べ物 */}
-            {(displayUser as any).favoriteFood && (displayUser as any).favoriteFood.length > 0 && (
+            {displayUser.favorite_food && displayUser.favorite_food.length > 0 && (
               <div className="space-y-2">
                 <div className="font-bold text-xs leading-3 text-gray-700 mb-[10px]">好きな食べ物</div>
                 <div className="flex flex-wrap gap-1.5">
-                  {(displayUser as any).favoriteFood.map((food: string, idx: number) => (
+                  {displayUser.favorite_food.map((food: string, idx: number) => (
                     <button
                       key={idx}
                       onClick={() => router.push(`/tags/${encodeURIComponent(food)}`)}
