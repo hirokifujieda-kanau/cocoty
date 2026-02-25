@@ -17,22 +17,24 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('');
 
-  // 管理者チェック
+  // 管理者チェック & メールアドレス取得
   useEffect(() => {
-    const checkAdmin = async () => {
+    const fetchUserData = async () => {
       if (!user) return;
       
       try {
         const data = await getCurrentUser();
         setIsAdmin(data.user.admin || false);
+        setUserEmail(data.user.email || '');
       } catch (error) {
-        console.error('Failed to check admin status:', error);
+        console.error('Failed to fetch user data:', error);
       }
     };
 
     if (isOpen && user) {
-      checkAdmin();
+      fetchUserData();
     }
   }, [isOpen, user]);
 
@@ -112,6 +114,20 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
       {/* Menu Content */}
       <div className="flex-1 bg-white overflow-y-auto">
+        {/* アカウント情報セクション */}
+        <div className="border-b border-gray-200">
+          <div className="px-6 py-3 bg-gray-50">
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">アカウント情報</h2>
+          </div>
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">メールアドレス</span>
+              <span className="text-sm font-medium text-gray-900">{userEmail || '取得中...'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* メニュー項目 */}
         <div>
           {menuItems.map((item, index) => (
             <button
