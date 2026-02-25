@@ -29,10 +29,14 @@ export async function uploadToCloudinary(
     throw new Error('Cloudinary cloud name is missing');
   }
 
+  if (!CLOUDINARY_CONFIG.uploadPreset) {
+    throw new Error('Cloudinary upload preset is missing');
+  }
+
   // より簡単な方法：デフォルトの署名なしアップロード
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('upload_preset', 'ml_default'); // Cloudinaryのデフォルト署名なしPreset
+  formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset); // 環境変数から取得
   
   if (publicId) {
     formData.append('public_id', publicId);
