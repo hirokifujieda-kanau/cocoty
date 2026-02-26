@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles } from 'lucide-react';
 import { calculateRpgDiagnosis, type RpgAnswer, type InstinctLevels } from '@/lib/rpg/calculator';
-import { getRpgQuestions, type RpgQuestion, type Profile } from '@/lib/api/client';
+import { type Profile } from '@/lib/api/client';
+import { type RpgQuestion } from '@/lib/rpg/constants';
 import { StartStep } from './StartStep';
 import { QuestionStep } from './QuestionStep';
 import { ResultStep } from './ResultStep';
@@ -43,17 +44,11 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   const bgmRef = React.useRef<HTMLAudioElement | null>(null);
   const clickSoundRef = React.useRef<HTMLAudioElement | null>(null);
 
-  // 診断完了済みかチェック
-  const isCompleted = !!profile?.rpg_diagnosis_completed_at;
+  // 診断完了済みかチェック（何度でも診断可能にするためfalseに固定）
+  const isCompleted = false;
 
-  // 完了済みの結果を取得
-  const completedResult: InstinctLevels | null = isCompleted && profile ? {
-    狩猟本能: profile.rpg_fencer || 1,
-    共感本能: profile.rpg_healer || 1,
-    飛躍本能: profile.rpg_schemer || 1,
-    職人魂: profile.rpg_gunner || 1,
-    防衛本能: profile.rpg_shielder || 1,
-  } : null;
+  // 完了済みの結果を取得（常にnull - 何度でも診断可能）
+  const completedResult: InstinctLevels | null = null;
 
   // 音声再生用のヘルパー関数
   const playSound = (soundPath: string) => {
@@ -69,13 +64,13 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     if (!bgmRef.current) {
       bgmRef.current = new Audio('/rpg-characters/質問中のBGM.mp3');
       bgmRef.current.loop = true;
-      bgmRef.current.volume = 0.5;
+      bgmRef.current.volume = 0.2; // 0.5 → 0.2に音量を下げる
     }
 
     // 効果音の作成
     if (!clickSoundRef.current) {
       clickSoundRef.current = new Audio('/rpg-characters/ボタンクリック音.mp3');
-      clickSoundRef.current.volume = 0.7;
+      clickSoundRef.current.volume = 0.4; // 0.7 → 0.4に音量を下げる
     }
 
     // BGMの再生/停止（性別選択画面または質問画面の場合のみ）
@@ -103,7 +98,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     }
   };
 
-  // 質問データをAPIから取得
+  // 質問データをフロントエンドから取得
   useEffect(() => {
     if (isOpen && !isCompleted) {
       // 未完了の場合はスタート画面から開始
@@ -129,7 +124,6 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         setShowGenderSelect(false);
         setCurrentQuestionIndex(0);
         setAnswers([]);
-        setQuestions([]);
         setIsVideoLoaded(false);
         setHideQuestion(false);
         setGender(undefined);
@@ -141,6 +135,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
   useEffect(() => {
     if (isOpen && !isCompleted && videoRef.current) {
       videoRef.current.load();
+      videoRef.current.volume = 0.3; // 動画の音量を30%に設定
       
       // 動画の読み込み完了を検知
       const handleCanPlay = () => {
@@ -161,13 +156,12 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     setIsLoading(true);
     setError(null);
     try {
-      const response = await getRpgQuestions();
-      // orderでソート
-      const sortedQuestions = response.questions.sort((a, b) => a.order - b.order);
-      setQuestions(sortedQuestions);
+      // フロントエンドの定数から質問を取得（APIリクエスト不要）
+      const { RPG_QUESTIONS } = await import('@/lib/rpg/constants');
+      setQuestions(RPG_QUESTIONS);
     } catch (err) {
-      console.error('Failed to load RPG questions:', err);
-      setError('質問の読み込みに失敗しました。ネットワーク接続を確認してください。');
+      console.error('❌ [RpgDiagnosis] Failed to load RPG questions:', err);
+      setError('質問の読み込みに失敗しました。');
     } finally {
       setIsLoading(false);
     }
@@ -204,8 +198,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     );
   }
 
-  // 質問1は性別選択なので、currentQuestionIndexが0の場合はnullを返す
-  const currentQuestion = currentQuestionIndex === 0 ? null : questions[currentQuestionIndex - 1];
+  // 質問13は性別選択なので、currentQuestionIndexが12（questions.length）の場合はnullを返す
+  const currentQuestion = currentQuestionIndex < questions.length ? questions[currentQuestionIndex] : null;
   const currentAnswer = currentQuestion ? (answers.find(a => a.questionId === currentQuestion.id)?.score || 3) : 3;
 
   // 回答を保存
@@ -218,7 +212,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
 
   // 次へ
   const handleNext = () => {
-    // 質問1（性別選択）+ questions.length なので、最後は questions.length
+    // 通常質問12問 + 性別選択1問 = 13問
     if (currentQuestionIndex < questions.length) {
       // 次の質問へ移動（ホワイトアウト → ホワイトイン演出）
       setShowWhiteOverlay(true);
@@ -258,6 +252,9 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       // 診断結果へボタン音を再生
       playSound('/rpg-characters/診断結果へボタン音.mp3');
       
+      // 性別画面を即座に非表示にしてチラつき防止
+      setHideQuestion(true);
+      
       setShowWhiteOverlay(true);
       
       // 少し遅らせてopacityを1にする
@@ -268,11 +265,8 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         }
       }, 50);
       
-      // ホワイトアウト完了まで待ってから動画再生
+      // ホワイトアウト完了まで待ってから動画再生（1500ms → 800msに短縮）
       setTimeout(() => {
-        // ホワイトアウト完了後に質問画面を非表示
-        setHideQuestion(true);
-        
         // 完全に白くなったら動画再生開始
         setShowVideo(true);
         
@@ -286,9 +280,9 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
         
         setTimeout(() => {
           if (videoRef.current) {
-            // 動画の終了少し前に音声を再生
+            // 動画の終了3秒前に音声を再生
             videoRef.current.addEventListener('timeupdate', function checkTime() {
-              if (videoRef.current && videoRef.current.duration - videoRef.current.currentTime < 1.0) {
+              if (videoRef.current && videoRef.current.duration - videoRef.current.currentTime < 3.0) {
                 playSound('/rpg-characters/演出から診断結果表示.mp3');
                 videoRef.current.removeEventListener('timeupdate', checkTime);
               }
@@ -302,44 +296,17 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
             });
           }
         }, 100);
-      }, 1500);
+      }, 800);
     }
   };
 
   // 動画再生終了時
   const handleVideoEnd = () => {
     setShowVideo(false);
-    // 再度白い画面を表示
-    setShowWhiteOverlay(true);
-    
-    // 白い画面を一瞬表示してからフェードイン開始
-    setTimeout(() => {
-      // 白いオーバーレイをopacity: 1にする
-      const overlay = document.getElementById('white-overlay');
-      if (overlay) {
-        overlay.style.opacity = '1';
-      }
-    }, 50);
-    
-    setTimeout(() => {
-      // 白いオーバーレイをフェードアウト開始
-      const overlay = document.getElementById('white-overlay');
-      if (overlay) {
-        overlay.style.opacity = '0';
-      }
-      
-      // フェードアウト開始と同時に結果を表示開始
-      setTimeout(() => {
-        setShowResult(true);
-      }, 100);
-      
-      // フェードアウト完了後、オーバーレイを完全に削除
-      setTimeout(() => {
-        setShowWhiteOverlay(false);
-      }, 2000); // 1000ms → 2000ms にしてゆっくりに
-    }, 1000); // 500ms → 1000ms にしてゆっくりに
+    setShowResult(true);
   };
 
+  // 戻る
   // 戻る
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
@@ -350,11 +317,11 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
     }
   };
 
-  // スタート画面から質問1（性別選択）へ
+  // スタート画面から質問1へ
   const handleStart = () => {
     setShowStart(false);
     setShowGenderSelect(false);
-    setCurrentQuestionIndex(0); // 質問1から開始
+    setCurrentQuestionIndex(0); // 質問1（通常質問）から開始
   };
 
   // スタート画面に戻る
@@ -420,10 +387,10 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
       {showWhiteOverlay && (
         <div
           id="white-overlay"
-          className="fixed inset-0 bg-white transition-opacity duration-1000"
+          className="fixed inset-0 bg-white transition-opacity duration-500"
           style={{ 
-            zIndex: showVideo ? 10002 : 10001,
-            opacity: showResult ? 0 : 0
+            zIndex: showVideo ? 10002 : 10000,
+            opacity: 0
           }}
         />
       )}
@@ -434,7 +401,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
           <div 
             className="fixed flex items-center gap-2 z-[10000]"
             style={{
-              top: 'calc(var(--spacing) * 18)',
+              top: 'calc(var(--spacing) * 8)',
               right: 'calc(var(--spacing) * 64)'
             }}
           >
@@ -479,50 +446,50 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
 
         {/* コンテンツ */}
         <div className="h-screen overflow-y-auto flex items-center justify-center">
-          <div className={`mx-auto ${showResult ? 'max-w-7xl' : 'p-8'}`}>
+          <div className={`mx-auto w-full ${showResult ? 'max-w-7xl' : ''}`}>
             {/* スタート画面 */}
             {showStart && !showResult && (
-              <StartStep
-                onStart={handleStart}
-                onBack={onClose}
-                isSoundOn={isSoundOn}
-                playClickSound={playClickSound}
-              />
+              <div className="p-8">
+                <StartStep
+                  onStart={handleStart}
+                  onBack={onClose}
+                  isSoundOn={isSoundOn}
+                  playClickSound={playClickSound}
+                />
+              </div>
             )}
 
             {/* 質問画面：動画再生中または非表示フラグが立っている場合は表示しない */}
             {!showVideo && !showResult && !hideQuestion && !showStart && !showGenderSelect && (
               <>
-                {currentQuestionIndex === 0 ? (
-                  /* 質問1: 性別選択 */
+                {currentQuestionIndex === questions.length ? (
+                  /* 質問13: 性別選択 */
                   <div className="space-y-0">
                     {/* 質問番号表示（上部） */}
-                    <div className="text-center mb-8">
-                      <p className="text-sm font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
-                        質問01
+                    <div className="text-center mb-4">
+                      <p className="text-3xl font-noto-sans-jp font-light" style={{ color: '#7d7d7d' }}>
+                        質問13
                       </p>
                     </div>
 
-                    {/* 質問セクション全体（背景色付き） */}
-                    <div className="w-full max-w-3xl mx-auto" style={{ backgroundColor: '#52333f' }}>
+                    {/* 質問セクション全体（背景色付き） - 固定幅 */}
+                    <div className="w-full mx-auto" style={{ backgroundColor: '#52333f', maxWidth: '1050px' }}>
                       {/* 質問文 */}
-                      <div className="text-center pt-12 pb-6 px-6">
-                        <div className="flex items-center justify-center w-full" style={{ gap: 'calc(var(--spacing) * 4)', paddingInline: 'calc(var(--spacing) * 24)' }}>
+                      <div className="text-center px-6" style={{ paddingTop: '80px', paddingBottom: '40px' }}>
+                        <div className="flex items-center justify-center w-full" style={{ gap: 'calc(var(--spacing) * 8)' }}>
                           <img 
-                            src="/tarot-question/Question_01.png" 
+                            src="/tarot-question/Question_13.png" 
                             alt="質問アイコン" 
-                            className="w-24 h-24 lg:w-32 lg:h-32 object-contain flex-shrink-0"
+                            className="w-40 h-40 lg:w-48 lg:h-48 object-contain flex-shrink-0"
                           />
-                          <h3 className="text-lg text-white flex-1 whitespace-nowrap font-noto-sans-jp font-medium">
+                          <h3 className="text-2xl text-white whitespace-nowrap font-noto-sans-jp font-medium">
                             性別を選択してください
                           </h3>
-                          {/* 右側のスペーサー（画像と同じサイズ） */}
-                          <div className="w-24 h-24 lg:w-32 lg:h-32 flex-shrink-0 opacity-0" aria-hidden="true"></div>
                         </div>
                       </div>
 
                       {/* 性別選択 */}
-                      <div className="space-y-4 pb-6 w-full px-8">
+                      <div className="w-full px-8" style={{ paddingBottom: '60px' }}>
                       {/* ボタンとラベル */}
                       <div className="flex flex-col gap-4">
                         {/* 中央: 数字とボタン */}
@@ -530,22 +497,22 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                           {/* スケールラベル（数字） - ボタンと同じ幅のコンテナに配置 */}
                           <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 12)' }}>
                             {/* PC時: 左スペーサー（左ラベルと同じ幅） */}
-                            <span className="hidden md:block text-xs flex-shrink-0 opacity-0 font-noto-sans-jp">男</span>
+                            <span className="hidden md:block text-base flex-shrink-0 opacity-0 font-noto-sans-jp">男</span>
                             
                             {/* 数字 */}
-                            <div className="flex justify-center items-center text-xs text-white" style={{ gap: 'clamp(8rem, calc(var(--spacing) * 40), calc(var(--spacing) * 50))' }}>
+                            <div className="flex justify-center items-center text-base text-white" style={{ gap: 'clamp(8rem, calc(var(--spacing) * 40), calc(var(--spacing) * 50))' }}>
                               <span className="w-6 text-center">1</span>
                               <span className="w-6 text-center">2</span>
                             </div>
                             
                             {/* PC時: 右スペーサー（右ラベルと同じ幅） */}
-                            <span className="hidden md:block text-xs flex-shrink-0 opacity-0 font-noto-sans-jp">女</span>
+                            <span className="hidden md:block text-base flex-shrink-0 opacity-0 font-noto-sans-jp">女</span>
                           </div>
 
                           {/* ボタンと左右ラベル（PC時） */}
                           <div className="flex justify-center items-center w-full" style={{ gap: 'calc(var(--spacing) * 12)' }}>
                             {/* PC時: 左ラベル */}
-                            <span className="hidden md:block text-sm text-white flex-shrink-0 font-noto-sans-jp">男</span>
+                            <span className="hidden md:block text-2xl text-white flex-shrink-0 font-noto-sans-jp font-light">男性</span>
 
                             {/* ボタン */}
                             <div className="flex justify-center items-center flex-nowrap" style={{ gap: 'clamp(8rem, calc(var(--spacing) * 40), calc(var(--spacing) * 50))' }}>
@@ -607,112 +574,94 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                             </div>
 
                             {/* PC時: 右ラベル */}
-                            <span className="hidden md:block text-sm text-white flex-shrink-0 font-noto-sans-jp">女</span>
+                            <span className="hidden md:block text-2xl text-white flex-shrink-0 font-noto-sans-jp font-light">女性</span>
                           </div>
                         </div>
                       </div>
 
                       {/* SP時: テキストラベル */}
-                      <div className="flex md:hidden justify-between text-sm text-white">
-                        <span className="font-noto-sans-jp">男</span>
-                        <span className="font-noto-sans-jp">女</span>
+                      <div className="flex md:hidden justify-between text-xl text-white font-noto-sans-jp font-light">
+                        <span className="font-noto-sans-jp">男性</span>
+                        <span className="font-noto-sans-jp">女性</span>
                       </div>
                       </div>
                     </div>
 
                     {/* ナビゲーションボタン */}
-                    <div className="flex justify-center pt-8" style={{ gap: 'calc(var(--spacing) * 33)' }}>
-                      <button
-                        onClick={() => {
-                          playClickSound();
-                          handleBackToStart();
-                        }}
-                        className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
-                        style={{
-                          background: 'linear-gradient(to bottom, #d4cfc9, #686c6f)'
-                        }}
-                      >
-                        <span 
-                          className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
-                          style={{
-                            background: 'linear-gradient(to bottom, #515151, #b1b0b0)',
-                            color: '#ffffff'
-                          }}
-                        >
-                          もどる
-                        </span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (gender) {
+                    <div className="w-full pt-8 px-4">
+                      <div className="relative max-w-4xl mx-auto">
+                        {/* 左寄せの「もどる」ボタン */}
+                        <button
+                          onClick={() => {
                             playClickSound();
-                            // ホワイトアウト → ホワイトイン演出
-                            setShowWhiteOverlay(true);
-                            
-                            // ホワイトアウト開始
-                            setTimeout(() => {
-                              const overlay = document.getElementById('white-overlay');
-                              if (overlay) {
-                                overlay.style.opacity = '1';
-                              }
-                            }, 50);
-                            
-                            // ホワイトアウト完了後、質問を切り替えてホワイトイン
-                            setTimeout(() => {
-                              setCurrentQuestionIndex(1);
-                              
-                              // 質問切り替え後、ホワイトイン開始
-                              setTimeout(() => {
-                                const overlay = document.getElementById('white-overlay');
-                                if (overlay) {
-                                  overlay.style.opacity = '0';
-                                }
-                                
-                                // フェードアウト完了後、オーバーレイを削除
-                                setTimeout(() => {
-                                  setShowWhiteOverlay(false);
-                                }, 500);
-                              }, 100);
-                            }, 600);
-                          }
-                        }}
-                        disabled={!gender}
-                        className="w-[140px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
-                        style={{
-                          background: gender 
-                            ? 'linear-gradient(to bottom, #00edfe, #015eea)'
-                            : 'linear-gradient(to bottom, #d4cfc9, #686c6f)',
-                          opacity: gender ? 1 : 0.5,
-                          cursor: gender ? 'pointer' : 'not-allowed'
-                        }}
-                      >
-                        <span 
-                          className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
+                            handleBack();
+                          }}
+                          className="absolute left-0 w-[140px] h-12 rounded-lg transition-all hover:opacity-90 p-1"
                           style={{
-                            background: gender
-                              ? 'linear-gradient(to bottom, #0960d8, #00f6ff)'
-                              : 'linear-gradient(to bottom, #515151, #b1b0b0)',
-                            color: '#ffffff'
+                            background: 'linear-gradient(to bottom, #d4cfc9, #686c6f)',
+                            left: '-3rem'
                           }}
                         >
-                          次へ
-                        </span>
-                      </button>
+                          <span 
+                            className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
+                            style={{
+                              background: 'linear-gradient(to bottom, #515151, #b1b0b0)',
+                              color: '#ffffff'
+                            }}
+                          >
+                            もどる
+                          </span>
+                        </button>
+                        
+                        {/* 中央の「結果を見る」ボタン */}
+                        <div className="flex justify-center">
+                          <button
+                            onClick={() => {
+                              if (gender) {
+                                playClickSound();
+                                // 質問13（性別選択）が終わったので結果表示へ
+                                handleNext();
+                              }
+                            }}
+                            disabled={!gender}
+                            className="w-[240px] h-12 rounded-lg transition-all hover:opacity-90 relative p-1"
+                            style={{
+                              background: gender 
+                                ? 'linear-gradient(to bottom, #00edfe, #015eea)'
+                                : 'linear-gradient(to bottom, #d4cfc9, #686c6f)',
+                              opacity: gender ? 1 : 0.5,
+                              cursor: gender ? 'pointer' : 'not-allowed'
+                            }}
+                          >
+                            <span 
+                              className="flex items-center justify-center w-full h-full rounded-md font-noto-sans-jp font-medium"
+                              style={{
+                                background: gender
+                                  ? 'linear-gradient(to bottom, #0960d8, #00f6ff)'
+                                  : 'linear-gradient(to bottom, #515151, #b1b0b0)',
+                                color: '#ffffff'
+                              }}
+                            >
+                              結果を見る
+                            </span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
                     {/* 質問番号表示 */}
                     <div className="text-center pt-4">
                       <p className="text-black text-sm">
-                        01/{(questions.length + 1).toString().padStart(2, '0')}
+                        13/{(questions.length + 1).toString().padStart(2, '0')}
                       </p>
                     </div>
                   </div>
-                ) : (
-                  /* 質問2以降: 通常の質問 */
+                ) : currentQuestion ? (
+                  /* 質問1-12: 通常の質問 */
                   <QuestionStep
                     questionNumber={currentQuestionIndex + 1}
                     totalQuestions={questions.length + 1}
-                    questionText={currentQuestion!.text}
+                    questionText={currentQuestion.text}
                     currentAnswer={currentAnswer}
                     onAnswer={handleAnswer}
                     onNext={handleNext}
@@ -723,7 +672,7 @@ export const RpgDiagnosisModal: React.FC<RpgDiagnosisModalProps> = ({
                     setIsSoundOn={setIsSoundOn}
                     playClickSound={playClickSound}
                   />
-                )}
+                ) : null}
               </>
             )}
 
